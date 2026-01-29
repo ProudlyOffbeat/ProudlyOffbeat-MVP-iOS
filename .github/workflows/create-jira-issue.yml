@@ -46,21 +46,15 @@ jobs:
             ${{ github.event.issue.body }}
           mode: md2jira
 
-      # 5. Jira 이슈 생성 (입력받은 parentKey 사용)
+      # 5. Jira 이슈 생성 (Task로 독립 생성)
       - name: Create Issue
         id: create
         uses: atlassian/gajira-create@v3
         with:
-          project: PO # 💡 본인의 실제 Jira 프로젝트 키를 적으세요 (예: PO, LH 등)
-          issuetype: Subtask
+          project: PO
+          issuetype: Task
           summary: "${{ github.event.issue.title }}"
           description: "${{ steps.md2jira.outputs.output-text }}"
-          fields: |
-            {
-              "parent": {
-                "key": "${{ steps.issue-parser.outputs.issueparser_parentKey }}"
-              }
-            }
 
       - name: Log created issue
         run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/$ {{steps.create.outputs.issue }} was created"
@@ -70,11 +64,11 @@ jobs:
         run: |
           # 변수 할당
           PREFIX="${{ steps.issue-parser.outputs.issueparser_branchPrefix }}"
-          PARENT="${{ steps.issue-parser.outputs.issueparser_parentKey }}"
+          TICKET="${{ steps.create.outputs.issue }}"
           SLUG="${{ steps.issue-parser.outputs.issueparser_branchName }}"
 
-          # prefix/#parent-slug
-          BRANCH_NAME="${PREFIX}/#${PARENT}_${SLUG}"
+          # prefix/#ticket-slug (예: feat/#PO-10_login-view)
+          BRANCH_NAME="${PREFIX}/#${TICKET}_${SLUG}"
 
           git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
