@@ -1,5 +1,5 @@
-name: 'LivingHome-iOS 이슈 생성'
-description: ' ProudlyOffbeat-MVP-iOS 레포에 이슈를 생성하며, 생성된 이슈는 Jira와 연동됩니다.'
+name: 'ProudlyOffbeat-MVP-iOS 이슈 생성'
+description: 'ProudlyOffbeat-MVP-iOS 레포에 이슈를 생성하며, 생성된 이슈는 Jira와 연동됩니다.'
 labels: [order]
 title: '이슈 이름을 작성해주세요'
 body:
@@ -17,8 +17,8 @@ body:
     attributes:
       label: '브랜치 이름 (이슈 요약)'
       description: '영문 소문자로 브랜치 이름을 적어주세요. (ex: [도메인명]-[기능])'
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: input
     id: branchPrefix
