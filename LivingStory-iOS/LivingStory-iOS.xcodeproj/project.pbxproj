@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D57FA93A2F2C9C5D00157A72 /* HomeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D57FA9382F2C9C5800157A72 /* HomeKit.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D5EA4E0D2F1DFC6C004FF6C7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -23,28 +27,29 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		D57FA93C2F2C9C5D00157A72 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		D57FA9382F2C9C5800157A72 /* HomeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HomeKit.framework; path = System/Library/Frameworks/HomeKit.framework; sourceTree = SDKROOT; };
 		D5EA4DF32F1DFC6B004FF6C7 /* LivingStory-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LivingStory-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5EA4E0C2F1DFC6C004FF6C7 /* LivingStory-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LivingStory-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5EA4E162F1DFC6C004FF6C7 /* LivingStory-iOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LivingStory-iOSUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		D5EA4E1E2F1DFC6C004FF6C7 /* Exceptions for "LivingStory-iOS" folder in "LivingStory-iOS" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				"Core/Supporting Files/Info.plist",
-			);
-			target = D5EA4DF22F1DFC6B004FF6C7 /* LivingStory-iOS */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		D5EA4DF52F1DFC6B004FF6C7 /* LivingStory-iOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				D5EA4E1E2F1DFC6C004FF6C7 /* Exceptions for "LivingStory-iOS" folder in "LivingStory-iOS" target */,
-			);
 			path = "LivingStory-iOS";
 			sourceTree = "<group>";
 		};
@@ -65,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D57FA93A2F2C9C5D00157A72 /* HomeKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,12 +91,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D57FA9372F2C9C5800157A72 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D57FA9382F2C9C5800157A72 /* HomeKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D5EA4DEA2F1DFC6B004FF6C7 = {
 			isa = PBXGroup;
 			children = (
 				D5EA4DF52F1DFC6B004FF6C7 /* LivingStory-iOS */,
 				D5EA4E0F2F1DFC6C004FF6C7 /* LivingStory-iOSTests */,
 				D5EA4E192F1DFC6C004FF6C7 /* LivingStory-iOSUITests */,
+				D57FA9372F2C9C5800157A72 /* Frameworks */,
 				D5EA4DF42F1DFC6B004FF6C7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -115,6 +130,7 @@
 				D5EA4DEF2F1DFC6B004FF6C7 /* Sources */,
 				D5EA4DF02F1DFC6B004FF6C7 /* Frameworks */,
 				D5EA4DF12F1DFC6B004FF6C7 /* Resources */,
+				D57FA93C2F2C9C5D00157A72 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -290,8 +306,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9S8SHSW95K;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "LivingStory-iOS/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -305,6 +321,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.GMYoo.LivingStory-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -322,8 +342,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9S8SHSW95K;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "LivingStory-iOS/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -337,6 +357,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.GMYoo.LivingStory-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
