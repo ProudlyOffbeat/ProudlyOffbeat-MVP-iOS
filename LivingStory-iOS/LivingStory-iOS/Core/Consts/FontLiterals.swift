@@ -52,6 +52,9 @@ extension UIFont {
     // MARK: 커스텀 폰트 헬퍼
     // TODO: 이후 커스텀 폰트 추가시
     // Enum 로우벨류로 스트링타입으로 하나 추가하고 static func로 커스텀 함수 만들기.
+    
+    // MARK: Button Title
+    static let buttonTitle: UIFont = .systemFont(ofSize: 17, weight: .medium)
 }
 
 // SwiftUI Extension
@@ -80,4 +83,7 @@ extension Font {
     // MARK: Footnote
     static let footnoteRegular: Font = .system(size: 13, weight: .regular)
     static let footnoteEmphasized: Font = .system(size: 13, weight: .semibold)
+    
+    // MARK: Button Title
+    static let buttonTitle: Font = .system(size: 17, weight: .medium)
 }
