@@ -57,13 +57,16 @@ struct PrimaryButtonSwiftUI: View {
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.headlineRegular)
-                .foregroundColor(Color("gray100"))
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
-                .background(Color("blue0"))
-                .cornerRadius(12)
+            Capsule()
+                .frame(height: 52)
+                  .padding(.horizontal, 20)
+                .foregroundStyle(.black)
+                .glassEffect()
+                .overlay {
+                    Text(title)
+                        .font(.buttonTitle)
+                        .foregroundStyle(.white)
+                }
         }
     }
 }
