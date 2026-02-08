@@ -51,7 +51,7 @@ final class PrimaryButton: UIButton {
 // MARK: - SwiftUI Version
 
 struct PrimaryButtonSwiftUI: View {
-
+    @Environment(\.colorScheme) var scheme
     let title: String
     let action: () -> Void
 
@@ -59,8 +59,7 @@ struct PrimaryButtonSwiftUI: View {
         Button(action: action) {
             Capsule()
                 .frame(height: 52)
-                  .padding(.horizontal, 20)
-                .foregroundStyle(.black)
+                .foregroundStyle(scheme == .dark ? .clear : .black)
                 .glassEffect()
                 .overlay {
                     Text(title)
@@ -68,5 +67,12 @@ struct PrimaryButtonSwiftUI: View {
                         .foregroundStyle(.white)
                 }
         }
+    }
+}
+
+#Preview {
+    ZStack {
+        Color.white
+        PrimaryButtonSwiftUI(title: "책 환경 세팅", action: {})
     }
 }
