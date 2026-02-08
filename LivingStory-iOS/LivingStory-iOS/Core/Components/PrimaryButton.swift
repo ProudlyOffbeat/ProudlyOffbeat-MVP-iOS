@@ -70,9 +70,26 @@ struct PrimaryButtonSwiftUI: View {
     }
 }
 
-#Preview {
-    ZStack {
-        Color.white
-        PrimaryButtonSwiftUI(title: "책 환경 세팅", action: {})
+struct WhiteButtonSwiftUI: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Capsule()
+                .frame(height: 52)
+                .foregroundStyle(.clear)
+                .glassEffect()
+                .overlay {
+                    Text(title)
+                        .font(.buttonTitle)
+                        .foregroundStyle(.black)
+                        .opacity(0.7)
+                }
+        }
     }
+}
+
+#Preview {
+    WhiteButtonSwiftUI(title: "테스트 버튼") {}
 }
