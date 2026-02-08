@@ -95,6 +95,11 @@ final class AppCoordinator: Coordinator {
         navigationController.pushViewController(hostingVC, animated: true)
     }
 
+    /// 독서 중단 화면 (SwiftUI)
+    func showStopReading() {
+        // TODO: StopReadingView 구현 후 연결
+    }
+
     /// 통계 화면 (SwiftUI)
     func showStatistics() {
         let view = StatisticsView(coordinator: self)

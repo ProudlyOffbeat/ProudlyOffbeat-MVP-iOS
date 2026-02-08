@@ -35,7 +35,7 @@ struct BookProfileView: View {
                 PrimaryButtonSwiftUI(title: "책 환경 세팅하기") {
                     coordinator.showReading(book: book)
                 }
-                .padding(20)
+                .padding(.horizontal, 20)
             }
         }
     }

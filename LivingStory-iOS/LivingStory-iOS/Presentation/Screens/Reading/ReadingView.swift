@@ -21,8 +21,8 @@ struct ReadingView: View {
             statusContent
             Spacer()
             actionButton
+                .padding(.horizontal, 20)
         }
-        .padding()
         .navigationTitle(viewModel.book.bookTitle)
         .navigationBarTitleDisplayMode(.inline)
         .background { pulseBackground }
@@ -35,11 +35,18 @@ struct ReadingView: View {
                 isPulsing = true
             }
         }
-        .alert("환경 세팅을 전체 중단할까요?", isPresented: $showStopAlert) {
+        .alert(
+            viewModel.state == .setting ? "환경 세팅을 전체 중단할까요?" : "독서를 중단할까요?",
+            isPresented: $showStopAlert
+        ) {
             Button("닫기", role: .cancel) {}
             Button("중단", role: .destructive) {
                 viewModel.stopReading()
-                coordinator.pop()
+                if viewModel.state == .setting {
+                    coordinator.pop()
+                } else {
+                    coordinator.showStopReading()
+                }
             }
         }
         .task {
@@ -75,12 +82,7 @@ struct ReadingView: View {
         PrimaryButtonSwiftUI(
             title: viewModel.state == .setting ? "환경 세팅 중지" : "독서 중지"
         ) {
-            if viewModel.state == .setting {
-                showStopAlert = true
-            } else {
-                viewModel.stopReading()
-                coordinator.pop()
-            }
+            showStopAlert = true
         }
         .environment(\.colorScheme, .dark)
     }
