@@ -1,38 +1,41 @@
 import SwiftUI
 
-struct BookProfileView: View {
-    
-    // MARK: - Properties
-    
-    let coordinator: AppCoordinator
-    // 추후 데미안 ISBN에서 넘겨주는 Book모델로 변경 예정
-    struct BookProfileModel: Codable {
-        let bookCoverImageURL: URL?
-        let bookTitle: String
-        let bookDescription: String
+// 추후 데미안 ISBN에서 넘겨주는 Book모델로 변경 예정
+struct BookProfileModel: Codable {
+    let bookCoverImageURL: URL?
+    let bookTitle: String
+    let bookDescription: String
 
-        static let mock = BookProfileModel(
-            bookCoverImageURL: URL(string: "https://covers.openlibrary.org/b/isbn/9780156012195-L.jpg"),
-            bookTitle: "완다는 별의 소리를 들어요",
-            bookDescription: "사막에 불시착한 비행사가 별에서 온 왕자를 만나 대화하며, 여우에게 길들여짐과 관계의 소중한 책임감을 배운 뒤에, 사랑하는 장미가 있는 자신의 별로 돌아가는 이야기입니다."
-        )
-    }
-    
+    static let mock = BookProfileModel(
+        bookCoverImageURL: URL(string: "https://covers.openlibrary.org/b/isbn/9780156012195-L.jpg"),
+        bookTitle: "완다는 별의 소리를 들어요",
+        bookDescription: "사막에 불시착한 비행사가 별에서 온 왕자를 만나 대화하며, 여우에게 길들여짐과 관계의 소중한 책임감을 배운 뒤에, 사랑하는 장미가 있는 자신의 별로 돌아가는 이야기입니다."
+    )
+}
+
+struct BookProfileView: View {
+
+    // MARK: - Properties
+
+    let coordinator: AppCoordinator
+    let book: BookProfileModel
+
     // MARK: - Body
-    
+
     var body: some View {
         GeometryReader { geometry in
             VStack {
                 BookCoverSection(
-                    bookCoverImageURL: BookProfileModel.mock.bookCoverImageURL,
-                    title: BookProfileModel.mock.bookTitle,
-                    plot: BookProfileModel.mock.bookDescription,
+                    bookCoverImageURL: book.bookCoverImageURL,
+                    title: book.bookTitle,
+                    plot: book.bookDescription,
                     height: geometry.size.height * 0.7
                 )
                 Spacer()
                 PrimaryButtonSwiftUI(title: "책 환경 세팅하기") {
-                    coordinator.showReading()
+                    coordinator.showReading(book: book)
                 }
+                .padding(20)
             }
         }
     }
@@ -98,7 +101,8 @@ private struct BookCoverSection: View {
 #Preview {
     NavigationView {
         BookProfileView(
-            coordinator: AppCoordinator(navigationController: UINavigationController())
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            book: .mock
         )
     }
 }

@@ -81,15 +81,16 @@ final class AppCoordinator: Coordinator {
     // MARK: - 📱 이토 담당 (SwiftUI)
 
     /// 책 프로필 화면 (SwiftUI)
-    func showBookProfile() {
-        let view = BookProfileView(coordinator: self)
+    func showBookProfile(book: BookProfileModel) {
+        let view = BookProfileView(coordinator: self, book: book)
         let hostingVC = UIHostingController(rootView: view)
         navigationController.pushViewController(hostingVC, animated: true)
     }
 
     /// 독서 중 화면 (SwiftUI)
-    func showReading() {
-        let view = ReadingView(coordinator: self)
+    func showReading(book: BookProfileModel) {
+        let viewModel = ReadingViewModel(book: book)
+        let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
         navigationController.pushViewController(hostingVC, animated: true)
     }
