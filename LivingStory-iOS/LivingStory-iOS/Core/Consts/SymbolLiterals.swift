@@ -34,8 +34,8 @@ enum SymbolLiterals: String {
 
     case home = "house.fill"
     case book = "book.fill"
-    case statistics = "chart.bar.fill"
-    case settings = "gearshape.fill"
+    case person = "person.fill"
+    case settings = "gearshape"
 
     // MARK: - Navigation
 
@@ -58,8 +58,9 @@ enum SymbolLiterals: String {
 
     case lightbulb = "lightbulb.fill"
     case lightbulbOff = "lightbulb"
-    case device = "homepod.fill"
-    case wifi = "wifi"
+    case speaker = "speaker.wave.2.fill"
+    case speakerOff = "speaker.wave.2"
+    case ellipsis = "ellipsis"
 
     // MARK: - Status
 
