@@ -57,7 +57,6 @@ enum SymbolLiterals: String {
     // MARK: - HomeKit / Devices
 
     case lightbulb = "lightbulb.fill"
-    case lightbulbOff = "lightbulb"
     case speaker = "speaker.wave.2.fill"
     case speakerOff = "speaker.wave.2"
     case ellipsis = "ellipsis"
