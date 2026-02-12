@@ -69,7 +69,7 @@ struct StatisticsView: View {
 
 // MARK: - Subviews
 
-private struct StatCard: View {
+struct StatCard: View {
     let icon: String
     let title: String
     let value: String

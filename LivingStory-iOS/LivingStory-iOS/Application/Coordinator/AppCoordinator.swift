@@ -97,7 +97,21 @@ final class AppCoordinator: Coordinator {
 
     /// 독서 중단 화면 (SwiftUI)
     func showStopReading() {
-        // TODO: StopReadingView 구현 후 연결
+        let view = StopReadingView(coordinator: self, conversations: Conversation.mock)
+        let hostingVC = UIHostingController(rootView: view)
+        navigationController.pushViewController(hostingVC, animated: true)
+    }
+
+    /// 독서 결과 화면 (SwiftUI)
+    func showResult() {
+        let view = ResultView(coordinator: self)
+        let hostingVC = UIHostingController(rootView: view)
+        navigationController.pushViewController(hostingVC, animated: true)
+    }
+
+    /// 홈으로 돌아가기
+    func popToHome() {
+        navigationController.popToRootViewController(animated: true)
     }
 
     /// 통계 화면 (SwiftUI)

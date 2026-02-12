@@ -3,6 +3,7 @@ import SwiftUI
 struct ReadingLogCalendar: View {
 
     let readDates: Set<DateComponents>
+    var showNavigation: Bool = true
 
     @State private var displayedMonth = Date()
 
@@ -30,17 +31,19 @@ struct ReadingLogCalendar: View {
                     .fontWeight(.semibold)
             }
             Spacer()
-            HStack(spacing: 28) {
-                Button { changeMonth(by: -1) } label: {
-                    Image(systemName: "chevron.left")
-                        .fontWeight(.semibold)
+            if showNavigation {
+                HStack(spacing: 28) {
+                    Button { changeMonth(by: -1) } label: {
+                        Image(systemName: "chevron.left")
+                            .fontWeight(.semibold)
+                    }
+                    Button { changeMonth(by: 1) } label: {
+                        Image(systemName: "chevron.right")
+                            .fontWeight(.semibold)
+                    }
                 }
-                Button { changeMonth(by: 1) } label: {
-                    Image(systemName: "chevron.right")
-                        .fontWeight(.semibold)
-                }
+                .foregroundStyle(.yellow0)
             }
-            .foregroundStyle(.yellow0)
         }
     }
 
@@ -68,7 +71,7 @@ struct ReadingLogCalendar: View {
             }
         }
         .id(displayedMonth)
-        .gesture(
+        .gesture(showNavigation ?
             DragGesture(minimumDistance: 50)
                 .onEnded { value in
                     if value.translation.width < -50 {
@@ -77,6 +80,7 @@ struct ReadingLogCalendar: View {
                         changeMonth(by: -1)
                     }
                 }
+            : nil
         )
     }
 
