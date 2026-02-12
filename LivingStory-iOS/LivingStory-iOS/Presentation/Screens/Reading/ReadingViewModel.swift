@@ -15,25 +15,54 @@ final class ReadingViewModel {
     private(set) var isMusicPlaying = false
     private(set) var elapsedSeconds: Int = 0
 
-    private var timerTask: Task<Void, Never>?
+    private(set) var conversations: [Conversation] = []
+    private(set) var musicCategory: MusicCategory?
+    private(set) var lightingConfig: LightingConfig?
+    private(set) var errorMessage: String?
 
-    init(book: BookProfileModel) {
+    private let geminiService: GeminiService
+    private var timerTask: Task<Void, Never>?
+    private var hasStarted = false
+
+    init(book: BookProfileModel, geminiService: GeminiService = GeminiService()) {
         self.book = book
+        self.geminiService = geminiService
     }
 
     // MARK: - Public
 
     func startSetup() async {
-        // TODO: Gemini API → hue 값 + 음악 추천
-        // TODO: HomeKit 조명 설정
-        isLightingReady = true
+        guard !hasStarted else {
+            print("[Gemini] 중복 호출 차단됨")
+            return
+        }
+        hasStarted = true
+        print("[Gemini] API 요청 시작 (1회)")
 
-        // TODO: AVFoundation 음악 재생
-        isMusicPlaying = true
+        do {
+            let environment = try await geminiService.generateReadingEnvironment(for: book)
 
-        if isLightingReady && isMusicPlaying {
-            state = .reading
-            startTimer()
+            musicCategory = environment.musicCategory
+            lightingConfig = environment.lighting
+            conversations = environment.toDomainConversations()
+
+            print("[Gemini] 음악: \(environment.musicCategory.rawValue)")
+            print("[Gemini] 조명: H\(environment.lighting.hue) S\(environment.lighting.saturation) B\(environment.lighting.brightness)")
+            print("[Gemini] 대화 주제: \(environment.conversations.count)개")
+
+            // TODO: HomeKit 조명 설정
+            isLightingReady = true
+
+            // TODO: AVFoundation 음악 재생
+            isMusicPlaying = true
+
+            if isLightingReady && isMusicPlaying {
+                state = .reading
+                startTimer()
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+            print("[Gemini] 오류: \(error)")
         }
     }
 

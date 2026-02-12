@@ -45,7 +45,7 @@ struct ReadingView: View {
                 if viewModel.state == .setting {
                     coordinator.pop()
                 } else {
-                    coordinator.showStopReading()
+                    coordinator.showStopReading(conversations: viewModel.conversations)
                 }
             }
         } message: {
@@ -54,7 +54,7 @@ struct ReadingView: View {
             }
         }
         .task {
-            //await viewModel.startSetup()
+            await viewModel.startSetup()
         }
     }
 
