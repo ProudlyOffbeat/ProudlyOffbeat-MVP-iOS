@@ -7,21 +7,6 @@
 
 import UIKit
 
-//MARK: - 기기종류
-enum HomeDeviceType {
-    case light
-    case speaker
-    
-    var homeIcon: UIImage? {
-        switch self {
-        case .light:
-            return UIImage(.lightbulb)
-        case .speaker:
-            return UIImage(.speaker)
-        }
-    }
-}
-
 final class HomeDeviceCardView: UIView {
     
     private let homeDeviceType: HomeDeviceType
@@ -171,5 +156,14 @@ private extension HomeDeviceCardView {
         homeIconBackgroundView.backgroundColor = UIColor(named: "gray60")
         homeIconDeviceImageView.tintColor = UIColor(named: "gray50")
         deviceStatusLabel.textColor = UIColor(named: "gray40")
+    }
+}
+
+extension HomeDeviceType {
+    var homeIcon: UIImage? {
+        switch self {
+        case .light: return UIImage(.lightbulb)
+        case .speaker: return UIImage(.speaker)
+        }
     }
 }
