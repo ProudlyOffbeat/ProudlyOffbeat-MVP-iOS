@@ -7,37 +7,28 @@
 
 import Foundation
 
-// MARK: - DeviceModel
-
-struct DeviceModel {
+//MARK: - Device Model
+struct DeviceModel: Hashable {
+    var name: String
     let id: UUID
-    let name: String
-    let type: DeviceType
     var isOn: Bool
+    var deviceType: HomeDeviceType
     var percentage: Int?
+    
+    // id가 같으면 같은 id
+    static func == (lhs: DeviceModel, rhs: DeviceModel) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    // 해쉬 값도 id로만 만들기 -> Hashable 프로토콜
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
-
-// MARK: - RoomModel
-
-struct RoomModel {
-    let id: UUID
-    let name: String
-    var devices: [DeviceModel]
-}
-
-// MARK: - HomeModel
-
-struct HomeModel {
-    let id: UUID
-    let name: String
-    var rooms: [RoomModel]
-}
-
-// MARK: - DeviceModel Helpers
 
 extension DeviceModel {
-    var statusText: String {
-        guard isOn, let percentage = percentage else { return "Off" }
-        return "\(percentage)%"
+    var status: String {
+        guard isOn, let percentage else { return "꺼짐" }
+        return "\(percentage)"
     }
 }
