@@ -40,6 +40,7 @@ extension UIFont {
     
     // MARK: Body
     static let bodyRegular: UIFont = .systemFont(ofSize: 17, weight: .regular)
+    static let bodyMedium: UIFont = .systemFont(ofSize: 17, weight: .medium)
     static let bodyEmphasized: UIFont = .systemFont(ofSize: 17, weight: .semibold)
     
     // MARK: Callout
@@ -72,6 +73,7 @@ extension Font {
     
     // MARK: Body
     static let bodyRegular: Font = .system(size: 17, weight: .regular)
+    static let bodyMedium: Font = .system(size: 17, weight: .medium)
     static let bodyEmphasized: Font = .system(size: 17, weight: .semibold)
     
     // MARK: Callout
