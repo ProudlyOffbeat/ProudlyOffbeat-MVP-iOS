@@ -8,7 +8,7 @@
 import Foundation
 
 //MARK: - Device Model
-struct DeviceModel: Hashable {
+nonisolated struct DeviceModel: Hashable, Sendable {
     var name: String
     let id: UUID
     var isOn: Bool
@@ -16,19 +16,19 @@ struct DeviceModel: Hashable {
     var percentage: Int?
     
     // id가 같으면 같은 id
-    static func == (lhs: DeviceModel, rhs: DeviceModel) -> Bool {
+    nonisolated static func == (lhs: DeviceModel, rhs: DeviceModel) -> Bool {
         lhs.id == rhs.id
     }
-    
+
     // 해쉬 값도 id로만 만들기 -> Hashable 프로토콜
-    func hash(into hasher: inout Hasher) {
+    nonisolated func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 }
 
 extension DeviceModel {
     var status: String {
-        guard isOn, let percentage else { return "꺼짐" }
-        return "\(percentage)"
+        guard isOn, let percentage else { return StringLiterals.Home.deviceOff }
+        return "\(percentage)%"
     }
 }
