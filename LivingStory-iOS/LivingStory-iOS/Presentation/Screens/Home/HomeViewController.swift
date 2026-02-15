@@ -34,6 +34,8 @@ final class HomeViewController: UIViewController {
         return collectionView
     }()
 
+    private let radialGlowView = RadialGlowView()
+
     private let emptyStateView: HomeEmptyStateView = {
         let view = HomeEmptyStateView()
         view.isHidden = true
@@ -75,15 +77,22 @@ private extension HomeViewController {
     }
 
     func setupHierarchy() {
+        view.addSubview(radialGlowView)
         view.addSubview(roomCollectionView)
         view.addSubview(emptyStateView)
     }
 
     func setupLayout() {
+        radialGlowView.translatesAutoresizingMaskIntoConstraints = false
         roomCollectionView.translatesAutoresizingMaskIntoConstraints = false
         emptyStateView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
+            radialGlowView.widthAnchor.constraint(equalToConstant: 589),
+            radialGlowView.heightAnchor.constraint(equalToConstant: 610),
+            radialGlowView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -100),
+            radialGlowView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+
             roomCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             roomCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             roomCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
