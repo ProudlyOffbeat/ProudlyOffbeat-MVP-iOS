@@ -30,21 +30,26 @@ import SwiftUI
 final class PrimaryButton: UIButton {
 
     init(title: String) {
+        var config = UIButton.Configuration.filled()
+        config.title = title
+        config.baseBackgroundColor = UIColor(named: "blue0")
+        config.baseForegroundColor = .white
+        config.background.cornerRadius = 12
+        config.contentInsets = NSDirectionalEdgeInsets(
+            top: 16, leading: 24, bottom: 16, trailing: 24
+        )
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = .headlineRegular
+            return outgoing
+        }
         super.init(frame: .zero)
-        setTitle(title, for: .normal)
-        setupStyle()
+        self.configuration = config
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupStyle() {
-        backgroundColor = UIColor(named: "blue0")
-        setTitleColor(.white, for: .normal)
-        titleLabel?.font = .headlineRegular
-        layer.cornerRadius = 12
-        contentEdgeInsets = UIEdgeInsets(top: 16, left: 24, bottom: 16, right: 24)
     }
 }
 
