@@ -47,10 +47,10 @@ final class HomeDeviceCardView: UIView {
     }()
     
     //MARK: - 초기화
-    init(deviceType: HomeDeviceType, deviceState: Bool) {
-        self.homeDeviceType = deviceType
-        self.homeDeviceState = deviceState
+    init(deviceType: HomeDeviceType) {
         // 코드베이스 + AutoLayout시 .zero
+        self.homeDeviceType = deviceType
+        
         super.init(frame: .zero)
         
         setupStyle()
@@ -71,10 +71,10 @@ final class HomeDeviceCardView: UIView {
 //MARK: - Public Methods
 
 extension HomeDeviceCardView {
-    func configure(name: String, status: String, homeDeviceState: Bool) {
-        self.homeDeviceState = homeDeviceState
-        deviceNameLabel.text = name
-        deviceStatusLabel.text = status
+    func configure(with device: DeviceModel) {
+        self.homeDeviceState = device.isOn
+        deviceNameLabel.text = device.name
+        deviceStatusLabel.text = device.status
         updateAppearance()
     }
 }

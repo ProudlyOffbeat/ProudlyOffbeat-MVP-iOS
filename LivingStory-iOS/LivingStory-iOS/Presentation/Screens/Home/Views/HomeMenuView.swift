@@ -100,7 +100,7 @@ private extension HomeMenuView {
             ? .init { _ in UIColor(named: "gray10") ?? .label }
             : .init { _ in .clear }
         config.imagePadding = 8
-        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 50)
+        config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 30)
         
         let button = UIButton(configuration: config)
         button.addAction(UIAction { [weak self] _ in
@@ -110,10 +110,4 @@ private extension HomeMenuView {
         }, for: .touchUpInside)
         return button
     }
-}
-
-#Preview {
-    let menu = HomeMenuView(items: ["집 1" , "집 2"], selectedIndex: 1)
-    menu.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
-    return menu
 }
