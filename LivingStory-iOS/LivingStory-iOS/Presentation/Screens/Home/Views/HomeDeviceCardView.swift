@@ -9,7 +9,7 @@ import UIKit
 
 final class HomeDeviceCardView: UIView {
     
-    private let homeDeviceType: HomeDeviceType
+    private var homeDeviceType: HomeDeviceType
     private var homeDeviceState: Bool = false
     
     private let homeIconBackgroundView: UIView = {
@@ -72,6 +72,7 @@ final class HomeDeviceCardView: UIView {
 
 extension HomeDeviceCardView {
     func configure(with device: DeviceModel) {
+        self.homeDeviceType = device.deviceType
         self.homeDeviceState = device.isOn
         deviceNameLabel.text = device.name
         deviceStatusLabel.text = device.status

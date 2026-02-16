@@ -11,31 +11,46 @@ final class HomeDeviceCardCell: UICollectionViewCell {
 
     static let reuseIdentifier = "HomeDeviceCardCell"
 
-    private var cardView: HomeDeviceCardView?
+    private let cardView = HomeDeviceCardView(deviceType: .light)
 
-    func configure(with device: DeviceModel) {
-        // 기존 카드뷰 제거
-        cardView?.removeFromSuperview()
+    // MARK: - Init
 
-        let newCard = HomeDeviceCardView(deviceType: device.deviceType)
-        newCard.configure(with: device)
-        newCard.translatesAutoresizingMaskIntoConstraints = false
-
-        contentView.addSubview(newCard)
-
-        NSLayoutConstraint.activate([
-            newCard.topAnchor.constraint(equalTo: contentView.topAnchor),
-            newCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            newCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            newCard.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-        ])
-
-        cardView = newCard
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupHierarchy()
+        setupLayout()
     }
 
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        cardView?.removeFromSuperview()
-        cardView = nil
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+// MARK: - Public Methods
+
+extension HomeDeviceCardCell {
+    func configure(with device: DeviceModel) {
+        cardView.configure(with: device)
+    }
+}
+
+// MARK: - Private Methods
+
+private extension HomeDeviceCardCell {
+
+    func setupHierarchy() {
+        contentView.addSubview(cardView)
+    }
+
+    func setupLayout() {
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            cardView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            cardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
     }
 }
