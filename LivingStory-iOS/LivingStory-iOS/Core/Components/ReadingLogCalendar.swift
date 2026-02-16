@@ -110,13 +110,14 @@ struct ReadingLogCalendar: View {
     }
 
     private func makeDays() -> [Int] {
-        let range = calendar.range(of: .day, in: .month, for: displayedMonth)!
+        guard let range = calendar.range(of: .day, in: .month, for: displayedMonth) else { return [] }
         let first = calendar.component(.weekday, from: startOfMonth()) - 1
         return Array(repeating: 0, count: first) + Array(1...range.count)
     }
 
     private func startOfMonth() -> Date {
-        calendar.date(from: calendar.dateComponents([.year, .month], from: displayedMonth))!
+        guard let date = calendar.date(from: calendar.dateComponents([.year, .month], from: displayedMonth)) else { return displayedMonth }
+        return date
     }
 
     private func isTodayDay(_ day: Int) -> Bool {
