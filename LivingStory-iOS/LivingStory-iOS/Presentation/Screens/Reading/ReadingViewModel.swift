@@ -54,3 +54,11 @@ final class ReadingViewModel {
         }
     }
 }
+
+#if DEBUG
+extension ReadingViewModel {
+    func setState(_ state: ReadingState) {
+        self.state = state
+    }
+}
+#endif
