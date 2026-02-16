@@ -36,11 +36,11 @@ struct ReadingView: View {
             }
         }
         .alert(
-            viewModel.state == .setting ? "환경 세팅을 전체 중단할까요?" : "독서를 중단할까요?",
+            viewModel.state == .setting ? StringLiterals.Reading.stopSettingAlert : StringLiterals.Reading.stopReadingAlert,
             isPresented: $showStopAlert
         ) {
-            Button("닫기", role: .cancel) {}
-            Button("중단", role: .destructive) {
+            Button(StringLiterals.Reading.close, role: .cancel) {}
+            Button(StringLiterals.Reading.stop, role: .destructive) {
                 viewModel.stopReading()
                 if viewModel.state == .setting {
                     coordinator.pop()
@@ -66,10 +66,10 @@ struct ReadingView: View {
                 .id(viewModel.state)
 
             VStack(spacing: 6) {
-                Text(viewModel.state == .setting ? "환경 세팅중..." : "책 분위기에 맞게 환경이 세팅 됐어요!")
+                Text(viewModel.state == .setting ? StringLiterals.Reading.settingTitle : StringLiterals.Reading.settingDoneTitle)
                     .font(.bodyRegular)
                     .foregroundStyle(.white)
-                Text(viewModel.state == .setting ? "몇 분 소요될 수 있습니다." : "책 흐름에 맞게 분위기가 변할거에요.\n이제 책을 더 재밌게 읽으세요!")
+                Text(viewModel.state == .setting ? StringLiterals.Reading.settingSubtitle : StringLiterals.Reading.settingDoneSubtitle)
                     .font(.subheadline)
                     .foregroundStyle(.white)
                     .opacity(0.5)
@@ -80,7 +80,7 @@ struct ReadingView: View {
 
     private var actionButton: some View {
         PrimaryButtonSwiftUI(
-            title: viewModel.state == .setting ? "환경 세팅 중지" : "독서 중지"
+            title: viewModel.state == .setting ? StringLiterals.Reading.stopSettingButton : StringLiterals.Reading.stopReadingButton
         ) {
             showStopAlert = true
         }
