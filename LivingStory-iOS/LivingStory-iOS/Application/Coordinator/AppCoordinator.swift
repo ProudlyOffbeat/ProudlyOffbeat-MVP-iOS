@@ -2,35 +2,8 @@
 //  AppCoordinator.swift
 //  LivingStory-iOS
 //
-//  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  📚 화면 담당
-//  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  Created by Demian Yoo on 2/9/26.
 //
-//  🧑‍💻 데미안 (UIKit)          📱 이토 (SwiftUI)
-//  ─────────────────────────  ─────────────────────────
-//  • 온보딩                    • 책 프로필
-//  • 홈                        • 독서 중
-//  • 스캐너                    • 통계
-//  • 기기 검색
-//
-//  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  📚 UIKit vs SwiftUI 화면 전환
-//  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//
-//  UIKit 화면 이동:
-//  ```swift
-//  let vc = SomeViewController()
-//  navigationController.pushViewController(vc, animated: true)
-//  ```
-//
-//  SwiftUI 화면 이동:
-//  ```swift
-//  let swiftUIView = SomeSwiftUIView()
-//  let hostingVC = UIHostingController(rootView: swiftUIView)
-//  navigationController.pushViewController(hostingVC, animated: true)
-//  ```
-//
-//  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 import UIKit
 import SwiftUI
@@ -40,51 +13,84 @@ final class AppCoordinator: Coordinator {
     let navigationController: UINavigationController
     var childCoordinators: [Coordinator] = []
 
+    private var tabBarController: MainTabBarController?
+
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
 
     func start() {
-        showHome()
+        setupTabBar()
     }
 
-    // MARK: - 🧑‍💻 데미안 담당 (UIKit)
+    // MARK: - Tab Bar
 
-    /// 홈 화면
-    func showHome() {
-        let vc = HomeViewController()
-        vc.coordinator = self
-        navigationController.setViewControllers([vc], animated: false)
+    private func setupTabBar() {
+        let tabBarController = MainTabBarController()
+
+        // Tab 1: 환경 세팅
+        let homeNav = UINavigationController()
+        let homeVC = HomeViewController()
+        homeVC.coordinator = self
+        homeNav.setViewControllers([homeVC], animated: false)
+        homeNav.tabBarItem = UITabBarItem(
+            title: StringLiterals.TabBar.home,
+            image: UIImage(.home),
+            tag: 0
+        )
+
+        // Tab 2: 책 읽기
+        let bookNav = UINavigationController()
+        let bookVC = BookViewController()
+        bookVC.coordinator = self
+        bookNav.setViewControllers([bookVC], animated: false)
+        bookNav.tabBarItem = UITabBarItem(
+            title: StringLiterals.TabBar.book,
+            image: UIImage(.book),
+            tag: 1
+        )
+
+        // Tab 3: 마이
+        let myNav = UINavigationController()
+        let myVC = MyViewController()
+        myVC.coordinator = self
+        myNav.setViewControllers([myVC], animated: false)
+        myNav.tabBarItem = UITabBarItem(
+            title: StringLiterals.TabBar.my,
+            image: UIImage(.person),
+            tag: 2
+        )
+
+        tabBarController.viewControllers = [homeNav, bookNav, myNav]
+
+        self.tabBarController = tabBarController
+        navigationController.setNavigationBarHidden(true, animated: false)
+        navigationController.setViewControllers([tabBarController], animated: false)
     }
 
-    /// 온보딩 화면
-    func showOnboarding() {
-        let vc = OnboardingViewController()
-        vc.coordinator = self
-        navigationController.setViewControllers([vc], animated: false)
-    }
-
-    /// 스캐너 화면
-    func showScanner() {
-        let vc = ScannerViewController()
-        vc.coordinator = self
-        navigationController.pushViewController(vc, animated: true)
-    }
+    // MARK: - 환경 세팅 탭 네비게이션
 
     /// 기기 검색 화면
     func showDeviceDiscovery() {
         let vc = DeviceDiscoveryViewController()
         vc.coordinator = self
-        navigationController.pushViewController(vc, animated: true)
+        activeNavigationController?.pushViewController(vc, animated: true)
     }
 
-    // MARK: - 📱 이토 담당 (SwiftUI)
+    // MARK: - 책 읽기 탭 네비게이션
+
+    /// 스캐너 화면
+    func showScanner() {
+        let vc = ScannerViewController()
+        vc.coordinator = self
+        activeNavigationController?.pushViewController(vc, animated: true)
+    }
 
     /// 책 프로필 화면 (SwiftUI)
     func showBookProfile(book: BookProfileModel) {
         let view = BookProfileView(coordinator: self, book: book)
         let hostingVC = UIHostingController(rootView: view)
-        navigationController.pushViewController(hostingVC, animated: true)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
     /// 독서 중 화면 (SwiftUI)
@@ -92,9 +98,10 @@ final class AppCoordinator: Coordinator {
         let viewModel = ReadingViewModel(book: book)
         let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
-        navigationController.pushViewController(hostingVC, animated: true)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
+    // MARK: - 마이 탭 네비게이션
     /// 독서 중단 화면 (SwiftUI)
     func showStopReading() {
         // TODO: StopReadingView 구현 후 연결
@@ -104,13 +111,29 @@ final class AppCoordinator: Coordinator {
     func showStatistics() {
         let view = StatisticsView(coordinator: self)
         let hostingVC = UIHostingController(rootView: view)
-        navigationController.pushViewController(hostingVC, animated: true)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
     // MARK: - 공통
 
     /// 뒤로 가기
     func pop() {
-        navigationController.popViewController(animated: true)
+        activeNavigationController?.popViewController(animated: true)
+    }
+
+    /// 온보딩 화면
+    func showOnboarding() {
+        let vc = OnboardingViewController()
+        vc.coordinator = self
+        navigationController.setViewControllers([vc], animated: false)
+    }
+}
+
+// MARK: - Private Helpers
+
+private extension AppCoordinator {
+    /// 현재 활성화된 탭의 NavigationController
+    var activeNavigationController: UINavigationController? {
+        tabBarController?.selectedViewController as? UINavigationController
     }
 }
