@@ -91,24 +91,36 @@ struct ReadingView: View {
         .environment(\.colorScheme, .dark)
     }
 
+    private var lightingColor: Color {
+        guard let config = viewModel.lightingConfig else {
+            return .yellow0
+        }
+        return Color(
+            hue: Double(config.hue) / 360.0,
+            saturation: Double(config.saturation) / 100.0,
+            brightness: Double(config.brightness) / 100.0
+        )
+    }
+
     private var pulseBackground: some View {
         ZStack {
             Color.black
-            if viewModel.state == .setting {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [.yellow0, .yellow20, .clear],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 305
-                        )
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: viewModel.state == .setting
+                            ? [.yellow0, .yellow20, .clear]
+                            : [lightingColor, lightingColor.opacity(0.4), .clear],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 305
                     )
-                    .frame(width: 610, height: 610)
-                    .scaleEffect(isPulsing ? 1.0 : 0.85)
-                    .opacity(isPulsing ? 0.3 : 0.05)
-                    .blur(radius: 50)
-            }
+                )
+                .frame(width: 610, height: 610)
+                .scaleEffect(isPulsing ? 1.0 : 0.85)
+                .opacity(isPulsing ? 0.3 : 0.05)
+                .blur(radius: 50)
+                .animation(.easeInOut(duration: 1.5), value: viewModel.state)
         }
         .ignoresSafeArea()
     }
