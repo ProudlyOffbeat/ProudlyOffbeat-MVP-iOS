@@ -35,7 +35,7 @@ extension UIFont {
     
     // MARK: Headline / Subheadline
     static let headlineRegular: UIFont = .systemFont(ofSize: 17, weight: .semibold )
-    static let subhaedlineRegular: UIFont = .systemFont(ofSize: 15, weight: .regular )
+    static let subheadlineRegular: UIFont = .systemFont(ofSize: 15, weight: .regular )
     static let subheadlineEmphasized: UIFont = .systemFont(ofSize: 15, weight: .semibold )
     
     // MARK: Body
