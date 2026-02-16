@@ -48,6 +48,10 @@ struct ReadingView: View {
                     coordinator.showStopReading()
                 }
             }
+        } message: {
+            if viewModel.state == .reading {
+                Text(StringLiterals.Reading.stopReadingAlertMessage)
+            }
         }
         .task {
             //await viewModel.startSetup()
@@ -112,11 +116,24 @@ struct ReadingView: View {
 
 // MARK: - Preview
 
-#Preview {
+#Preview("세팅 중") {
     NavigationView {
         ReadingView(
             coordinator: AppCoordinator(navigationController: UINavigationController()),
             viewModel: ReadingViewModel(book: .mock)
+        )
+    }
+}
+
+#Preview("독서 중") {
+    NavigationView {
+        ReadingView(
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            viewModel: {
+                let vm = ReadingViewModel(book: .mock)
+                vm.setState(.reading)
+                return vm
+            }()
         )
     }
 }
