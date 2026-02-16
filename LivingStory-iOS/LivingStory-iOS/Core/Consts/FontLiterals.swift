@@ -35,11 +35,12 @@ extension UIFont {
     
     // MARK: Headline / Subheadline
     static let headlineRegular: UIFont = .systemFont(ofSize: 17, weight: .semibold )
-    static let subhaedlineRegular: UIFont = .systemFont(ofSize: 15, weight: .regular )
-    static let subheadlienRegular: UIFont = .systemFont(ofSize: 15, weight: .semibold )
+    static let subheadlineRegular: UIFont = .systemFont(ofSize: 15, weight: .regular )
+    static let subheadlineEmphasized: UIFont = .systemFont(ofSize: 15, weight: .semibold )
     
     // MARK: Body
     static let bodyRegular: UIFont = .systemFont(ofSize: 17, weight: .regular)
+    static let bodyMedium: UIFont = .systemFont(ofSize: 17, weight: .medium)
     static let bodyEmphasized: UIFont = .systemFont(ofSize: 17, weight: .semibold)
     
     // MARK: Callout
@@ -75,6 +76,7 @@ extension Font {
     
     // MARK: Body
     static let bodyRegular: Font = .system(size: 17, weight: .regular)
+    static let bodyMedium: Font = .system(size: 17, weight: .medium)
     static let bodyEmphasized: Font = .system(size: 17, weight: .semibold)
     
     // MARK: Callout

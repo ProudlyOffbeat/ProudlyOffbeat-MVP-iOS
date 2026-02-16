@@ -5,6 +5,7 @@ enum ReadingState {
     case reading
 }
 
+@MainActor
 @Observable
 final class ReadingViewModel {
 
@@ -53,3 +54,11 @@ final class ReadingViewModel {
         }
     }
 }
+
+#if DEBUG
+extension ReadingViewModel {
+    func setState(_ state: ReadingState) {
+        self.state = state
+    }
+}
+#endif
