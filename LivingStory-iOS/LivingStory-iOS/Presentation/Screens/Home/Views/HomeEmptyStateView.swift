@@ -32,7 +32,7 @@ final class HomeEmptyStateView: UIView {
 
     private let subtitleLabel: UILabel = {
         let label = UILabel()
-        label.font = .subhaedlineRegular
+        label.font = .subheadlineRegular
         label.textColor = UIColor(named: "gray40")
         label.textAlignment = .center
         label.numberOfLines = 0
