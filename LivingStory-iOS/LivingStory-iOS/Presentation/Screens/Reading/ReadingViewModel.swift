@@ -5,6 +5,7 @@ enum ReadingState {
     case reading
 }
 
+@MainActor
 @Observable
 final class ReadingViewModel {
 
