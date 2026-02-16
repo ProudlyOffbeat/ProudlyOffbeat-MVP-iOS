@@ -87,20 +87,25 @@ final class AppCoordinator: Coordinator {
     }
 
     /// 책 프로필 화면 (SwiftUI)
-    func showBookProfile() {
-        let view = BookProfileView(coordinator: self)
+    func showBookProfile(book: BookProfileModel) {
+        let view = BookProfileView(coordinator: self, book: book)
         let hostingVC = UIHostingController(rootView: view)
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
     /// 독서 중 화면 (SwiftUI)
-    func showReading() {
-        let view = ReadingView(coordinator: self)
+    func showReading(book: BookProfileModel) {
+        let viewModel = ReadingViewModel(book: book)
+        let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
     // MARK: - 마이 탭 네비게이션
+    /// 독서 중단 화면 (SwiftUI)
+    func showStopReading() {
+        // TODO: StopReadingView 구현 후 연결
+    }
 
     /// 통계 화면 (SwiftUI)
     func showStatistics() {

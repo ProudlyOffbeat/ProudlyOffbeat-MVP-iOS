@@ -56,19 +56,45 @@ final class PrimaryButton: UIButton {
 // MARK: - SwiftUI Version
 
 struct PrimaryButtonSwiftUI: View {
-
+    @Environment(\.colorScheme) var scheme
     let title: String
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.headlineRegular)
-                .foregroundColor(Color("gray100"))
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
-                .background(Color("blue0"))
-                .cornerRadius(12)
+            Capsule()
+                .frame(height: 52)
+                .foregroundStyle(scheme == .dark ? .clear : .black)
+                .glassEffect()
+                .overlay {
+                    Text(title)
+                        .font(.buttonTitle)
+                        .foregroundStyle(.white)
+                }
         }
     }
+}
+
+struct WhiteButtonSwiftUI: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Capsule()
+                .frame(height: 52)
+                .foregroundStyle(.clear)
+                .glassEffect()
+                .overlay {
+                    Text(title)
+                        .font(.buttonTitle)
+                        .foregroundStyle(.black)
+                        .opacity(0.7)
+                }
+        }
+    }
+}
+
+#Preview {
+    WhiteButtonSwiftUI(title: "테스트 버튼") {}
 }
