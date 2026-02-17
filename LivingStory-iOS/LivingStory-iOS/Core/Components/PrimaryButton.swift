@@ -29,21 +29,29 @@ import SwiftUI
 
 final class PrimaryButton: UIButton {
 
-    init(title: String) {
-        var config = UIButton.Configuration.filled()
-        config.title = title
-        config.baseBackgroundColor = UIColor(named: "blue0")
-        config.baseForegroundColor = .white
-        config.background.cornerRadius = 12
-        config.contentInsets = NSDirectionalEdgeInsets(
+    init(
+        title: String,
+        font: UIFont = .headlineRegular,
+        backgroundColor: UIColor? = UIColor(named: "blue0"),
+        foregroundColor: UIColor = .white,
+        cornerRadius: CGFloat = 22,
+        contentInsets: NSDirectionalEdgeInsets = NSDirectionalEdgeInsets(
             top: 16, leading: 24, bottom: 16, trailing: 24
         )
+    ) {
+        super.init(frame: .zero)
+
+        var config = UIButton.Configuration.filled()
+        config.title = title
+        config.baseBackgroundColor = backgroundColor
+        config.baseForegroundColor = foregroundColor
+        config.background.cornerRadius = cornerRadius
+        config.contentInsets = contentInsets
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var outgoing = incoming
-            outgoing.font = .headlineRegular
+            outgoing.font = font
             return outgoing
         }
-        super.init(frame: .zero)
         self.configuration = config
     }
 
