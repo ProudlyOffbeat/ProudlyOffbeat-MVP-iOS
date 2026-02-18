@@ -13,13 +13,7 @@ final class BookViewController: UIViewController {
 
     weak var coordinator: AppCoordinator?
 
-    private let carouselItems: [(tag: String, title: String, imageName: String)] = [
-        (StringLiterals.Book.tagUsage, StringLiterals.Book.titleUsage, StringLiterals.Book.imageUsage),
-        (StringLiterals.Book.tag01, StringLiterals.Book.title01, StringLiterals.Book.image01),
-        (StringLiterals.Book.tag02, StringLiterals.Book.title02, StringLiterals.Book.image02),
-        (StringLiterals.Book.tag03, StringLiterals.Book.title03, StringLiterals.Book.image03),
-        (StringLiterals.Book.tag04, StringLiterals.Book.title04, StringLiterals.Book.image04)
-    ]
+    private let bookDataSource = BookDataSource()
 
     // MARK: - UI Components
 
@@ -35,9 +29,7 @@ final class BookViewController: UIViewController {
         cv.showsHorizontalScrollIndicator = false
         cv.decelerationRate = .fast
         cv.contentInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-        cv.dataSource = self
         cv.delegate = self
-        cv.register(CarouselCell.self, forCellWithReuseIdentifier: CarouselCell.identifier)
         return cv
     }()
 
@@ -61,26 +53,7 @@ final class BookViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         setupActions()
-    }
-}
-
-// MARK: - UICollectionViewDataSource
-
-extension BookViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        carouselItems.count
-    }
-
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: CarouselCell.identifier,
-            for: indexPath
-        ) as? CarouselCell else {
-            return UICollectionViewCell()
-        }
-        let item = carouselItems[indexPath.item]
-        cell.configure(tag: item.tag, title: item.title, imageName: item.imageName)
-        return cell
+        bookDataSource.configure(with: collectionView)
     }
 }
 
@@ -115,7 +88,7 @@ private extension BookViewController {
             .font: UIFont.title1Emphasized
         ]
 
-        wormPageControl.numberOfPages = carouselItems.count
+        wormPageControl.numberOfPages = bookDataSource.items.count
     }
 
     func setupHierarchy() {
@@ -162,7 +135,7 @@ private extension BookViewController {
 
     func updatePageControl() {
         let itemWidth = collectionView.bounds.width - 60
-        let pageWidth = itemWidth + 12 // item width + minimumLineSpacing
+        let pageWidth = itemWidth + 12
         let offsetX = collectionView.contentOffset.x + collectionView.contentInset.left
         let progress = offsetX / pageWidth
         wormPageControl.progress = progress

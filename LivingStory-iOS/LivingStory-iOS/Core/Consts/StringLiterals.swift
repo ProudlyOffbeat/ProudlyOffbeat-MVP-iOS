@@ -66,6 +66,20 @@ enum StringLiterals {
         static let image04 = "UsingIntro4"
     }
 
+    enum Scanner {
+        static let title = "바코드 스캔"
+        static let recognizing = "바코드 인식중"
+        static let success = "인식 완료!"
+        static let failed = "인식 실패"
+        static let retry = "다시 시도"
+        static let guideTitle = "책 뒷면의 바코드 스캔"
+        static let guideSubtitle = "정확한 책의 정보를 가져오기 위해, 읽으실 책의\n바코드를 스캔해주세요. 바코드는 주로 뒷면에\n위치해 있습니다."
+        static let cameraPermissionTitle = "카메라 권한 필요"
+        static let cameraPermissionMessage = "바코드를 스캔하려면 카메라 접근 권한이 필요합니다."
+        static let cancel = "취소"
+        static let goToSettings = "설정으로 이동"
+    }
+
     enum My {
         static let title = "마이"
     }
