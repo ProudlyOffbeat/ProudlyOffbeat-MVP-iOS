@@ -69,8 +69,3 @@ private extension MyViewController {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    UINavigationController(rootViewController: MyViewController())
-}

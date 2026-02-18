@@ -36,8 +36,3 @@ final class DeviceDiscoveryViewController: UIViewController {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    DeviceDiscoveryViewController()
-}

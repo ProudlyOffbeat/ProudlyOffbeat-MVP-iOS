@@ -103,6 +103,3 @@ struct WhiteButtonSwiftUI: View {
     }
 }
 
-#Preview {
-    WhiteButtonSwiftUI(title: "테스트 버튼") {}
-}
