@@ -10,18 +10,11 @@ import SwiftUI
 struct StatisticsView: View {
 
     let coordinator: AppCoordinator
-
-    // TODO: 실제 데이터로 교체
-    private let readDates: Set<DateComponents> = [
-        DateComponents(year: 2026, month: 2, day: 2),
-    ]
-    private let monthlyBooks = 24
-    private let totalBooks = 95
-    private let totalHours = 32
+    private let store = ReadingSessionStore.shared
 
     var body: some View {
             VStack(spacing: 16) {
-                ReadingLogCalendar(readDates: readDates)
+                ReadingLogCalendar(readDates: store.readDateComponents)
                     .padding(.top, 25)
                 statsSection
                     
@@ -42,6 +35,7 @@ struct StatisticsView: View {
                 .offset(y: 150)
             )
         .navigationTitle("마이")
+        .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem {
                 Button {
@@ -58,10 +52,10 @@ struct StatisticsView: View {
     private var statsSection: some View {
             VStack(spacing: 12) {
                 HStack(spacing: 10) {
-                    StatCard(icon: "calendar", title: "이번 달 읽은 책 수", value: "\(monthlyBooks)권")
-                    StatCard(icon: "books.vertical.fill", title: "총 읽은 책 수", value: "\(totalBooks)권")
+                    StatCard(icon: "calendar", title: "이번 달 읽은 책 수", value: "\(store.monthlyBookCount)권")
+                    StatCard(icon: "books.vertical.fill", title: "총 읽은 책 수", value: "\(store.totalBookCount)권")
                 }
-                StatCard(icon: "clock", title: "총 읽은 시간", value: "\(totalHours)시간", isWide: true)
+                StatCard(icon: "clock", title: "총 읽은 시간", value: store.totalTimeString, isWide: true)
                 Spacer()
             }
     }

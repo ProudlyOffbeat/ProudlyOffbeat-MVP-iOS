@@ -98,22 +98,22 @@ final class AppCoordinator: Coordinator {
         let viewModel = ReadingViewModel(book: book)
         let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
-        activeNavigationController?.pushViewController(hostingVC, animated: true)
+        (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
 
     // MARK: - 마이 탭 네비게이션
     /// 독서 중단 화면 (SwiftUI)
-    func showStopReading(conversations: [Conversation]) {
-        let view = StopReadingView(coordinator: self, conversations: conversations)
+    func showStopReading(bookTitle: String, conversations: [Conversation]) {
+        let view = StopReadingView(coordinator: self, bookTitle: bookTitle, conversations: conversations)
         let hostingVC = UIHostingController(rootView: view)
-        navigationController.pushViewController(hostingVC, animated: true)
+        (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
 
     /// 독서 결과 화면 (SwiftUI)
     func showResult() {
         let view = ResultView(coordinator: self)
         let hostingVC = UIHostingController(rootView: view)
-        navigationController.pushViewController(hostingVC, animated: true)
+        (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
 
     /// 홈으로 돌아가기
