@@ -374,6 +374,8 @@
 		};
 		D5EA4E222F1DFC6C004FF6C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D5EA4DF52F1DFC6B004FF6C7 /* LivingStory-iOS */;
+			baseConfigurationReferenceRelativePath = Core/Network/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -438,6 +440,8 @@
 		};
 		D5EA4E232F1DFC6C004FF6C7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = D5EA4DF52F1DFC6B004FF6C7 /* LivingStory-iOS */;
+			baseConfigurationReferenceRelativePath = Core/Network/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
