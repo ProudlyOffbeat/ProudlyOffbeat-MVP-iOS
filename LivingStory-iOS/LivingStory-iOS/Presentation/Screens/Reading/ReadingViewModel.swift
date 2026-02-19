@@ -35,6 +35,10 @@ final class ReadingViewModel {
         self.audioPlayerService = audioPlayerService
     }
 
+    deinit {
+        audioPlayerService.stop()
+    }
+
     // MARK: - Public
 
     func startSetup() async {

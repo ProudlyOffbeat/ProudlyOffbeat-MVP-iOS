@@ -9,6 +9,10 @@ final class AudioPlayerService {
 
     private var player: AVAudioPlayer?
 
+    deinit {
+        stop()
+    }
+
     func play(category: MusicCategory) throws {
         guard let url = Bundle.main.url(
             forResource: category.audioFileName,
