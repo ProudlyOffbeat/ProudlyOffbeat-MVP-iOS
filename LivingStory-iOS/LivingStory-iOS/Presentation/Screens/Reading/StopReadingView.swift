@@ -58,7 +58,9 @@ struct StopReadingView: View {
         VStack(spacing: 14) {
             PrimaryButtonSwiftUI(title: "다른 책 스캔", action: {})
                 .padding(.horizontal, 20)
-            WhiteButtonSwiftUI(title: "그만 읽기", action: {})
+            WhiteButtonSwiftUI(title: "그만 읽기", action: {
+                    coordinator.showResult()
+                })
                 .padding(.horizontal, 20)
         }
     }
