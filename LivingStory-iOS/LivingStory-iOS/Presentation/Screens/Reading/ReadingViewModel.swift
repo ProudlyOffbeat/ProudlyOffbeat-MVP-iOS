@@ -41,6 +41,10 @@ final class ReadingViewModel {
         self.sessionStore = sessionStore
     }
 
+    deinit {
+        audioPlayerService.stop()
+    }
+
     // MARK: - Public
 
     func startSetup() async {
