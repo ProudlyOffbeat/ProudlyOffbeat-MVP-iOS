@@ -10,33 +10,22 @@ import SwiftUI
 struct ResultView: View {
 
     let coordinator: AppCoordinator
-
-    // TODO: 실제 데이터로 교체
-    private let todayBooks = 3
-    private let monthlyBooks = 24
-    private let readDates: Set<DateComponents> = [
-        DateComponents(year: 2026, month: 2, day: 2),
-        DateComponents(year: 2026, month: 2, day: 3),
-        DateComponents(year: 2026, month: 2, day: 5),
-        DateComponents(year: 2026, month: 2, day: 8),
-        DateComponents(year: 2026, month: 2, day: 9),
-        DateComponents(year: 2026, month: 2, day: 10),
-    ]
+    private let store = ReadingSessionStore.shared
 
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("오늘 \(todayBooks)권의 책을 읽었어요!")
+                Text("오늘 \(store.todayBookCount)권의 책을 읽었어요!")
                     .font(.title2Emphasized)
                     .padding(.top, 33)
 
-                ReadingLogCalendar(readDates: readDates, showNavigation: false)
+                ReadingLogCalendar(readDates: store.readDateComponents, showNavigation: false)
                     .padding(.top, 33)
 
                 StatCard(
                     icon: "calendar",
                     title: "이번 달 읽은 책 수",
-                    value: "\(monthlyBooks)권",
+                    value: "\(store.monthlyBookCount)권",
                     isWide: true
                 )
             }
