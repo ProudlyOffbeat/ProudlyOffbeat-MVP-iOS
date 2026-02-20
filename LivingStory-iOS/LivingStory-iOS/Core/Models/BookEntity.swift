@@ -32,8 +32,11 @@ struct BookEntity {
 extension BookEntity {
     func toProfileModel() -> BookProfileModel {
         BookProfileModel(
+            isbn: isbn,
             bookCoverImageURL: coverURL.flatMap { URL(string: $0) },
             bookTitle: title,
+            bookAuthor: author,
+            bookPublisher: publication,
             bookDescription: description ?? ""
         )
     }
