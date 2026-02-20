@@ -35,15 +35,3 @@ final class DarkRoundedButton: UIButton {
     }
 }
 
-#Preview {
-    let vc = UIViewController()
-    vc.view.backgroundColor = .white
-    let button = DarkRoundedButton(title: "설정으로 이동")
-    button.translatesAutoresizingMaskIntoConstraints = false
-    vc.view.addSubview(button)
-    NSLayoutConstraint.activate([
-        button.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
-        button.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor)
-    ])
-    return vc
-}

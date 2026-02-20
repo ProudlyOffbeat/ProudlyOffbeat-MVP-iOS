@@ -79,11 +79,17 @@ final class AppCoordinator: Coordinator {
 
     // MARK: - 책 읽기 탭 네비게이션
 
-    /// 스캐너 화면
+    /// 스캐너 화면 (바텀시트, 상태별 디텐트 전환)
     func showScanner() {
         let vc = ScannerViewController()
         vc.coordinator = self
-        activeNavigationController?.pushViewController(vc, animated: true)
+
+        if let sheet = vc.sheetPresentationController {
+            sheet.detents = [vc.scanningDetent]
+            sheet.preferredCornerRadius = 32
+        }
+
+        activeNavigationController?.present(vc, animated: true)
     }
 
     /// 책 프로필 화면 (SwiftUI)

@@ -46,8 +46,11 @@ enum SymbolLiterals: String {
 
     // MARK: - Actions
 
+    case barcode = "barcode"
     case scanner = "barcode.viewfinder"
     case camera = "camera.fill"
+    case flashlightOff = "flashlight.off.fill"
+    case flashlightOn = "flashlight.on.fill"
     case search = "magnifyingglass"
     case plus = "plus"
     case edit = "pencil"

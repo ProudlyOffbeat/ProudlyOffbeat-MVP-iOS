@@ -133,6 +133,9 @@ iOSInjectionProject/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,swift,xcode
 
+# API Keys (xcconfig)
+*.xcconfig
+
 # Development tools
 .claude/
 

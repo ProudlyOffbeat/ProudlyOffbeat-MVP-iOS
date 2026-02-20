@@ -32,8 +32,3 @@ final class OnboardingViewController: UIViewController {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    OnboardingViewController()
-}
