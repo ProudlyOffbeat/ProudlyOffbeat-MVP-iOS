@@ -21,6 +21,7 @@ struct Conversation: Identifiable {
 
 struct StopReadingView: View {
     let coordinator: AppCoordinator
+    let bookTitle: String
     let conversations: [Conversation]
 
     var body: some View {
@@ -29,7 +30,7 @@ struct StopReadingView: View {
             Spacer()
             buttonSection
         }
-        .navigationTitle("완다는 별의 소리를 들어요")
+        .navigationTitle(bookTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -95,6 +96,7 @@ private struct ConversationCard: View {
     NavigationView {
         StopReadingView(
             coordinator: AppCoordinator(navigationController: UINavigationController()),
+            bookTitle: "냉장고 먹는 괴물",
             conversations: Conversation.mock
         )
     }
