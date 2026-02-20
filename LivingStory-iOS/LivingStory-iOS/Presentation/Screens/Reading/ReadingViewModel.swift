@@ -20,13 +20,29 @@ final class ReadingViewModel {
     private(set) var lightingConfig: LightingConfig?
     private(set) var errorMessage: String?
 
+    private(set) var readingSession: ReadingSession?
+
     private let geminiService: GeminiService
+    private let audioPlayerService: AudioPlayerService
+    private let sessionStore: ReadingSessionStore
     private var timerTask: Task<Void, Never>?
+    private var startTime: Date?
     private var hasStarted = false
 
-    init(book: BookProfileModel, geminiService: GeminiService = GeminiService()) {
+    init(
+        book: BookProfileModel,
+        geminiService: GeminiService = GeminiService(),
+        audioPlayerService: AudioPlayerService = AudioPlayerService(),
+        sessionStore: ReadingSessionStore = .shared
+    ) {
         self.book = book
         self.geminiService = geminiService
+        self.audioPlayerService = audioPlayerService
+        self.sessionStore = sessionStore
+    }
+
+    deinit {
+        audioPlayerService.stop()
     }
 
     // MARK: - Public
@@ -40,7 +56,11 @@ final class ReadingViewModel {
         print("[Gemini] API 요청 시작 (1회)")
 
         do {
+            #if DEBUG
+            let environment = ReadingEnvironment.mock
+            #else
             let environment = try await geminiService.generateReadingEnvironment(for: book)
+            #endif
 
             musicCategory = environment.musicCategory
             lightingConfig = environment.lighting
@@ -53,11 +73,23 @@ final class ReadingViewModel {
             // TODO: HomeKit 조명 설정
             isLightingReady = true
 
-            // TODO: AVFoundation 음악 재생
-            isMusicPlaying = true
+            // AVFoundation 음악 재생
+            if let category = musicCategory {
+                do {
+                    try audioPlayerService.play(category: category)
+                    isMusicPlaying = true
+                    print("[Audio] \(category.rawValue) 재생 시작")
+                } catch {
+                    print("[Audio] 재생 실패: \(error.localizedDescription)")
+                    isMusicPlaying = true // 음원 실패해도 독서 진행
+                }
+            } else {
+                isMusicPlaying = true
+            }
 
             if isLightingReady && isMusicPlaying {
                 state = .reading
+                startTime = Date()
                 startTimer()
             }
         } catch {
@@ -69,6 +101,22 @@ final class ReadingViewModel {
     func stopReading() {
         timerTask?.cancel()
         timerTask = nil
+        audioPlayerService.stop()
+        isMusicPlaying = false
+
+        // ReadingSession 생성
+        if let startTime {
+            let session = ReadingSession(
+                startTime: startTime,
+                endTime: Date(),
+                book: .mock // TODO: 실제 BookEntity로 교체
+            )
+            readingSession = session
+            sessionStore.addSession(session)
+            print("[Session] 독서 기록 저장 - \(session.duration)분")
+        }
+
+        print("[Audio] 재생 중단")
     }
 
     // MARK: - Private

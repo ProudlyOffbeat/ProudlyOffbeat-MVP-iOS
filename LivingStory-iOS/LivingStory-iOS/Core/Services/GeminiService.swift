@@ -59,7 +59,7 @@ nonisolated final class GeminiService: Sendable {
 
     private func buildURL() throws -> URL {
         var components = URLComponents(string: baseURL)
-        components?.queryItems = [URLQueryItem(name: "key", value: Secrets.geminiAPIKey)]
+        components?.queryItems = [URLQueryItem(name: "key", value: Config.geminiAPIKey)]
         guard let url = components?.url else { throw GeminiError.invalidURL }
         return url
     }

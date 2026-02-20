@@ -22,3 +22,15 @@ protocol LightingControllable {
     func applyLighting(_ config: LightingConfig) async throws
     func resetLighting() async throws
 }
+
+#if DEBUG
+struct MockLightingController: LightingControllable {
+    func applyLighting(_ config: LightingConfig) async throws {
+        print("[MockLighting] 조명 적용 - H\(config.hue) S\(config.saturation) B\(config.brightness)")
+    }
+
+    func resetLighting() async throws {
+        print("[MockLighting] 조명 리셋")
+    }
+}
+#endif
