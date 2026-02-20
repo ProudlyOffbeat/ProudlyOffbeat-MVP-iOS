@@ -306,7 +306,7 @@
 				CODE_SIGN_ENTITLEMENTS = "LivingStory-iOS/LivingStory-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8FKM9FB4PH;
+				DEVELOPMENT_TEAM = 9S8SHSW95K;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -343,7 +343,7 @@
 				CODE_SIGN_ENTITLEMENTS = "LivingStory-iOS/LivingStory-iOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8FKM9FB4PH;
+				DEVELOPMENT_TEAM = 9S8SHSW95K;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
