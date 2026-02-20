@@ -70,7 +70,8 @@ final class CameraPreviewView: UIView {
                         self?.setupCamera()
                         self?.startScanning()
                     } else {
-                        self?.delegate?.cameraPreviewPermissionDenied(self!)
+                        guard let self else { return }
+                        self.delegate?.cameraPreviewPermissionDenied(self)
                     }
                 }
             }
