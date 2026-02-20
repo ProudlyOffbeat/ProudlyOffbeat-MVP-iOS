@@ -13,10 +13,10 @@ struct ReadingSession {
     let endTime: Date
     /// 독서 시간 (분 단위)
     let duration: Int
-    let book: BookEntity
+    let book: BookRecord
     let createdAt: Date
 
-    init(startTime: Date, endTime: Date, book: BookEntity) {
+    init(startTime: Date, endTime: Date, book: BookRecord) {
         self.id = UUID()
         self.startTime = startTime
         self.endTime = endTime

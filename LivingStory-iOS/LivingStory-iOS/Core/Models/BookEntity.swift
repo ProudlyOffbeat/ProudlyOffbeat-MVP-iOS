@@ -1,5 +1,5 @@
 //
-//  BookEntity.swift
+//  BookRecord.swift
 //  LivingStory-iOS
 //
 //  임시 도메인 모델 (추후 CoreData Entity로 교체)
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BookEntity {
+struct BookRecord {
     let isbn: String
     let title: String
     let author: String
@@ -16,7 +16,7 @@ struct BookEntity {
     let description: String?
     let createdAt: Date
 
-    static let mock = BookEntity(
+    static let mock = BookRecord(
         isbn: "978-89-6546-359-7",
         title: "냉장고 먹는 괴물",
         author: "이현욱",
@@ -29,7 +29,7 @@ struct BookEntity {
 
 // MARK: - BookProfileModel 변환
 
-extension BookEntity {
+extension BookRecord {
     func toProfileModel() -> BookProfileModel {
         BookProfileModel(
             isbn: isbn,
