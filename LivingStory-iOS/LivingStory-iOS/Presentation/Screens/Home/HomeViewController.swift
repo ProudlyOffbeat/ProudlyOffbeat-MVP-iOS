@@ -14,10 +14,9 @@ final class HomeViewController: UIViewController {
     weak var coordinator: AppCoordinator?
 
     private let homeKitManager = HomeKitManager()
+    private let homeDataSource = HomeDataSource()
     private var homes: [HomeModel] = []
     private var currentHome: HomeModel?
-
-    private var dataSource: UICollectionViewDiffableDataSource<RoomModel, DeviceModel>!
 
     private let homeMenuButton: UIButton = {
         let button = UIButton(type: .system)
@@ -49,7 +48,7 @@ final class HomeViewController: UIViewController {
         setupStyle()
         setupHierarchy()
         setupLayout()
-        setupCollectionView()
+        homeDataSource.configure(with: roomCollectionView)
         setupEmptyStateActions()
         bindHomeKit()
     }
@@ -103,45 +102,6 @@ private extension HomeViewController {
             emptyStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             emptyStateView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
-    }
-
-    func setupCollectionView() {
-        roomCollectionView.register(
-            HomeDeviceCardCell.self,
-            forCellWithReuseIdentifier: HomeDeviceCardCell.reuseIdentifier
-        )
-        roomCollectionView.register(
-            RoomHeaderView.self,
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: RoomHeaderView.reuseIdentifier
-        )
-
-        dataSource = UICollectionViewDiffableDataSource<RoomModel, DeviceModel>(
-            collectionView: roomCollectionView
-        ) { collectionView, indexPath, device in
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: HomeDeviceCardCell.reuseIdentifier,
-                for: indexPath
-            ) as? HomeDeviceCardCell else {
-                return UICollectionViewCell()
-            }
-            cell.configure(with: device)
-            return cell
-        }
-
-        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
-            guard let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: RoomHeaderView.reuseIdentifier,
-                for: indexPath
-            ) as? RoomHeaderView else {
-                return UICollectionReusableView()
-            }
-
-            let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
-            header.configure(with: section.name)
-            return header
-        }
     }
 
     func setupEmptyStateActions() {
@@ -230,11 +190,12 @@ private extension HomeViewController {
 
         switch state {
         case .normal:
+            guard let home = currentHome else { return }
             emptyStateView.isHidden = true
             roomCollectionView.isHidden = false
             navigationItem.rightBarButtonItem?.isHidden = false
-            navigationItem.title = currentHome?.name
-            applySnapshot()
+            navigationItem.title = home.name
+            homeDataSource.applySnapshot(for: home)
 
         case .permissionsRequired:
             emptyStateView.isHidden = false
@@ -288,113 +249,8 @@ private extension HomeViewController {
         updateUI(for: home.state)
     }
 
-    func applySnapshot() {
-        guard let home = currentHome else { return }
-
-        var snapshot = NSDiffableDataSourceSnapshot<RoomModel, DeviceModel>()
-        for room in home.rooms {
-            snapshot.appendSections([room])
-            snapshot.appendItems(room.devices, toSection: room)
-        }
-        dataSource.apply(snapshot, animatingDifferences: true)
-    }
-
     func openSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }
 }
-
-// MARK: - Preview
-
-#if DEBUG
-extension HomeViewController {
-
-    func configurePreview(for state: HomeState) {
-        homeKitManager.onHomesUpdated = nil
-        homeKitManager.onPermissionDenied = nil
-
-        let mockHomes = Self.makeMockHomes()
-
-        switch state {
-        case .normal:
-            homes = mockHomes
-            currentHome = mockHomes[0]
-
-        case .noDevices:
-            homes = mockHomes
-            currentHome = mockHomes[1]
-
-        case .permissionsRequired:
-            homes = []
-            currentHome = nil
-        }
-
-        updateUI(for: state)
-    }
-
-    private static func makeMockHomes() -> [HomeModel] {
-        [
-            HomeModel(
-                id: UUID(),
-                name: "집 1",
-                state: .normal,
-                rooms: [
-                    RoomModel(name: "거실", id: UUID(), devices: [
-                        DeviceModel(name: "거실 조명", id: UUID(), isOn: true, deviceType: .light, percentage: 80),
-                        DeviceModel(name: "거실 스피커", id: UUID(), isOn: true, deviceType: .speaker, percentage: 50)
-                    ]),
-                    RoomModel(name: "침실", id: UUID(), devices: [
-                        DeviceModel(name: "침실 조명", id: UUID(), isOn: false, deviceType: .light, percentage: nil),
-                        DeviceModel(name: "침실 스피커", id: UUID(), isOn: true, deviceType: .speaker, percentage: 30)
-                    ]),
-                    RoomModel(name: "아이 방", id: UUID(), devices: [
-                        DeviceModel(name: "무드등", id: UUID(), isOn: true, deviceType: .light, percentage: 40),
-                        DeviceModel(name: "동화 스피커", id: UUID(), isOn: false, deviceType: .speaker, percentage: nil)
-                    ])
-                ]
-            ),
-            HomeModel(
-                id: UUID(),
-                name: "집 2",
-                state: .noDevices,
-                rooms: []
-            ),
-            HomeModel(
-                id: UUID(),
-                name: "별장",
-                state: .normal,
-                rooms: [
-                    RoomModel(name: "거실", id: UUID(), devices: [
-                        DeviceModel(name: "스탠드", id: UUID(), isOn: true, deviceType: .light, percentage: 60)
-                    ])
-                ]
-            )
-        ]
-    }
-}
-
-#Preview("기기 있음") {
-    let vc = HomeViewController()
-    let nav = UINavigationController(rootViewController: vc)
-    vc.loadViewIfNeeded()
-    vc.configurePreview(for: .normal)
-    return nav
-}
-
-#Preview("권한 필요") {
-    let vc = HomeViewController()
-    let nav = UINavigationController(rootViewController: vc)
-    vc.loadViewIfNeeded()
-    vc.configurePreview(for: .permissionsRequired)
-    return nav
-}
-
-#Preview("기기 없음") {
-    let vc = HomeViewController()
-    let nav = UINavigationController(rootViewController: vc)
-    vc.loadViewIfNeeded()
-    vc.configurePreview(for: .noDevices)
-    return nav
-}
-#endif

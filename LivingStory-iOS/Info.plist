@@ -18,6 +18,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>KAKAO_REST_API_KEY</key>
+	<string>$(KAKAO_REST_API_KEY)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>책 바코드를 스캔하기 위해 카메라 접근이 필요합니다.</string>
 	<key>NSHomeKitUsageDescription</key>
@@ -44,6 +46,9 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 </dict>
 </plist>
