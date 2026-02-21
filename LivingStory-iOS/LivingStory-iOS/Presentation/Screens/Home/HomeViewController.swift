@@ -192,6 +192,8 @@ private extension HomeViewController {
             self?.currentHome = nil
             self?.updateUI(for: .permissionsRequired)
         }
+
+        homeKitManager.checkInitialStatus()
     }
 }
 

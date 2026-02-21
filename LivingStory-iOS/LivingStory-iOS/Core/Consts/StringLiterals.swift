@@ -90,4 +90,12 @@ enum StringLiterals {
         static let minuteUnit = "분"
         static let secondUnit = "초"
     }
+
+    enum Onboarding {
+        static let coachMark1 = "책 읽기 시작하기를 통해 스캔한 책에 맞는 분위기로 조명과 스피커를 세팅할 수 있어요"
+        static let coachMark2 = "책 읽기에 사용할 장치를 설정할 수 있어요"
+        static let coachMark3 = "지금까지 내가 책을 읽은 시간과 권 수를 확인할 수 있어요"
+        static let next = "다음"
+        static let start = "시작하기"
+    }
 }
