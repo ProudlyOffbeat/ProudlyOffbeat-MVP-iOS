@@ -11,6 +11,7 @@ enum HomeKitLightingError: LocalizedError, Sendable {
     case noHomesAvailable
     case noLightsFound
     case characteristicWriteFailed(String)
+    case homeLoadTimeout
 
     var errorDescription: String? {
         switch self {
@@ -20,6 +21,8 @@ enum HomeKitLightingError: LocalizedError, Sendable {
             return "제어 가능한 조명을 찾을 수 없습니다."
         case .characteristicWriteFailed(let detail):
             return "조명 값 쓰기 실패: \(detail)"
+        case .homeLoadTimeout:
+            return "HomeKit 집 데이터 로드 시간 초과"
         }
     }
 }
@@ -44,7 +47,7 @@ final class HomeKitLightingController: NSObject, LightingControllable {
     // MARK: - LightingControllable
 
     func applyLighting(_ config: LightingConfig) async throws {
-        let homes = await ensureHomesLoaded()
+        let homes = try await ensureHomesLoaded()
         guard let primaryHome = homes.first else {
             throw HomeKitLightingError.noHomesAvailable
         }
@@ -96,13 +99,26 @@ extension HomeKitLightingController: HMHomeManagerDelegate {
 
 private extension HomeKitLightingController {
 
-    /// HMHomeManager의 homes가 로드될 때까지 대기
-    func ensureHomesLoaded() async -> [HMHome] {
+    /// HMHomeManager의 homes가 로드될 때까지 대기 (타임아웃 10초)
+    func ensureHomesLoaded() async throws -> [HMHome] {
         if !homeManager.homes.isEmpty {
             return homeManager.homes
         }
-        return await withCheckedContinuation { continuation in
-            self.homesLoadedContinuation = continuation
+
+        return try await withThrowingTaskGroup(of: [HMHome].self) { group in
+            group.addTask { @MainActor in
+                await withCheckedContinuation { continuation in
+                    self.homesLoadedContinuation = continuation
+                }
+            }
+            group.addTask {
+                try await Task.sleep(for: .seconds(10))
+                throw HomeKitLightingError.homeLoadTimeout
+            }
+
+            let result = try await group.next() ?? []
+            group.cancelAll()
+            return result
         }
     }
 
