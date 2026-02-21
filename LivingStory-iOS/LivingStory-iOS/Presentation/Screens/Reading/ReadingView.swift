@@ -137,6 +137,7 @@ struct ReadingView: View {
     }
 }
 
+#if DEBUG
 #Preview("독서 중") {
     NavigationView {
         ReadingView(
@@ -149,3 +150,4 @@ struct ReadingView: View {
         )
     }
 }
+#endif
