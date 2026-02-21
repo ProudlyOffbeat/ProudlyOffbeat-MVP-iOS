@@ -81,13 +81,3 @@ private struct ConversationCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 }
-
-#Preview {
-    NavigationView {
-        StopReadingView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            bookTitle: "냉장고 먹는 괴물",
-            conversations: ConversationProfile.mockList
-        )
-    }
-}
