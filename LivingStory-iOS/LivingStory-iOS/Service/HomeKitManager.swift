@@ -25,25 +25,44 @@ final class HomeKitManager: NSObject {
         super.init()
         homeManager.delegate = self
     }
+
+    /// 콜백 설정 후 호출 — 이미 권한이 결정된 상태면 즉시 콜백 실행
+    func checkInitialStatus() {
+        let status = homeManager.authorizationStatus
+        if status.contains(.determined) {
+            handleStatus(status)
+        }
+    }
 }
 
 // MARK: - HMHomeManagerDelegate
 
 extension HomeKitManager: HMHomeManagerDelegate {
 
-    /// HomeKit 권한 허용 후 + 집 데이터 로드 완료 시 호출
     func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        let status = manager.authorizationStatus
+        handleStatus(manager.authorizationStatus)
+    }
 
-        // 권한이 확인됐지만 허용되지 않은 경우
-        if status.contains(.determined) && !status.contains(.authorized) {
+    func homeManager(_ manager: HMHomeManager, didUpdate status: HMHomeManagerAuthorizationStatus) {
+        if status.contains(.determined) {
+            handleStatus(status)
+        }
+    }
+}
+
+// MARK: - Status Handling
+
+private extension HomeKitManager {
+
+    func handleStatus(_ status: HMHomeManagerAuthorizationStatus) {
+        guard status.contains(.authorized) else {
             DispatchQueue.main.async { [weak self] in
                 self?.onPermissionDenied?()
             }
             return
         }
 
-        let homes = manager.homes.map { mapHome($0) }
+        let homes = homeManager.homes.map { mapHome($0) }
         DispatchQueue.main.async { [weak self] in
             self?.onHomesUpdated?(homes)
         }
