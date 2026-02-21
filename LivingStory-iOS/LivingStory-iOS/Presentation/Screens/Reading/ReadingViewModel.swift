@@ -58,11 +58,7 @@ final class ReadingViewModel {
         print("[Gemini] API 요청 시작 (1회)")
 
         do {
-            #if DEBUG
-            let environment = ReadingEnvironment.mock
-            #else
             let environment = try await geminiService.generateReadingEnvironment(for: book)
-            #endif
 
             musicCategory = environment.musicCategory
             lightingConfig = environment.lighting
@@ -88,9 +84,7 @@ final class ReadingViewModel {
                 do {
                     try audioPlayerService.play(category: category)
                     isMusicPlaying = true
-                    print("[Audio] \(category.rawValue) 재생 시작")
                 } catch {
-                    print("[Audio] 재생 실패: \(error.localizedDescription)")
                     isMusicPlaying = true // 음원 실패해도 독서 진행
                 }
             } else {
@@ -148,12 +142,9 @@ final class ReadingViewModel {
         do {
             try bookRepository.saveBook(book)
             try sessionRepository.saveSession(session, bookISBN: book.isbn)
-            print("[Session] 독서 기록 저장 - \(durationMinutes)분")
         } catch {
-            print("[Session] 저장 실패: \(error)")
+            print("[Gemini] 세션 저장 실패: \(error)")
         }
-
-        print("[Audio] 재생 중단")
     }
 
     // MARK: - Private
@@ -168,11 +159,3 @@ final class ReadingViewModel {
         }
     }
 }
-
-#if DEBUG
-extension ReadingViewModel {
-    func setState(_ state: ReadingState) {
-        self.state = state
-    }
-}
-#endif

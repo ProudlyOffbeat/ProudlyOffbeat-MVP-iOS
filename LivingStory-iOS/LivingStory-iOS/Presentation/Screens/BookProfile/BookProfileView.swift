@@ -82,14 +82,3 @@ private struct BookCoverSection: View {
         .frame(height: height)
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    NavigationView {
-        BookProfileView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            book: .mock
-        )
-    }
-}

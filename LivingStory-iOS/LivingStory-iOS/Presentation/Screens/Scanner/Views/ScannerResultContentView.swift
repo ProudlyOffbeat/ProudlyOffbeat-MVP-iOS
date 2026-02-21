@@ -103,40 +103,6 @@ final class ScannerResultContentView: UIView {
         retryButton.isHidden = !showRetry
     }
 
-    func configureForPreview(state: ScannerState) {
-        isHidden = false
-
-        switch state {
-        case .scanning:
-            break
-
-        case .recognizing:
-            resetState()
-            statusLabel.text = StringLiterals.Scanner.recognizing + "..."
-            statusLabel.textColor = UIColor(named: "gray50")
-
-        case .success:
-            let config = UIImage.SymbolConfiguration(pointSize: 106, weight: .regular)
-            barcodeIconView.image = UIImage(.checkmarkCircle)?.withConfiguration(config)
-            barcodeIconView.tintColor = .systemGreen
-            statusLabel.text = StringLiterals.Scanner.success
-            statusLabel.textColor = .systemGreen
-            successIcon.isHidden = false
-            failedIcon.isHidden = true
-            retryButton.isHidden = true
-
-        case .failed:
-            let config = UIImage.SymbolConfiguration(pointSize: 106, weight: .regular)
-            barcodeIconView.image = UIImage(.scanner)?.withConfiguration(config)
-            barcodeIconView.tintColor = UIColor(named: "gray0")
-            statusLabel.text = StringLiterals.Scanner.failed
-            statusLabel.textColor = .systemRed
-            failedIcon.isHidden = false
-            successIcon.isHidden = true
-            retryButton.isHidden = false
-            retryButton.alpha = 1
-        }
-    }
 }
 
 // MARK: - Setup
@@ -169,54 +135,4 @@ private extension ScannerResultContentView {
             retryButton.heightAnchor.constraint(equalToConstant: 56),
         ])
     }
-}
-
-// MARK: - Preview
-
-#Preview("인식중") {
-    let vc = UIViewController()
-    vc.view.backgroundColor = .white
-    let resultView = ScannerResultContentView()
-    resultView.configureForPreview(state: .recognizing)
-    vc.view.addSubview(resultView)
-    resultView.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint.activate([
-        resultView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 50),
-        resultView.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor),
-        resultView.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor),
-        resultView.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor),
-    ])
-    return vc
-}
-
-#Preview("인식 완료") {
-    let vc = UIViewController()
-    vc.view.backgroundColor = .white
-    let resultView = ScannerResultContentView()
-    resultView.configureForPreview(state: .success)
-    vc.view.addSubview(resultView)
-    resultView.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint.activate([
-        resultView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 50),
-        resultView.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor),
-        resultView.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor),
-        resultView.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor),
-    ])
-    return vc
-}
-
-#Preview("인식 실패") {
-    let vc = UIViewController()
-    vc.view.backgroundColor = .white
-    let resultView = ScannerResultContentView()
-    resultView.configureForPreview(state: .failed)
-    vc.view.addSubview(resultView)
-    resultView.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint.activate([
-        resultView.topAnchor.constraint(equalTo: vc.view.safeAreaLayoutGuide.topAnchor, constant: 50),
-        resultView.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor),
-        resultView.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor),
-        resultView.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor),
-    ])
-    return vc
 }
