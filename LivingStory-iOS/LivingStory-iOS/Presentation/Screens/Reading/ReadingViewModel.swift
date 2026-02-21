@@ -26,6 +26,7 @@ final class ReadingViewModel {
     private let audioPlayerService: AudioPlayerService
     private let bookRepository: BookRepositoryProtocol
     private let sessionRepository: ReadingSessionRepositoryProtocol
+    private let lightingController: (any LightingControllable)?
     private var timerTask: Task<Void, Never>?
     private var startTime: Date?
     private var hasStarted = false
@@ -35,13 +36,15 @@ final class ReadingViewModel {
         geminiService: GeminiService? = nil,
         audioPlayerService: AudioPlayerService? = nil,
         bookRepository: BookRepositoryProtocol? = nil,
-        sessionRepository: ReadingSessionRepositoryProtocol? = nil
+        sessionRepository: ReadingSessionRepositoryProtocol? = nil,
+        lightingController: (any LightingControllable)? = nil
     ) {
         self.book = book
         self.geminiService = geminiService ?? GeminiService()
         self.audioPlayerService = audioPlayerService ?? AudioPlayerService()
         self.bookRepository = bookRepository ?? BookRepository()
         self.sessionRepository = sessionRepository ?? ReadingSessionRepository()
+        self.lightingController = lightingController
     }
 
     // MARK: - Public
@@ -69,8 +72,16 @@ final class ReadingViewModel {
             print("[Gemini] 조명: H\(environment.lighting.hue) S\(environment.lighting.saturation) B\(environment.lighting.brightness)")
             print("[Gemini] 대화 주제: \(environment.conversations.count)개")
 
-            // TODO: HomeKit 조명 설정
-            isLightingReady = true
+            // HomeKit 조명 설정
+            if let controller = lightingController, let config = lightingConfig {
+                do {
+                    try await controller.applyLighting(config)
+                    print("[Lighting] 조명 설정 완료")
+                } catch {
+                    print("[Lighting] 조명 설정 실패: \(error.localizedDescription)")
+                }
+            }
+            isLightingReady = true // 조명 실패해도 독서 진행
 
             // AVFoundation 음악 재생
             if let category = musicCategory {
@@ -102,6 +113,17 @@ final class ReadingViewModel {
         timerTask = nil
         audioPlayerService.stop()
         isMusicPlaying = false
+
+        // 조명 리셋 (fire-and-forget)
+        if let controller = lightingController {
+            Task {
+                do {
+                    try await controller.resetLighting()
+                } catch {
+                    print("[Lighting] 조명 리셋 실패: \(error.localizedDescription)")
+                }
+            }
+        }
 
         guard let startTime else { return }
 

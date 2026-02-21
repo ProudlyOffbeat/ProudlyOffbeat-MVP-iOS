@@ -101,7 +101,17 @@ final class AppCoordinator: Coordinator {
 
     /// 독서 중 화면 (SwiftUI)
     func showReading(book: BookProfileModel) {
-        let viewModel = ReadingViewModel(book: book)
+        let lightingController: any LightingControllable
+        #if DEBUG
+        lightingController = MockLightingController()
+        #else
+        lightingController = HomeKitLightingController()
+        #endif
+
+        let viewModel = ReadingViewModel(
+            book: book,
+            lightingController: lightingController
+        )
         let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
