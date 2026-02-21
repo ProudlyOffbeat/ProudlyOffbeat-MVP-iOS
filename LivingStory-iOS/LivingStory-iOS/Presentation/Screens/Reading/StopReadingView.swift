@@ -7,22 +7,10 @@
 
 import SwiftUI
 
-struct Conversation: Identifiable {
-    let id = UUID()
-    let question: String
-    let effect: String
-
-    static let mock: [Conversation] = [
-        Conversation(question: "어린왕자가 장미를 그리워할 때 어떤 마음이었을까?", effect: "공감 능력과 표현력을 길러줘요"),
-        Conversation(question: "상자 속에 어떤 양이 살고 있을까? OO이가 상상하는 양을 말해줘!", effect: "고정관념을 깨고 본질을 생각하게 해요"),
-        Conversation(question: "OO이만의 별이 있다면 무엇을 가져가고 싶어?", effect: "창의력과 자기표현을 도와줘요"),
-    ]
-}
-
 struct StopReadingView: View {
     let coordinator: AppCoordinator
     let bookTitle: String
-    let conversations: [Conversation]
+    let conversations: [ConversationProfile]
 
     var body: some View {
         VStack {
@@ -97,7 +85,7 @@ private struct ConversationCard: View {
         StopReadingView(
             coordinator: AppCoordinator(navigationController: UINavigationController()),
             bookTitle: "냉장고 먹는 괴물",
-            conversations: Conversation.mock
+            conversations: ConversationProfile.mockList
         )
     }
 }

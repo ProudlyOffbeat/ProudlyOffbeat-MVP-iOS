@@ -1,6 +1,6 @@
 import Foundation
 
-enum ReadingState {
+enum ReadingState: Sendable {
     case setting
     case reading
 }
@@ -15,34 +15,33 @@ final class ReadingViewModel {
     private(set) var isMusicPlaying = false
     private(set) var elapsedSeconds: Int = 0
 
-    private(set) var conversations: [Conversation] = []
+    private(set) var conversations: [ConversationProfile] = []
     private(set) var musicCategory: MusicCategory?
     private(set) var lightingConfig: LightingConfig?
     private(set) var errorMessage: String?
 
-    private(set) var readingSession: ReadingSession?
+    private(set) var readingSession: ReadingSessionProfile?
 
     private let geminiService: GeminiService
     private let audioPlayerService: AudioPlayerService
-    private let sessionStore: ReadingSessionStore
+    private let bookRepository: BookRepositoryProtocol
+    private let sessionRepository: ReadingSessionRepositoryProtocol
     private var timerTask: Task<Void, Never>?
     private var startTime: Date?
     private var hasStarted = false
 
     init(
         book: BookProfileModel,
-        geminiService: GeminiService = GeminiService(),
-        audioPlayerService: AudioPlayerService = AudioPlayerService(),
-        sessionStore: ReadingSessionStore = .shared
+        geminiService: GeminiService? = nil,
+        audioPlayerService: AudioPlayerService? = nil,
+        bookRepository: BookRepositoryProtocol? = nil,
+        sessionRepository: ReadingSessionRepositoryProtocol? = nil
     ) {
         self.book = book
-        self.geminiService = geminiService
-        self.audioPlayerService = audioPlayerService
-        self.sessionStore = sessionStore
-    }
-
-    deinit {
-        audioPlayerService.stop()
+        self.geminiService = geminiService ?? GeminiService()
+        self.audioPlayerService = audioPlayerService ?? AudioPlayerService()
+        self.bookRepository = bookRepository ?? BookRepository()
+        self.sessionRepository = sessionRepository ?? ReadingSessionRepository()
     }
 
     // MARK: - Public
@@ -64,7 +63,7 @@ final class ReadingViewModel {
 
             musicCategory = environment.musicCategory
             lightingConfig = environment.lighting
-            conversations = environment.toDomainConversations()
+            conversations = environment.toConversationProfiles()
 
             print("[Gemini] 음악: \(environment.musicCategory.rawValue)")
             print("[Gemini] 조명: H\(environment.lighting.hue) S\(environment.lighting.saturation) B\(environment.lighting.brightness)")
@@ -104,16 +103,32 @@ final class ReadingViewModel {
         audioPlayerService.stop()
         isMusicPlaying = false
 
-        // ReadingSession 생성
-        if let startTime {
-            let session = ReadingSession(
-                startTime: startTime,
-                endTime: Date(),
-                book: .mock // TODO: 실제 BookEntity로 교체
-            )
-            readingSession = session
-            sessionStore.addSession(session)
-            print("[Session] 독서 기록 저장 - \(session.duration)분")
+        guard let startTime else { return }
+
+        let endTime = Date()
+        let durationMinutes = Int(endTime.timeIntervalSince(startTime) / 60)
+
+        let session = ReadingSessionProfile(
+            id: UUID(),
+            startTime: startTime,
+            endTime: endTime,
+            durationMinutes: durationMinutes,
+            bookProfile: book,
+            musicCategory: musicCategory,
+            lighting: lightingConfig ?? .default,
+            conversations: conversations,
+            memo: nil,
+            createdAt: Date()
+        )
+
+        readingSession = session
+
+        do {
+            try bookRepository.saveBook(book)
+            try sessionRepository.saveSession(session, bookISBN: book.isbn)
+            print("[Session] 독서 기록 저장 - \(durationMinutes)분")
+        } catch {
+            print("[Session] 저장 실패: \(error)")
         }
 
         print("[Audio] 재생 중단")
