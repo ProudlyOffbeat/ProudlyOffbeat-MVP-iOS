@@ -20,7 +20,11 @@ final class AppCoordinator: Coordinator {
     }
 
     func start() {
-        setupTabBar()
+        if UserData.hasCompletedOnboarding {
+            setupTabBar()
+        } else {
+            showOnboarding()
+        }
     }
 
     // MARK: - Tab Bar
@@ -62,6 +66,7 @@ final class AppCoordinator: Coordinator {
         )
 
         tabBarController.viewControllers = [homeNav, bookNav, myNav]
+        tabBarController.selectedIndex = 1  // 기본 탭: 책 읽기
 
         self.tabBarController = tabBarController
         navigationController.setNavigationBarHidden(true, animated: false)
@@ -155,7 +160,14 @@ final class AppCoordinator: Coordinator {
     func showOnboarding() {
         let vc = OnboardingViewController()
         vc.coordinator = self
+        navigationController.setNavigationBarHidden(true, animated: false)
         navigationController.setViewControllers([vc], animated: false)
+    }
+
+    /// 온보딩 완료 → 메인 탭 + 코치마크
+    func completeOnboarding() {
+        setupTabBar()
+        showCoachMarks()
     }
 }
 
@@ -165,5 +177,22 @@ private extension AppCoordinator {
     /// 현재 활성화된 탭의 NavigationController
     var activeNavigationController: UINavigationController? {
         tabBarController?.selectedViewController as? UINavigationController
+    }
+
+    /// 코치마크 오버레이 표시
+    func showCoachMarks() {
+        guard let tabBarController,
+              let window = navigationController.view.window else { return }
+
+        let overlay = CoachMarkOverlayView(tabBar: tabBarController.tabBar)
+        overlay.frame = window.bounds
+        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        // "다음" 누르면 실제 탭 전환
+        overlay.onTabSwitch = { [weak tabBarController] tabIndex in
+            tabBarController?.selectedIndex = tabIndex
+        }
+
+        window.addSubview(overlay)
     }
 }
