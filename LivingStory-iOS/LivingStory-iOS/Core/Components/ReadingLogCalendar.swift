@@ -22,6 +22,21 @@ final class ReadingLogCalendarUIView: UIView {
     /// 연도/월 피커를 표시할 VC (sheet present용)
     weak var presenterViewController: UIViewController?
 
+    private lazy var monthYearPicker: MonthYearPickerViewController = {
+        let picker = MonthYearPickerViewController(
+            selectedDate: displayedMonth
+        ) { [weak self] newDate in
+            self?.displayedMonth = newDate
+            self?.reloadCalendar()
+        }
+        picker.isModalInPresentation = true
+        if let sheet = picker.sheetPresentationController {
+            sheet.detents = [.custom { _ in 280 }]
+            sheet.prefersGrabberVisible = true
+        }
+        return picker
+    }()
+
     private let cal = Calendar.current
     private let weekdayTitles = ["일", "월", "화", "수", "목", "금", "토"]
     private let weekdayColor = UIColor(red: 0.235, green: 0.235, blue: 0.263, alpha: 0.3)
@@ -323,16 +338,8 @@ private extension ReadingLogCalendarUIView {
     @objc func nextMonth() { changeMonth(by: 1) }
 
     @objc func monthYearTapped() {
-        let picker = MonthYearPickerViewController(
-            selectedDate: displayedMonth
-        ) { [weak self] newDate in
-            self?.displayedMonth = newDate
-            self?.reloadCalendar()
-        }
-        if let sheet = picker.sheetPresentationController {
-            sheet.detents = [.custom { _ in 280 }]
-        }
-        presenterViewController?.present(picker, animated: true)
+        monthYearPicker.updateSelectedDate(displayedMonth)
+        presenterViewController?.present(monthYearPicker, animated: true)
     }
 
     @objc func handleSwipe(_ gesture: UIPanGestureRecognizer) {
@@ -350,6 +357,8 @@ final class MonthYearPickerViewController: UIViewController {
     private var selectedYear: Int
     private var selectedMonth: Int
     private let years: [Int]
+    private let yearTitles: [String]
+    private let monthTitles: [String]
     private let onDateSelected: (Date) -> Void
 
     private let pickerView = UIPickerView()
@@ -359,6 +368,8 @@ final class MonthYearPickerViewController: UIViewController {
         self.selectedYear = cal.component(.year, from: selectedDate)
         self.selectedMonth = cal.component(.month, from: selectedDate)
         self.years = Array((selectedYear - 5)...(selectedYear + 5))
+        self.yearTitles = years.map { "\($0)년" }
+        self.monthTitles = (1...12).map { "\($0)월" }
         self.onDateSelected = onDateSelected
         super.init(nibName: nil, bundle: nil)
     }
@@ -373,6 +384,15 @@ final class MonthYearPickerViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setupUI()
         selectCurrentDate()
+    }
+
+    func updateSelectedDate(_ date: Date) {
+        let cal = Calendar.current
+        selectedYear = cal.component(.year, from: date)
+        selectedMonth = cal.component(.month, from: date)
+        if isViewLoaded {
+            selectCurrentDate()
+        }
     }
 
     private func setupUI() {
@@ -429,8 +449,12 @@ extension MonthYearPickerViewController: UIPickerViewDataSource, UIPickerViewDel
         component == 0 ? years.count : 12
     }
 
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        component == 0 ? "\(years[row])년" : "\(row + 1)월"
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+        let label = (view as? UILabel) ?? UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 20, weight: .regular)
+        label.text = component == 0 ? yearTitles[row] : monthTitles[row]
+        return label
     }
 
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
