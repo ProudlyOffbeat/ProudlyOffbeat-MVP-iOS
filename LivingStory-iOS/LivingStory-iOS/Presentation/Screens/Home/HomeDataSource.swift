@@ -60,6 +60,14 @@ final class HomeDataSource {
             snapshot.appendSections([room])
             snapshot.appendItems(room.devices, toSection: room)
         }
+
+        // 기존 아이템의 콘텐츠도 갱신 (isOn, percentage 변경 반영)
+        let existingItems = diffableDataSource.snapshot().itemIdentifiers
+        let itemsToReconfigure = snapshot.itemIdentifiers.filter { existingItems.contains($0) }
+        if !itemsToReconfigure.isEmpty {
+            snapshot.reconfigureItems(itemsToReconfigure)
+        }
+
         diffableDataSource.apply(snapshot, animatingDifferences: true)
     }
 }

@@ -12,6 +12,7 @@ final class HomeKitManager: NSObject {
     // MARK: - Properties
 
     private let homeManager = HMHomeManager()
+    private var pendingUpdateWorkItem: DispatchWorkItem?
 
     /// HomeKit에서 집 목록이 업데이트되면 호출되는 콜백
     var onHomesUpdated: (([HomeModel]) -> Void)?
@@ -43,6 +44,10 @@ extension HomeKitManager: HMHomeManagerDelegate {
             return
         }
 
+        for home in manager.homes {
+            registerForNotifications(in: home)
+        }
+
         let homes = manager.homes.map { mapHome($0) }
         DispatchQueue.main.async { [weak self] in
             self?.onHomesUpdated?(homes)
@@ -50,9 +55,62 @@ extension HomeKitManager: HMHomeManagerDelegate {
     }
 }
 
+// MARK: - HMAccessoryDelegate
+
+extension HomeKitManager: HMAccessoryDelegate {
+
+    /// 액세서리의 특성 값이 변경되면 호출 (외부 앱, 자동화, 물리 제어 등)
+    func accessory(_ accessory: HMAccessory, service: HMService,
+                   didUpdateValueFor characteristic: HMCharacteristic) {
+        // 쓰로틀링: 150ms 내 여러 변경을 하나로 합침 (밝기 슬라이더 등)
+        pendingUpdateWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            let homes = self.homeManager.homes.map { self.mapHome($0) }
+            self.onHomesUpdated?(homes)
+        }
+        pendingUpdateWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: workItem)
+    }
+}
+
 // MARK: - Private Mapping
 
 private extension HomeKitManager {
+
+    // MARK: - Notification Registration
+
+    /// 집 안 모든 액세서리에 delegate 설정 + 특성 변경 알림 구독
+    func registerForNotifications(in home: HMHome) {
+        for room in home.rooms {
+            for accessory in room.accessories {
+                accessory.delegate = self
+                enableNotifications(for: accessory)
+            }
+        }
+    }
+
+    /// 특성 값 변경 이벤트 알림 활성화 (전원, 밝기, 볼륨)
+    func enableNotifications(for accessory: HMAccessory) {
+        let subscribableTypes: Set<String> = [
+            HMCharacteristicTypePowerState,
+            HMCharacteristicTypeBrightness,
+            HMCharacteristicTypeVolume
+        ]
+        for service in accessory.services {
+            for characteristic in service.characteristics where
+                subscribableTypes.contains(characteristic.characteristicType) &&
+                characteristic.properties.contains(HMCharacteristicPropertySupportsEventNotification) {
+                characteristic.enableNotification(true) { error in
+                    if let error {
+                        print("[HomeKit] 알림 활성화 실패 (\(accessory.name)): \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Mapping
 
     /// HMHome → HomeModel 변환
     func mapHome(_ hmHome: HMHome) -> HomeModel {
