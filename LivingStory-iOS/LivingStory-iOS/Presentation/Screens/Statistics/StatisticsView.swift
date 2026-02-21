@@ -48,12 +48,8 @@ struct StatisticsView: View {
     }
 
     private var totalTimeString: String {
-        let minutes = (try? repository.fetchTotalMinutes()) ?? 0
-        let hours = minutes / 60
-        let mins = minutes % 60
-        if hours > 0 && mins > 0 { return "\(hours)시간 \(mins)분" }
-        if hours > 0 { return "\(hours)시간" }
-        return "\(mins)분"
+        let totalSeconds = (try? repository.fetchTotalSeconds()) ?? 0
+        return ReadingTimeFormatter.format(totalSeconds: totalSeconds)
     }
 
     // MARK: - Subviews
@@ -105,16 +101,5 @@ struct StatCard: View {
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
-    }
-}
-
-// MARK: - Preview
-
-#Preview {
-    NavigationView {
-        StatisticsView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            repository: ReadingSessionRepository()
-        )
     }
 }

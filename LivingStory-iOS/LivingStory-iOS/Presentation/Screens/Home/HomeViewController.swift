@@ -17,6 +17,7 @@ final class HomeViewController: UIViewController {
     private let homeDataSource = HomeDataSource()
     private var homes: [HomeModel] = []
     private var currentHome: HomeModel?
+    private var currentEmptyState: HomeState = .noDevices
 
     private let homeMenuButton: UIButton = {
         let button = UIButton(type: .system)
@@ -106,7 +107,15 @@ private extension HomeViewController {
 
     func setupEmptyStateActions() {
         emptyStateView.onButtonTapped = { [weak self] in
-            self?.openSettings()
+            guard let self else { return }
+            switch self.currentEmptyState {
+            case .permissionsRequired:
+                self.openSettings()
+            case .noDevices:
+                self.openHomeApp()
+            case .normal:
+                break
+            }
         }
     }
 
@@ -164,7 +173,12 @@ private extension HomeViewController {
             guard let self else { return }
             self.homes = homes
 
-            if let first = homes.first {
+            // 현재 선택된 집 유지 (실시간 업데이트 시 리셋 방지)
+            if let selectedId = self.currentHome?.id,
+               let updated = homes.first(where: { $0.id == selectedId }) {
+                self.currentHome = updated
+                self.updateUI(for: updated.state)
+            } else if let first = homes.first {
                 self.currentHome = first
                 self.updateUI(for: first.state)
             } else {
@@ -188,6 +202,7 @@ private extension HomeViewController {
 private extension HomeViewController {
 
     func updateUI(for state: HomeState) {
+        currentEmptyState = state
         updateHomeMenu()
 
         switch state {
@@ -253,6 +268,15 @@ private extension HomeViewController {
 
     func openSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
+    }
+
+    func openHomeApp() {
+        guard let url = URL(string: "com.apple.home://"),
+              UIApplication.shared.canOpenURL(url) else {
+            openSettings()
+            return
+        }
         UIApplication.shared.open(url)
     }
 }

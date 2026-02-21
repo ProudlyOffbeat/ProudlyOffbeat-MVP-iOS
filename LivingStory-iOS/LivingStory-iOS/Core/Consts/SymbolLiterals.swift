@@ -72,6 +72,12 @@ enum SymbolLiterals: String {
     case error = "xmark.circle.fill"
     case info = "info.circle.fill"
 
+    // MARK: - Statistics
+
+    case calendar = "calendar"
+    case books = "books.vertical.fill"
+    case clock = "clock"
+
     // MARK: - Reading
 
     case play = "play.fill"

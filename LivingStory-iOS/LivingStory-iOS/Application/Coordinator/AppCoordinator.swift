@@ -101,6 +101,7 @@ final class AppCoordinator: Coordinator {
     func showBookProfile(book: BookProfileModel) {
         let view = BookProfileView(coordinator: self, book: book)
         let hostingVC = UIHostingController(rootView: view)
+        hostingVC.hidesBottomBarWhenPushed = true
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
@@ -139,7 +140,37 @@ final class AppCoordinator: Coordinator {
 
     /// 홈으로 돌아가기
     func popToHome() {
-        navigationController.popToRootViewController(animated: true)
+        activeNavigationController?.popToRootViewController(animated: true)
+    }
+
+    /// 현재 화면 위에 바코드 스캔 시트 재호출 (독서 플로우 중 "다른 책 스캔")
+    func restartScanner() {
+        guard let nav = activeNavigationController else { return }
+
+        let vc = ScannerViewController()
+        vc.coordinator = self
+        vc.isRestarting = true
+
+        if let sheet = vc.sheetPresentationController {
+            sheet.detents = [vc.scanningDetent]
+            sheet.preferredCornerRadius = 32
+        }
+
+        // 현재 화면(StopReadingView) 위에 스캐너 present
+        nav.topViewController?.present(vc, animated: true)
+    }
+
+    /// 기존 독서 스택 정리 후 새 책 BookProfileView로 교체
+    func replaceReadingFlow(with book: BookProfileModel) {
+        guard let nav = activeNavigationController else { return }
+        // 루트(BookViewController)만 남기고 새 BookProfileView push
+        let view = BookProfileView(coordinator: self, book: book)
+        let hostingVC = UIHostingController(rootView: view)
+        hostingVC.hidesBottomBarWhenPushed = true
+
+        var viewControllers = [nav.viewControllers.first].compactMap { $0 }
+        viewControllers.append(hostingVC)
+        nav.setViewControllers(viewControllers, animated: true)
     }
 
     /// 통계 화면 (SwiftUI)

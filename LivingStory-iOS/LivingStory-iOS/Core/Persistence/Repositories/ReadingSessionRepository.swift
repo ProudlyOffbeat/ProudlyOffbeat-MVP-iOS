@@ -29,7 +29,7 @@ final class ReadingSessionRepository: ReadingSessionRepositoryProtocol {
         entity.id = session.id
         entity.startTime = session.startTime
         entity.endTime = session.endTime
-        entity.duration = Double(session.durationMinutes * 60)
+        entity.duration = Double(session.durationSeconds)
         entity.musicCategory = session.musicCategory?.rawValue
         entity.lightingHue = Int16(session.lighting.hue)
         entity.lightingSaturation = Int16(session.lighting.saturation)
@@ -99,25 +99,29 @@ final class ReadingSessionRepository: ReadingSessionRepositoryProtocol {
         let now = Date()
         let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
         let endOfMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth)!
-        
+
         let request = ReadingSessionEntity.fetchRequest()
         request.predicate = NSPredicate(
             format: "startTime >= %@ AND startTime < %@",
             startOfMonth as NSDate,
             endOfMonth as NSDate
         )
-        return try context.fetch(request).count
+        let sessions = try context.fetch(request)
+        let uniqueISBNs = Set(sessions.compactMap { $0.book?.isbn })
+        return uniqueISBNs.count
     }
-    
+
     func fetchTotalBookCount() throws -> Int {
         let request = ReadingSessionEntity.fetchRequest()
-        return try context.fetch(request).count
+        let sessions = try context.fetch(request)
+        let uniqueISBNs = Set(sessions.compactMap { $0.book?.isbn })
+        return uniqueISBNs.count
     }
     
-    func fetchTotalMinutes() throws -> Int {
+    func fetchTotalSeconds() throws -> Int {
         let request = ReadingSessionEntity.fetchRequest()
         let sessions = try context.fetch(request)
-        return sessions.reduce(0) { $0 + Int($1.duration / 60) }
+        return sessions.reduce(0) { $0 + Int($1.duration) }
     }
     
     func fetchReadDates() throws -> Set<DateComponents> {
@@ -126,7 +130,11 @@ final class ReadingSessionRepository: ReadingSessionRepositoryProtocol {
         let calendar = Calendar.current
         let components = sessions.compactMap { session -> DateComponents? in
             guard let startTime = session.startTime else { return nil }
-            return calendar.dateComponents([.year, .month, .day], from: startTime)
+            return DateComponents(
+                year: calendar.component(.year, from: startTime),
+                month: calendar.component(.month, from: startTime),
+                day: calendar.component(.day, from: startTime)
+            )
         }
         return Set(components)
     }

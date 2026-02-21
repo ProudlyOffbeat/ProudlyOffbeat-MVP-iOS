@@ -82,6 +82,13 @@ enum StringLiterals {
 
     enum My {
         static let title = "마이"
+        static let monthlyBookCount = "이번 달 읽은 책 수"
+        static let totalBookCount = "총 읽은 책 수"
+        static let totalReadingTime = "총 읽은 시간"
+        static let bookUnit = "권"
+        static let hourUnit = "시간"
+        static let minuteUnit = "분"
+        static let secondUnit = "초"
     }
 
     enum Onboarding {

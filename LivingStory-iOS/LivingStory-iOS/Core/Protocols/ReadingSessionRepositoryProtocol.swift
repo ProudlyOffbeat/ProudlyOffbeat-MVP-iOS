@@ -18,6 +18,6 @@ protocol ReadingSessionRepositoryProtocol {
     func fetchTodaySessions() throws -> [ReadingSessionProfile]
     func fetchMonthlyBookCount() throws -> Int
     func fetchTotalBookCount() throws -> Int
-    func fetchTotalMinutes() throws -> Int
+    func fetchTotalSeconds() throws -> Int
     func fetchReadDates() throws -> Set<DateComponents>
 }

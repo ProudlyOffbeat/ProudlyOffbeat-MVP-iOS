@@ -116,7 +116,3 @@ private extension CarouselCell {
         ])
     }
 }
-
-#Preview {
-    BookViewController()
-}

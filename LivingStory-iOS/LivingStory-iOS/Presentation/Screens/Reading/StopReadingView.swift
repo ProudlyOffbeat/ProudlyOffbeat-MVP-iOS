@@ -45,7 +45,9 @@ struct StopReadingView: View {
 
     private var buttonSection: some View {
         VStack(spacing: 14) {
-            PrimaryButtonSwiftUI(title: "다른 책 스캔", action: {})
+            PrimaryButtonSwiftUI(title: "다른 책 스캔", action: {
+                    coordinator.restartScanner()
+                })
                 .padding(.horizontal, 20)
             WhiteButtonSwiftUI(title: "그만 읽기", action: {
                     coordinator.showResult()
@@ -77,15 +79,5 @@ private struct ConversationCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.yellow90)
         .clipShape(RoundedRectangle(cornerRadius: 18))
-    }
-}
-
-#Preview {
-    NavigationView {
-        StopReadingView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            bookTitle: "냉장고 먹는 괴물",
-            conversations: ConversationProfile.mockList
-        )
     }
 }

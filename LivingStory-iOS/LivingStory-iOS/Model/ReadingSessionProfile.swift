@@ -11,7 +11,7 @@ struct ReadingSessionProfile: Sendable {
     let id: UUID
     let startTime: Date
     let endTime: Date?
-    let durationMinutes: Int
+    let durationSeconds: Int
     let bookProfile: BookProfileModel
     let musicCategory: MusicCategory?
     let lighting: LightingConfig
@@ -27,7 +27,7 @@ extension ReadingSessionProfile {
         id: UUID(),
         startTime: Calendar.current.date(byAdding: .minute, value: -30, to: Date())!,
         endTime: Date(),
-        durationMinutes: 30,
+        durationSeconds: 1800,
         bookProfile: .mock,
         musicCategory: .calmPiano,
         lighting: LightingConfig(hue: 40, saturation: 60, brightness: 80),
@@ -42,7 +42,7 @@ extension ReadingSessionProfile {
             id: UUID(),
             startTime: Calendar.current.date(byAdding: .hour, value: -3, to: Date())!,
             endTime: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
-            durationMinutes: 60,
+            durationSeconds: 3600,
             bookProfile: .mockISBN,
             musicCategory: .nature,
             lighting: LightingConfig(hue: 200, saturation: 40, brightness: 70),
