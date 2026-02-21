@@ -48,9 +48,14 @@ final class HomeKitLightingController: NSObject, LightingControllable {
 
     func applyLighting(_ config: LightingConfig) async throws {
         let homes = try await ensureHomesLoaded()
-        guard let primaryHome = homes.first else {
+        guard !homes.isEmpty else {
             throw HomeKitLightingError.noHomesAvailable
         }
+
+        // 조명이 있는 집 우선, 없으면 primaryHome fallback
+        let primaryHome = homes.first(where: { !findLightServices(in: $0).isEmpty })
+            ?? homeManager.primaryHome
+            ?? homes.first!
 
         let lightServices = findLightServices(in: primaryHome)
         guard !lightServices.isEmpty else {
