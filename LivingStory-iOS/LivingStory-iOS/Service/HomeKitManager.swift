@@ -63,11 +63,11 @@ private extension HomeKitManager {
             return
         }
 
-        for home in manager.homes {
+        for home in homeManager.homes {
             registerForNotifications(in: home)
         }
 
-        let homes = manager.homes.map { mapHome($0) }
+        let homes = homeManager.homes.map { mapHome($0) }
       
         DispatchQueue.main.async { [weak self] in
             self?.onHomesUpdated?(homes)
