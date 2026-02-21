@@ -17,7 +17,7 @@ extension ReadingSessionEntity {
             id: id ?? UUID(),
             startTime: startTime ?? Date(),
             endTime: endTime,
-            durationMinutes: Int(duration / 60),
+            durationSeconds: Int(duration),
             bookProfile: book?.toProfile() ?? BookProfileModel.mock,
             musicCategory: musicCategory.flatMap { MusicCategory(rawValue: $0) },
             lighting: LightingConfig(

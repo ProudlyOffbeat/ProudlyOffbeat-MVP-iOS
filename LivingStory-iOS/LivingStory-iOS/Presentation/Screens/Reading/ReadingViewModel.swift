@@ -122,13 +122,13 @@ final class ReadingViewModel {
         guard let startTime else { return }
 
         let endTime = Date()
-        let durationMinutes = Int(endTime.timeIntervalSince(startTime) / 60)
+        let durationSeconds = Int(endTime.timeIntervalSince(startTime))
 
         let session = ReadingSessionProfile(
             id: UUID(),
             startTime: startTime,
             endTime: endTime,
-            durationMinutes: durationMinutes,
+            durationSeconds: durationSeconds,
             bookProfile: book,
             musicCategory: musicCategory,
             lighting: lightingConfig ?? .default,
