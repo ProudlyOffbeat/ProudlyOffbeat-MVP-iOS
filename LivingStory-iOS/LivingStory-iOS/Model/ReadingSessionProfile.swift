@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ReadingSessionProfile {
+struct ReadingSessionProfile: Sendable {
     let id: UUID
     let startTime: Date
     let endTime: Date?

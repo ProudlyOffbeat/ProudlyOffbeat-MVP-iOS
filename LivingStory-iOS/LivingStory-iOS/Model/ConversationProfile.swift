@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ConversationProfile {
+struct ConversationProfile: Identifiable, Sendable {
     let id: UUID
     let question: String
     let effect: String

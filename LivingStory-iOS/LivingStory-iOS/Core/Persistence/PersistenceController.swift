@@ -7,6 +7,7 @@
 
 import CoreData
 
+@MainActor
 final class PersistenceController {
     
     //MARK: - 싱글톤

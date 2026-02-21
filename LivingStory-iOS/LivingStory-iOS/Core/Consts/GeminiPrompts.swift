@@ -5,7 +5,7 @@
 
 import Foundation
 
-enum GeminiPrompts {
+nonisolated enum GeminiPrompts: Sendable {
 
     static func readingEnvironment(bookTitle: String, bookDescription: String) -> String {
         """

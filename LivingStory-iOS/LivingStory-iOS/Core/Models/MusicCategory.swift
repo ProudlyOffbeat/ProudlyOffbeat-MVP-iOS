@@ -5,7 +5,7 @@
 
 import Foundation
 
-enum MusicCategory: String, Codable, CaseIterable {
+enum MusicCategory: String, Codable, CaseIterable, Sendable {
     case nature = "자연의소리"
     case classical = "클래식"
     case nurseryRhyme = "동요"
@@ -34,7 +34,5 @@ enum MusicCategory: String, Codable, CaseIterable {
     }
 
     /// 프롬프트에 사용할 카테고리 목록 문자열
-    static var promptList: String {
-        allCases.map { $0.rawValue }.joined(separator: ", ")
-    }
+    nonisolated static let promptList = "자연의소리, 클래식, 동요, 판타지, 잔잔한피아노, 오르골, 재즈, 바다와비, 숲속, 우주"
 }

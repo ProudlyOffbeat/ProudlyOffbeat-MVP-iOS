@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BookProfileModel: Codable {
+struct BookProfileModel: Codable, Sendable {
     let isbn: String
     let bookCoverImageURL: URL?
     let bookTitle: String

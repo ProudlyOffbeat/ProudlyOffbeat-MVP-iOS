@@ -8,11 +8,16 @@
 import Foundation
 import CoreData
 
+@MainActor
 final class BookRepository: BookRepositoryProtocol {
     
     private let context: NSManagedObjectContext
-    
-    init(context: NSManagedObjectContext = PersistenceController.shared.context) {
+
+    init() {
+        self.context = PersistenceController.shared.context
+    }
+
+    init(context: NSManagedObjectContext) {
         self.context = context
     }
     
