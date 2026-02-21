@@ -128,13 +128,13 @@ final class ReadingViewModel {
         guard let startTime else { return }
 
         let endTime = Date()
-        let durationMinutes = Int(endTime.timeIntervalSince(startTime) / 60)
+        let durationSeconds = Int(endTime.timeIntervalSince(startTime))
 
         let session = ReadingSessionProfile(
             id: UUID(),
             startTime: startTime,
             endTime: endTime,
-            durationMinutes: durationMinutes,
+            durationSeconds: durationSeconds,
             bookProfile: book,
             musicCategory: musicCategory,
             lighting: lightingConfig ?? .default,
@@ -148,7 +148,7 @@ final class ReadingViewModel {
         do {
             try bookRepository.saveBook(book)
             try sessionRepository.saveSession(session, bookISBN: book.isbn)
-            print("[Session] 독서 기록 저장 - \(durationMinutes)분")
+            print("[Session] 독서 기록 저장 - \(durationSeconds)초")
         } catch {
             print("[Session] 저장 실패: \(error)")
         }

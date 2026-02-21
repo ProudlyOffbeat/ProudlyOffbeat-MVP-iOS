@@ -48,12 +48,8 @@ struct StatisticsView: View {
     }
 
     private var totalTimeString: String {
-        let minutes = (try? repository.fetchTotalMinutes()) ?? 0
-        let hours = minutes / 60
-        let mins = minutes % 60
-        if hours > 0 && mins > 0 { return "\(hours)시간 \(mins)분" }
-        if hours > 0 { return "\(hours)시간" }
-        return "\(mins)분"
+        let totalSeconds = (try? repository.fetchTotalSeconds()) ?? 0
+        return ReadingTimeFormatter.format(totalSeconds: totalSeconds)
     }
 
     // MARK: - Subviews
