@@ -62,7 +62,7 @@ extension HomeKitManager: HMAccessoryDelegate {
     /// 액세서리의 특성 값이 변경되면 호출 (외부 앱, 자동화, 물리 제어 등)
     func accessory(_ accessory: HMAccessory, service: HMService,
                    didUpdateValueFor characteristic: HMCharacteristic) {
-        // 쓰로틀링: 150ms 내 여러 변경을 하나로 합침 (밝기 슬라이더 등)
+        // 디바운싱: 150ms 내 연속 변경을 최종 1회로 합침 (밝기 슬라이더 등)
         pendingUpdateWorkItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
             guard let self else { return }
