@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Config {
+nonisolated enum Config: Sendable {
     static var kakaoRESTAPIKey: String {
         guard let key = Bundle.main.object(forInfoDictionaryKey: "KAKAO_REST_API_KEY") as? String,
               !key.isEmpty else {

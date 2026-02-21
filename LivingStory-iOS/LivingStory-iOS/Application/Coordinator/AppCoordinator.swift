@@ -109,7 +109,7 @@ final class AppCoordinator: Coordinator {
 
     // MARK: - 마이 탭 네비게이션
     /// 독서 중단 화면 (SwiftUI)
-    func showStopReading(bookTitle: String, conversations: [Conversation]) {
+    func showStopReading(bookTitle: String, conversations: [ConversationProfile]) {
         let view = StopReadingView(coordinator: self, bookTitle: bookTitle, conversations: conversations)
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
@@ -117,7 +117,7 @@ final class AppCoordinator: Coordinator {
 
     /// 독서 결과 화면 (SwiftUI)
     func showResult() {
-        let view = ResultView(coordinator: self)
+        let view = ResultView(coordinator: self, repository: ReadingSessionRepository())
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
@@ -129,7 +129,7 @@ final class AppCoordinator: Coordinator {
 
     /// 통계 화면 (SwiftUI)
     func showStatistics() {
-        let view = StatisticsView(coordinator: self)
+        let view = StatisticsView(coordinator: self, repository: ReadingSessionRepository())
         let hostingVC = UIHostingController(rootView: view)
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }

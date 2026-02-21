@@ -7,19 +7,19 @@ import Foundation
 
 // MARK: - Error
 
-enum GeminiError: LocalizedError {
+enum GeminiError: LocalizedError, Sendable {
     case invalidURL
-    case networkError(Error)
+    case networkError(String)
     case invalidResponse(statusCode: Int)
     case emptyResponse
-    case decodingError(Error)
+    case decodingError(String)
 
     var errorDescription: String? {
         switch self {
         case .invalidURL:
             return "잘못된 API URL입니다."
-        case .networkError(let error):
-            return "네트워크 오류: \(error.localizedDescription)"
+        case .networkError(let message):
+            return "네트워크 오류: \(message)"
         case .invalidResponse(let code):
             if code == 429 {
                 return "API 요청 한도 초과 - 잠시 후 다시 시도해주세요."
@@ -27,15 +27,15 @@ enum GeminiError: LocalizedError {
             return "서버 응답 오류 (코드: \(code))"
         case .emptyResponse:
             return "Gemini 응답이 비어있습니다."
-        case .decodingError(let error):
-            return "응답 파싱 오류: \(error.localizedDescription)"
+        case .decodingError(let message):
+            return "응답 파싱 오류: \(message)"
         }
     }
 }
 
 // MARK: - Service
 
-nonisolated final class GeminiService: Sendable {
+final class GeminiService: Sendable {
 
     private let session: URLSession
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
@@ -91,7 +91,7 @@ nonisolated final class GeminiService: Sendable {
         do {
             return try await session.data(for: request)
         } catch {
-            throw GeminiError.networkError(error)
+            throw GeminiError.networkError(error.localizedDescription)
         }
     }
 
@@ -132,7 +132,7 @@ nonisolated final class GeminiService: Sendable {
         do {
             return try JSONDecoder().decode(ReadingEnvironment.self, from: data)
         } catch {
-            throw GeminiError.decodingError(error)
+            throw GeminiError.decodingError(error.localizedDescription)
         }
     }
 }

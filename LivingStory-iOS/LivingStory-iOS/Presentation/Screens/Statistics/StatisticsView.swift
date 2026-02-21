@@ -10,14 +10,14 @@ import SwiftUI
 struct StatisticsView: View {
 
     let coordinator: AppCoordinator
-    private let store = ReadingSessionStore.shared
+    let repository: ReadingSessionRepositoryProtocol
 
     var body: some View {
             VStack(spacing: 16) {
-                ReadingLogCalendar(readDates: store.readDateComponents)
+                ReadingLogCalendar(readDates: (try? repository.fetchReadDates()) ?? [])
                     .padding(.top, 25)
                 statsSection
-                    
+
                 Spacer()
             }
             .padding(.horizontal, 20)
@@ -47,15 +47,24 @@ struct StatisticsView: View {
         }
     }
 
+    private var totalTimeString: String {
+        let minutes = (try? repository.fetchTotalMinutes()) ?? 0
+        let hours = minutes / 60
+        let mins = minutes % 60
+        if hours > 0 && mins > 0 { return "\(hours)시간 \(mins)분" }
+        if hours > 0 { return "\(hours)시간" }
+        return "\(mins)분"
+    }
+
     // MARK: - Subviews
 
     private var statsSection: some View {
             VStack(spacing: 12) {
                 HStack(spacing: 10) {
-                    StatCard(icon: "calendar", title: "이번 달 읽은 책 수", value: "\(store.monthlyBookCount)권")
-                    StatCard(icon: "books.vertical.fill", title: "총 읽은 책 수", value: "\(store.totalBookCount)권")
+                    StatCard(icon: "calendar", title: "이번 달 읽은 책 수", value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)권")
+                    StatCard(icon: "books.vertical.fill", title: "총 읽은 책 수", value: "\((try? repository.fetchTotalBookCount()) ?? 0)권")
                 }
-                StatCard(icon: "clock", title: "총 읽은 시간", value: store.totalTimeString, isWide: true)
+                StatCard(icon: "clock", title: "총 읽은 시간", value: totalTimeString, isWide: true)
                 Spacer()
             }
     }
@@ -104,7 +113,8 @@ struct StatCard: View {
 #Preview {
     NavigationView {
         StatisticsView(
-            coordinator: AppCoordinator(navigationController: UINavigationController())
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            repository: ReadingSessionRepository()
         )
     }
 }

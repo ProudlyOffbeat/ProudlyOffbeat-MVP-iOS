@@ -10,22 +10,22 @@ import SwiftUI
 struct ResultView: View {
 
     let coordinator: AppCoordinator
-    private let store = ReadingSessionStore.shared
+    let repository: ReadingSessionRepositoryProtocol
 
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("오늘 \(store.todayBookCount)권의 책을 읽었어요!")
+                Text("오늘 \((try? repository.fetchTodaySessions().count) ?? 0)권의 책을 읽었어요!")
                     .font(.title2Emphasized)
                     .padding(.top, 33)
 
-                ReadingLogCalendar(readDates: store.readDateComponents, showNavigation: false)
+                ReadingLogCalendar(readDates: (try? repository.fetchReadDates()) ?? [], showNavigation: false)
                     .padding(.top, 33)
 
                 StatCard(
                     icon: "calendar",
                     title: "이번 달 읽은 책 수",
-                    value: "\(store.monthlyBookCount)권",
+                    value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)권",
                     isWide: true
                 )
             }
@@ -61,7 +61,8 @@ struct ResultView: View {
 #Preview {
     NavigationView {
         ResultView(
-            coordinator: AppCoordinator(navigationController: UINavigationController())
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            repository: ReadingSessionRepository()
         )
     }
 }

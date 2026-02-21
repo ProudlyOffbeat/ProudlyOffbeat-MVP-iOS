@@ -5,13 +5,10 @@
 
 import AVFoundation
 
+@MainActor
 final class AudioPlayerService {
 
     private var player: AVAudioPlayer?
-
-    deinit {
-        stop()
-    }
 
     func play(category: MusicCategory) throws {
         guard let url = Bundle.main.url(
@@ -40,7 +37,7 @@ final class AudioPlayerService {
     }
 }
 
-enum AudioPlayerError: LocalizedError {
+enum AudioPlayerError: LocalizedError, Sendable {
     case fileNotFound(String)
 
     var errorDescription: String? {
