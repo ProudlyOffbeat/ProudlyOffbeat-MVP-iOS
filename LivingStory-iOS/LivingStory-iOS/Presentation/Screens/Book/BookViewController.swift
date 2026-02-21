@@ -149,9 +149,3 @@ private extension BookViewController {
         coordinator?.showScanner()
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    UINavigationController(rootViewController: BookViewController())
-}

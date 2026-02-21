@@ -118,36 +118,10 @@ struct ReadingView: View {
                 )
                 .frame(width: 610, height: 610)
                 .scaleEffect(isPulsing ? 1.0 : 0.85)
-                .opacity(isPulsing ? 0.3 : 0.05)
+                .opacity(isPulsing ? 0.4 : 0.1)
                 .blur(radius: 50)
                 .animation(.easeInOut(duration: 1.5), value: viewModel.state)
         }
         .ignoresSafeArea()
     }
 }
-
-// MARK: - Preview
-
-#Preview("세팅 중") {
-    NavigationView {
-        ReadingView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            viewModel: ReadingViewModel(book: .mock)
-        )
-    }
-}
-
-#if DEBUG
-#Preview("독서 중") {
-    NavigationView {
-        ReadingView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            viewModel: {
-                let vm = ReadingViewModel(book: .mock)
-                vm.setState(.reading)
-                return vm
-            }()
-        )
-    }
-}
-#endif

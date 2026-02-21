@@ -57,12 +57,3 @@ struct ResultView: View {
         )
     }
 }
-
-#Preview {
-    NavigationView {
-        ResultView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            repository: ReadingSessionRepository()
-        )
-    }
-}

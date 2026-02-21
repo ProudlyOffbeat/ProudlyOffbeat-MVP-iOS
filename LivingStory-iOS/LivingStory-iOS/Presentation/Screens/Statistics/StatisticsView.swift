@@ -103,14 +103,3 @@ struct StatCard: View {
         .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    NavigationView {
-        StatisticsView(
-            coordinator: AppCoordinator(navigationController: UINavigationController()),
-            repository: ReadingSessionRepository()
-        )
-    }
-}

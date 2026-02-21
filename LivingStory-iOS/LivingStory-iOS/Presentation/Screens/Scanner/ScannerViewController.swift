@@ -23,6 +23,8 @@ final class ScannerViewController: UIViewController {
     // MARK: - Properties
 
     weak var coordinator: AppCoordinator?
+    /// 독서 플로우 중 "다른 책 스캔"으로 열린 경우 true
+    var isRestarting = false
 
     private var state: ScannerState = .scanning {
         didSet { transition(to: state) }
@@ -211,7 +213,11 @@ private extension ScannerViewController {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
                 guard let self, let book = self.fetchedBook else { return }
                 self.dismiss(animated: true) {
-                    self.coordinator?.showBookProfile(book: book)
+                    if self.isRestarting {
+                        self.coordinator?.replaceReadingFlow(with: book)
+                    } else {
+                        self.coordinator?.showBookProfile(book: book)
+                    }
                 }
             }
 
