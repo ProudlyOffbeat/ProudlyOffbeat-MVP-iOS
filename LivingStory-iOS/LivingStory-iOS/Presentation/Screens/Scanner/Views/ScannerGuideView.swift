@@ -30,7 +30,7 @@ final class ScannerGuideView: UIView {
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.text = StringLiterals.Scanner.guideSubtitle
-        label.font = .footnoteRegular
+        label.font = .subheadlineRegular
         label.textColor = UIColor(named: "gray30")
         label.numberOfLines = 0
         return label

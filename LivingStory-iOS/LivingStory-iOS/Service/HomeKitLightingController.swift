@@ -52,12 +52,11 @@ final class HomeKitLightingController: NSObject, LightingControllable {
             throw HomeKitLightingError.noHomesAvailable
         }
 
-        // 조명이 있는 집 우선, 없으면 primaryHome fallback
-        let primaryHome = homes.first(where: { !findLightServices(in: $0).isEmpty })
-            ?? homeManager.primaryHome
-            ?? homes.first!
+        // 조명이 있는 집 우선, 없으면 첫 번째 집 fallback
+        let targetHome = homes.first(where: { !findLightServices(in: $0).isEmpty })
+            ?? homes[0]
 
-        let lightServices = findLightServices(in: primaryHome)
+        let lightServices = findLightServices(in: targetHome)
         guard !lightServices.isEmpty else {
             throw HomeKitLightingError.noLightsFound
         }
