@@ -97,8 +97,18 @@ final class ReadingViewModel {
                 startTimer()
             }
         } catch {
-            errorMessage = error.localizedDescription
-            print("[Gemini] 오류: \(error)")
+            print("[Gemini] 오류: \(error) — 기본값으로 독서 진행")
+
+            // Gemini 실패 시 기본값으로 fallback
+            lightingConfig = .default
+            musicCategory = .calmPiano
+            conversations = []
+
+            isLightingReady = true
+            isMusicPlaying = true
+            state = .reading
+            startTime = Date()
+            startTimer()
         }
     }
 
