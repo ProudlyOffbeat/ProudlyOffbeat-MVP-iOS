@@ -15,7 +15,7 @@ struct ResultView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("오늘 \((try? repository.fetchTodaySessions().count) ?? 0)권의 책을 읽었어요!")
+                Text(StringLiterals.Reading.todayBookCount((try? repository.fetchTodaySessions().count) ?? 0))
                     .font(.title2Emphasized)
                     .padding(.top, 33)
 
@@ -23,9 +23,9 @@ struct ResultView: View {
                     .padding(.top, 33)
 
                 StatCard(
-                    icon: "calendar",
-                    title: "이번 달 읽은 책 수",
-                    value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)권",
+                    icon: SymbolLiterals.calendar.rawValue,
+                    title: StringLiterals.My.monthlyBookCount,
+                    value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.bookUnit)",
                     isWide: true
                 )
             }
@@ -33,13 +33,13 @@ struct ResultView: View {
 
             Spacer()
 
-            PrimaryButtonSwiftUI(title: "홈으로") {
+            PrimaryButtonSwiftUI(title: StringLiterals.Reading.homeButton) {
                 coordinator.popToHome()
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
-        .navigationTitle("읽은 책")
+        .navigationTitle(StringLiterals.Reading.resultTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .background(

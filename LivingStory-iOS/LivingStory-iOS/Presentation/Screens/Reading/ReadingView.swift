@@ -62,7 +62,7 @@ struct ReadingView: View {
 
     private var statusContent: some View {
         VStack(spacing: 28) {
-            Image(systemName: viewModel.state == .setting ? "house.fill" : "music.note.house.fill")
+            Image(viewModel.state == .setting ? .home : .musicNoteHouse)
                 .resizable()
                 .scaledToFit()
                 .foregroundStyle(.white)

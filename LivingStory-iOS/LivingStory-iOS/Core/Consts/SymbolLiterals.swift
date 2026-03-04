@@ -80,6 +80,7 @@ enum SymbolLiterals: String {
 
     // MARK: - Reading
 
+    case musicNoteHouse = "music.note.house.fill"
     case play = "play.fill"
     case pause = "pause.fill"
     case stop = "stop.fill"
