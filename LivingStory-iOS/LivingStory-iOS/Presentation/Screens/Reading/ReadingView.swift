@@ -45,7 +45,7 @@ struct ReadingView: View {
                 if viewModel.state == .setting {
                     coordinator.pop()
                 } else {
-                    coordinator.showStopReading(bookTitle: viewModel.book.bookTitle, conversations: viewModel.conversations)
+                    coordinator.showStopReading(bookTitle: viewModel.book.bookTitle, conversations: viewModel.conversations, viewModel: viewModel)
                 }
             }
         } message: {
