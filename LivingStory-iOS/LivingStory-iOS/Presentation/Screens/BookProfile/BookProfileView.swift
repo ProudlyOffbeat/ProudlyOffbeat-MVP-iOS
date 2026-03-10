@@ -37,7 +37,7 @@ private struct BookCoverSection: View {
     let height: CGFloat
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .top) {
             if let url = bookCoverImageURL {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -57,10 +57,12 @@ private struct BookCoverSection: View {
                             .ignoresSafeArea(edges: .top)
                     }
                 }
+                .frame(height: height)
             } else {
                 Rectangle()
                     .fill(Color.gray)
                     .ignoresSafeArea(edges: .top)
+                    .frame(height: height)
             }
 
             LinearGradient(
@@ -69,16 +71,17 @@ private struct BookCoverSection: View {
                 endPoint: .top
             )
             .ignoresSafeArea(edges: .top)
+            .frame(height: height)
 
             VStack(alignment: .leading, spacing: 12) {
+                Spacer()
                 Text(title)
                     .font(.title2Emphasized)
                 Text(plot)
                     .font(.bodyRegular)
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            .padding(.bottom, 40)
         }
-        .frame(height: height)
     }
 }
