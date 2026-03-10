@@ -20,6 +20,7 @@ struct StopReadingView: View {
         }
         .navigationTitle(bookTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
     }
 
     // MARK: - Subviews

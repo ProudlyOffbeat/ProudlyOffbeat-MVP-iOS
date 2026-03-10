@@ -25,6 +25,17 @@ struct BookProfileView: View {
                 .padding(.horizontal, 20)
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    coordinator.pop()
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundStyle(.gray)
+                }
+            }
+        }
     }
 }
 
