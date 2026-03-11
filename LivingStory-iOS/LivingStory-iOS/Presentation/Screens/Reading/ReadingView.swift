@@ -53,6 +53,20 @@ struct ReadingView: View {
                 Text(StringLiterals.Reading.stopReadingAlertMessage)
             }
         }
+        .alert(
+            viewModel.errorMessage ?? "",
+            isPresented: Binding(
+                get: { viewModel.state == .error },
+                set: { _ in }
+            )
+        ) {
+            Button("재시도", role: .cancel) {
+                Task { await viewModel.retry() }
+            }
+            Button("닫기", role: .destructive) {
+                coordinator.pop()
+            }
+        }
         .task {
             await viewModel.startSetup()
         }
