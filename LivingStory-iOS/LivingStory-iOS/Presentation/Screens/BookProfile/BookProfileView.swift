@@ -32,7 +32,7 @@ struct BookProfileView: View {
                     coordinator.pop()
                 } label: {
                     Image(systemName: "xmark")
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(.black)
                 }
             }
         }
