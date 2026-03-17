@@ -52,6 +52,22 @@ final class HomeViewController: UIViewController {
         homeDataSource.configure(with: roomCollectionView)
         setupEmptyStateActions()
         bindHomeKit()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        Task { await homeKitManager.refreshAllCharacteristics() }
+    }
+
+    @objc private func handleWillEnterForeground() {
+        Task { await homeKitManager.refreshAllCharacteristics() }
     }
 }
 
