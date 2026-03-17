@@ -15,6 +15,9 @@ protocol CameraPreviewDelegate: AnyObject {
     func cameraPreviewPermissionDenied(_ view: CameraPreviewView)
 }
 
+/// 바코드 감지 시 바운딩 박스 축소 애니메이션 완료 후 delegate에 isbn 전달
+/// (홈앱 QR 감지 애니메이션 차용)
+
 // MARK: - CameraPreviewView
 
 final class CameraPreviewView: UIView {
@@ -38,6 +41,18 @@ final class CameraPreviewView: UIView {
         view.isHidden = true
         return view
     }()
+
+    private let boundingBoxView: UIView = {
+        let view = UIView()
+        view.layer.borderColor = UIColor.systemYellow.cgColor
+        view.layer.borderWidth = 3
+        view.layer.cornerRadius = 6
+        view.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.1)
+        view.isHidden = true
+        return view
+    }()
+
+    private var pendingISBN: String?
 
     // MARK: - Init
 
@@ -84,6 +99,9 @@ final class CameraPreviewView: UIView {
 
     func startScanning() {
         lastDetectedISBN = nil
+        pendingISBN = nil
+        boundingBoxView.isHidden = true
+        boundingBoxView.alpha = 0
         guard let session = captureSession, !session.isRunning else { return }
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             session.startRunning()
@@ -125,12 +143,17 @@ extension CameraPreviewView: AVCaptureMetadataOutputObjectsDelegate {
         guard let metadataObject = metadataObjects.first,
               let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject,
               let isbn = readableObject.stringValue,
-              isbn != lastDetectedISBN else { return }
+              isbn != lastDetectedISBN,
+              let previewLayer,
+              let transformedObject = previewLayer.transformedMetadataObject(for: readableObject)
+        else { return }
 
         lastDetectedISBN = isbn
+        pendingISBN = isbn
+
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.delegate?.cameraPreview(self, didDetectBarcode: isbn)
+            self.showBoundingBoxAnimation(for: transformedObject.bounds)
         }
     }
 }
@@ -144,6 +167,7 @@ private extension CameraPreviewView {
         layer.cornerRadius = 20
         clipsToBounds = true
         addSubview(focusIndicator)
+        addSubview(boundingBoxView)
     }
 
     func setupTapGesture() {
@@ -193,6 +217,49 @@ private extension CameraPreviewView {
                 }
                 device.unlockForConfiguration()
             } catch {}
+        }
+    }
+
+    func showBoundingBoxAnimation(for barcodeBounds: CGRect) {
+        // 바코드 bounds에 여유 패딩 추가
+        let padding: CGFloat = 16
+        let paddedBounds = barcodeBounds.insetBy(dx: -padding, dy: -padding)
+
+        // 초기 상태: 카메라 프리뷰 전체 크기
+        boundingBoxView.frame = bounds
+        boundingBoxView.layer.cornerRadius = 20
+        boundingBoxView.isHidden = false
+        boundingBoxView.alpha = 1
+
+        // 햅틱 피드백
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        // 바코드 크기로 축소 애니메이션 (0.6초 + 스프링)
+        UIView.animate(
+            withDuration: 0.6,
+            delay: 0,
+            usingSpringWithDamping: 0.7,
+            initialSpringVelocity: 0.3
+        ) {
+            self.boundingBoxView.frame = paddedBounds
+            self.boundingBoxView.layer.cornerRadius = 6
+        } completion: { [weak self] _ in
+            guard let self, let isbn = self.pendingISBN else { return }
+            // 바운딩 박스 잠깐 유지 후 delegate 호출
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                self.delegate?.cameraPreview(self, didDetectBarcode: isbn)
+                self.pendingISBN = nil
+            }
+        }
+    }
+
+    /// 외부에서 바운딩 박스를 숨길 때 호출
+    func hideBoundingBox() {
+        UIView.animate(withDuration: 0.2) {
+            self.boundingBoxView.alpha = 0
+        } completion: { [weak self] _ in
+            self?.boundingBoxView.isHidden = true
         }
     }
 
