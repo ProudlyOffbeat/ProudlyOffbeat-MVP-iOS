@@ -36,6 +36,26 @@ final class HomeKitManager: NSObject {
     }
 }
 
+extension HomeKitManager: HMHomeDelegate {
+    
+    func home(_ home: HMHome, didAdd accessory: HMAccessory) {
+        accessory.delegate = self
+        enableNotifications(for: accessory)
+        
+        let homes = homeManager.homes.map { mapHome($0) }
+        DispatchQueue.main.async { [weak self] in
+            self?.onHomesUpdated?(homes)
+        }
+    }
+    
+    func home(_ home: HMHome, didRemove accessory: HMAccessory) {
+        let homes = homeManager.homes.map { mapHome($0)}
+        DispatchQueue.main.async { [weak self] in
+            self?.onHomesUpdated?(homes)
+        }
+    }
+}
+
 // MARK: - HMHomeManagerDelegate
 
 extension HomeKitManager: HMHomeManagerDelegate {
@@ -102,6 +122,7 @@ private extension HomeKitManager {
 
     /// 집 안 모든 액세서리에 delegate 설정 + 특성 변경 알림 구독
     func registerForNotifications(in home: HMHome) {
+        home.delegate = self
         for room in home.rooms {
             for accessory in room.accessories {
                 accessory.delegate = self
