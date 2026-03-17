@@ -79,10 +79,10 @@ final class ReadingViewModel {
             }
             isLightingReady = true // 조명 실패해도 독서 진행
 
-            // AVFoundation 음악 재생
+            // AVFoundation 음악 재생 (페이드인)
             if let category = musicCategory {
                 do {
-                    try audioPlayerService.play(category: category)
+                    try audioPlayerService.play(category: category, fadeIn: true)
                     isMusicPlaying = true
                 } catch {
                     isMusicPlaying = true // 음원 실패해도 독서 진행
@@ -115,7 +115,14 @@ final class ReadingViewModel {
     func stopReading() {
         timerTask?.cancel()
         timerTask = nil
-        audioPlayerService.stop()
+
+        // 카테고리 음악 페이드아웃 → 기본 음악 페이드인
+        audioPlayerService.fadeOutAndStop { [weak self] in
+            guard let self else { return }
+            Task { @MainActor in
+                self.playBasicMusic()
+            }
+        }
         isMusicPlaying = false
 
         // 조명 리셋 (fire-and-forget)
@@ -155,6 +162,20 @@ final class ReadingViewModel {
         } catch {
             print("[Gemini] 세션 저장 실패: \(error)")
         }
+    }
+
+    /// 기본 배경음악 재생 (StopReadingView용)
+    func playBasicMusic() {
+        do {
+            try audioPlayerService.playBasicMusic(fadeIn: true)
+        } catch {
+            print("[Audio] 기본 배경음악 재생 실패: \(error)")
+        }
+    }
+
+    /// 기본 배경음악 페이드아웃 후 정지 (ResultView 이동 또는 홈 이동 시)
+    func stopBasicMusic() {
+        audioPlayerService.fadeOutAndStop()
     }
 
     // MARK: - Private

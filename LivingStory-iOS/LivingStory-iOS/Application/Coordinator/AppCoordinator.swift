@@ -125,8 +125,8 @@ final class AppCoordinator: Coordinator {
 
     // MARK: - 마이 탭 네비게이션
     /// 독서 중단 화면 (SwiftUI)
-    func showStopReading(bookTitle: String, conversations: [ConversationProfile]) {
-        let view = StopReadingView(coordinator: self, bookTitle: bookTitle, conversations: conversations)
+    func showStopReading(bookTitle: String, conversations: [ConversationProfile], viewModel: ReadingViewModel) {
+        let view = StopReadingView(coordinator: self, bookTitle: bookTitle, conversations: conversations, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }

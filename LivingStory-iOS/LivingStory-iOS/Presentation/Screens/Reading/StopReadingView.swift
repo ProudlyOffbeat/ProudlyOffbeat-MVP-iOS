@@ -11,6 +11,7 @@ struct StopReadingView: View {
     let coordinator: AppCoordinator
     let bookTitle: String
     let conversations: [ConversationProfile]
+    let viewModel: ReadingViewModel
 
     var body: some View {
         VStack {
@@ -20,6 +21,9 @@ struct StopReadingView: View {
         }
         .navigationTitle(bookTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .onDisappear {
+            viewModel.stopBasicMusic()
+        }
     }
 
     // MARK: - Subviews
