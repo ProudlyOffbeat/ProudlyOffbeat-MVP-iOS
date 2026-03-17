@@ -26,7 +26,7 @@ struct StopReadingView: View {
 
     private var conversationSection: some View {
         VStack(alignment: .leading, spacing: 24) {
-            Text("책에 대해 아이와 대화를 나눠보세요.")
+            Text(StringLiterals.Reading.conversationPrompt)
                 .font(.title2Emphasized)
             ScrollView {
                 VStack(spacing: 10) {
@@ -45,11 +45,11 @@ struct StopReadingView: View {
 
     private var buttonSection: some View {
         VStack(spacing: 14) {
-            PrimaryButtonSwiftUI(title: "다른 책 스캔", action: {
+            PrimaryButtonSwiftUI(title: StringLiterals.Reading.restartScan, action: {
                     coordinator.restartScanner()
                 })
                 .padding(.horizontal, 20)
-            WhiteButtonSwiftUI(title: "그만 읽기", action: {
+            WhiteButtonSwiftUI(title: StringLiterals.Reading.stopReadingButton, action: {
                     coordinator.showResult()
                 })
                 .padding(.horizontal, 20)

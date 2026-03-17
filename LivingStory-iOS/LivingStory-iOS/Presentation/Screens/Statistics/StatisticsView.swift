@@ -34,14 +34,14 @@ struct StatisticsView: View {
                 .frame(width: 589, height: 610)
                 .offset(y: 150)
             )
-        .navigationTitle("마이")
+        .navigationTitle(StringLiterals.My.title)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem {
                 Button {
                     // setting시트 열리는 로직
                 } label: {
-                    Image(systemName: "gearshape")
+                    Image(.settings)
                 }
             }
         }
@@ -57,10 +57,10 @@ struct StatisticsView: View {
     private var statsSection: some View {
             VStack(spacing: 12) {
                 HStack(spacing: 10) {
-                    StatCard(icon: "calendar", title: "이번 달 읽은 책 수", value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)권")
-                    StatCard(icon: "books.vertical.fill", title: "총 읽은 책 수", value: "\((try? repository.fetchTotalBookCount()) ?? 0)권")
+                    StatCard(icon: SymbolLiterals.calendar.rawValue, title: StringLiterals.My.monthlyBookCount, value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.bookUnit)")
+                    StatCard(icon: SymbolLiterals.books.rawValue, title: StringLiterals.My.totalBookCount, value: "\((try? repository.fetchTotalBookCount()) ?? 0)\(StringLiterals.My.bookUnit)")
                 }
-                StatCard(icon: "clock", title: "총 읽은 시간", value: totalTimeString, isWide: true)
+                StatCard(icon: SymbolLiterals.clock.rawValue, title: StringLiterals.My.totalReadingTime, value: totalTimeString, isWide: true)
                 Spacer()
             }
     }

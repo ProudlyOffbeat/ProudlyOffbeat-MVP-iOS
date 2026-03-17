@@ -19,7 +19,7 @@ struct BookProfileView: View {
                     height: geometry.size.height * 0.7
                 )
                 Spacer()
-                PrimaryButtonSwiftUI(title: "책 환경 세팅하기") {
+                PrimaryButtonSwiftUI(title: StringLiterals.Reading.setupButton) {
                     coordinator.showReading(book: book)
                 }
                 .padding(.horizontal, 20)

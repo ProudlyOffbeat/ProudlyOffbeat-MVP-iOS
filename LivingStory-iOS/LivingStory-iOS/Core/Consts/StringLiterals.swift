@@ -41,6 +41,12 @@ enum StringLiterals {
         static let stopSettingButton = "환경 세팅 중지"
         static let stopReadingButton = "그만 읽기"
         static let stopReadingAlertMessage = "중단시, 세팅된 환경이 중단될 거에요."
+        static let conversationPrompt = "책에 대해 아이와 대화를 나눠보세요."
+        static let restartScan = "다른 책 스캔"
+        static let setupButton = "책 환경 세팅하기"
+        static let resultTitle = "읽은 책"
+        static let homeButton = "홈으로"
+        static func todayBookCount(_ count: Int) -> String { "오늘 \(count)권의 책을 읽었어요!" }
     }
 
     enum Book {
