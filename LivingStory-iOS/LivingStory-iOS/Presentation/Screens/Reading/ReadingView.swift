@@ -25,8 +25,10 @@ struct ReadingView: View {
         }
         .navigationTitle(viewModel.book.bookTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .background { pulseBackground }
         .preferredColorScheme(.dark)
+        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             withAnimation(
                 .easeInOut(duration: 2.5)
