@@ -12,7 +12,7 @@ final class HomeKitManager: NSObject {
     // MARK: - Properties
 
     private let homeManager = HMHomeManager()
-    private var pendingUpdateWorkItem: DispatchWorkItem?
+    private var pendingUpdateTask: Task<Void, Never>?
 
     /// HomeKit에서 집 목록이 업데이트되면 호출되는 콜백
     var onHomesUpdated: (([HomeModel]) -> Void)?
@@ -34,24 +34,53 @@ final class HomeKitManager: NSObject {
             handleStatus(status)
         }
     }
+
+    /// 모든 구독 대상 특성의 최신 값을 HomeKit에서 읽어옴 (포그라운드 복귀 시 호출)
+    func refreshAllCharacteristics() async {
+        let subscribableTypes: Set<String> = [
+            HMCharacteristicTypePowerState,
+            HMCharacteristicTypeBrightness,
+            HMCharacteristicTypeVolume
+        ]
+
+        let characteristics = homeManager.homes
+            .flatMap(\.rooms)
+            .flatMap(\.accessories)
+            .flatMap(\.services)
+            .flatMap(\.characteristics)
+            .filter { subscribableTypes.contains($0.characteristicType) }
+
+        await withTaskGroup(of: Void.self) { group in
+            for characteristic in characteristics {
+                group.addTask {
+                    try? await characteristic.readValue()
+                }
+            }
+        }
+    }
 }
 
 extension HomeKitManager: HMHomeDelegate {
     
     func home(_ home: HMHome, didAdd accessory: HMAccessory) {
         accessory.delegate = self
-        enableNotifications(for: accessory)
-        
-        let homes = homeManager.homes.map { mapHome($0) }
-        DispatchQueue.main.async { [weak self] in
-            self?.onHomesUpdated?(homes)
+
+        Task {
+            await enableNotifications(for: accessory)
+
+            let homes = homeManager.homes.map { mapHome($0) }
+            await MainActor.run {
+                onHomesUpdated?(homes)
+            }
         }
     }
-    
+
     func home(_ home: HMHome, didRemove accessory: HMAccessory) {
-        let homes = homeManager.homes.map { mapHome($0)}
-        DispatchQueue.main.async { [weak self] in
-            self?.onHomesUpdated?(homes)
+        Task {
+            let homes = homeManager.homes.map { mapHome($0) }
+            await MainActor.run {
+                onHomesUpdated?(homes)
+            }
         }
     }
 }
@@ -77,20 +106,21 @@ private extension HomeKitManager {
 
     func handleStatus(_ status: HMHomeManagerAuthorizationStatus) {
         guard status.contains(.authorized) else {
-            DispatchQueue.main.async { [weak self] in
-                self?.onPermissionDenied?()
+            Task { @MainActor in
+                onPermissionDenied?()
             }
             return
         }
 
-        for home in homeManager.homes {
-            registerForNotifications(in: home)
-        }
+        Task {
+            for home in homeManager.homes {
+                await registerForNotifications(in: home)
+            }
 
-        let homes = homeManager.homes.map { mapHome($0) }
-      
-        DispatchQueue.main.async { [weak self] in
-            self?.onHomesUpdated?(homes)
+            let homes = homeManager.homes.map { mapHome($0) }
+            await MainActor.run {
+                onHomesUpdated?(homes)
+            }
         }
     }
 }
@@ -103,14 +133,13 @@ extension HomeKitManager: HMAccessoryDelegate {
     func accessory(_ accessory: HMAccessory, service: HMService,
                    didUpdateValueFor characteristic: HMCharacteristic) {
         // 디바운싱: 150ms 내 연속 변경을 최종 1회로 합침 (밝기 슬라이더 등)
-        pendingUpdateWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-            let homes = self.homeManager.homes.map { self.mapHome($0) }
-            self.onHomesUpdated?(homes)
+        pendingUpdateTask?.cancel()
+        pendingUpdateTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(150))
+            guard !Task.isCancelled else { return }
+            let homes = homeManager.homes.map { mapHome($0) }
+            onHomesUpdated?(homes)
         }
-        pendingUpdateWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: workItem)
     }
 }
 
@@ -121,18 +150,18 @@ private extension HomeKitManager {
     // MARK: - Notification Registration
 
     /// 집 안 모든 액세서리에 delegate 설정 + 특성 변경 알림 구독
-    func registerForNotifications(in home: HMHome) {
+    func registerForNotifications(in home: HMHome) async {
         home.delegate = self
         for room in home.rooms {
             for accessory in room.accessories {
                 accessory.delegate = self
-                enableNotifications(for: accessory)
+                await enableNotifications(for: accessory)
             }
         }
     }
 
     /// 특성 값 변경 이벤트 알림 활성화 (전원, 밝기, 볼륨)
-    func enableNotifications(for accessory: HMAccessory) {
+    func enableNotifications(for accessory: HMAccessory) async {
         let subscribableTypes: Set<String> = [
             HMCharacteristicTypePowerState,
             HMCharacteristicTypeBrightness,
@@ -142,10 +171,10 @@ private extension HomeKitManager {
             for characteristic in service.characteristics where
                 subscribableTypes.contains(characteristic.characteristicType) &&
                 characteristic.properties.contains(HMCharacteristicPropertySupportsEventNotification) {
-                characteristic.enableNotification(true) { error in
-                    if let error {
-                        print("[HomeKit] 알림 활성화 실패 (\(accessory.name)): \(error.localizedDescription)")
-                    }
+                do {
+                    try await characteristic.enableNotification(true)
+                } catch {
+                    print("[HomeKit] 알림 활성화 실패 (\(accessory.name)): \(error.localizedDescription)")
                 }
             }
         }
