@@ -36,6 +36,7 @@ final class HomeKitLightingController: NSObject, LightingControllable {
 
     private let homeManager = HMHomeManager()
     private var homesLoadedContinuation: CheckedContinuation<[HMHome], Never>?
+    private var pulseTask: Task<Void, Never>?
 
     // MARK: - Init
 
@@ -82,6 +83,90 @@ final class HomeKitLightingController: NSObject, LightingControllable {
     func resetLighting() async throws {
         try await applyLighting(.default)
         print("[HomeKit] 조명 리셋 완료 (기본값)")
+    }
+
+    /// 밝기 펄스 시작 (세팅 중 깜빡임 효과, UI 펄스와 동일한 2.5초 주기)
+    /// 단계별로 부드럽게 밝기 변경 (예: 80→65→50→65→80)
+    func startBrightnessPulse(base: Int = 80, range: Int = 50) async {
+        pulseTask?.cancel()
+        pulseTask = Task {
+            let homes = (try? await ensureHomesLoaded()) ?? []
+            let targetHome = homes.first(where: { !findLightServices(in: $0).isEmpty }) ?? homes.first
+            guard let home = targetHome else { return }
+
+            let brightChars = findLightServices(in: home).compactMap { service in
+                service.characteristics.first { $0.characteristicType == HMCharacteristicTypeBrightness }
+            }
+            guard !brightChars.isEmpty else { return }
+
+            let low = max(base - range, 10)
+            let high = min(base + range, 100)
+            let steps = 4 // 한 방향 단계 수
+            let stepDelay: Double = 0.8 / Double(steps) // 0.8초 ÷ 4 = 0.2초 간격 (한 사이클 1.6초)
+
+            while !Task.isCancelled {
+                // 밝게 → 어둡게 (단계별)
+                for i in 0...steps {
+                    guard !Task.isCancelled else { return }
+                    let brightness = high - (high - low) * i / steps
+                    for char in brightChars {
+                        try? await writeCharacteristic(char, value: brightness)
+                    }
+                    if i < steps {
+                        try? await Task.sleep(for: .seconds(stepDelay))
+                    }
+                }
+                // 어둡게 → 밝게 (단계별)
+                for i in 0...steps {
+                    guard !Task.isCancelled else { return }
+                    let brightness = low + (high - low) * i / steps
+                    for char in brightChars {
+                        try? await writeCharacteristic(char, value: brightness)
+                    }
+                    if i < steps {
+                        try? await Task.sleep(for: .seconds(stepDelay))
+                    }
+                }
+            }
+        }
+    }
+
+    /// 밝기 펄스 중지
+    func stopBrightnessPulse() async {
+        pulseTask?.cancel()
+        pulseTask = nil
+    }
+
+    /// 조명이 꺼져있어도 H/S/B를 먼저 세팅한 뒤 전원을 켜서 색상 깜빡임 방지
+    func applyLightingWithPowerOn(_ config: LightingConfig) async throws {
+        let homes = try await ensureHomesLoaded()
+        guard !homes.isEmpty else {
+            throw HomeKitLightingError.noHomesAvailable
+        }
+
+        let targetHome = homes.first(where: { !findLightServices(in: $0).isEmpty })
+            ?? homes[0]
+
+        let lightServices = findLightServices(in: targetHome)
+        guard !lightServices.isEmpty else {
+            throw HomeKitLightingError.noLightsFound
+        }
+
+        var errors: [Error] = []
+        for service in lightServices {
+            do {
+                try await writeLightingValuesThenPower(config, to: service)
+            } catch {
+                errors.append(error)
+                print("[HomeKit] 조명 적용 실패: \(error.localizedDescription)")
+            }
+        }
+
+        if errors.count == lightServices.count {
+            throw HomeKitLightingError.noLightsFound
+        }
+
+        print("[HomeKit] 조명 적용 완료 (PowerOn) - H\(config.hue) S\(config.saturation) B\(config.brightness), \(lightServices.count - errors.count)/\(lightServices.count)개 성공")
     }
 }
 
@@ -133,7 +218,7 @@ private extension HomeKitLightingController {
         }
     }
 
-    /// 조명 서비스에 HSB + 전원 값 쓰기
+    /// 조명 서비스에 전원 켜기 → HSB 값 쓰기 (기존 방식)
     func writeLightingValues(_ config: LightingConfig, to service: HMService) async throws {
         // 전원 켜기
         if let powerChar = service.characteristics.first(where: {
@@ -161,6 +246,35 @@ private extension HomeKitLightingController {
             $0.characteristicType == HMCharacteristicTypeBrightness
         }) {
             try await writeCharacteristic(brightChar, value: config.brightness)
+        }
+    }
+
+    /// HSB를 먼저 세팅한 뒤 전원을 켜서 색상 깜빡임 방지
+    func writeLightingValuesThenPower(_ config: LightingConfig, to service: HMService) async throws {
+        // 1. 색상/채도/밝기 먼저 세팅 (전원 끈 상태에서도 값은 쓸 수 있음)
+        if let hueChar = service.characteristics.first(where: {
+            $0.characteristicType == HMCharacteristicTypeHue
+        }) {
+            try await writeCharacteristic(hueChar, value: Float(config.hue))
+        }
+
+        if let satChar = service.characteristics.first(where: {
+            $0.characteristicType == HMCharacteristicTypeSaturation
+        }) {
+            try await writeCharacteristic(satChar, value: Float(config.saturation))
+        }
+
+        if let brightChar = service.characteristics.first(where: {
+            $0.characteristicType == HMCharacteristicTypeBrightness
+        }) {
+            try await writeCharacteristic(brightChar, value: config.brightness)
+        }
+
+        // 2. 마지막에 전원 켜기 → 세팅된 색상으로 바로 켜짐
+        if let powerChar = service.characteristics.first(where: {
+            $0.characteristicType == HMCharacteristicTypePowerState
+        }) {
+            try await writeCharacteristic(powerChar, value: true)
         }
     }
 

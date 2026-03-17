@@ -26,6 +26,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
         self.window = window
+
+        // 앱 라이프사이클에 따른 조명 관리 시작 (didBecomeActive에서 디폴트 적용)
+        AppLightingService.shared.registerLifecycleObservers()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
