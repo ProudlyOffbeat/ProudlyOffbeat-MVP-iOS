@@ -120,6 +120,8 @@ final class AppCoordinator: Coordinator {
         )
         let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
+        hostingVC.title = book.bookTitle
+        hostingVC.navigationItem.largeTitleDisplayMode = .never
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
 

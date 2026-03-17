@@ -339,6 +339,10 @@ private extension ReadingLogCalendarUIView {
 
     @objc func monthYearTapped() {
         monthYearPicker.updateSelectedDate(displayedMonth)
+        if let sheet = monthYearPicker.sheetPresentationController {
+            sheet.detents = [.custom { _ in 280 }]
+            sheet.prefersGrabberVisible = true
+        }
         presenterViewController?.present(monthYearPicker, animated: true)
     }
 
