@@ -3,6 +3,7 @@ import Foundation
 enum ReadingState: Sendable {
     case setting
     case reading
+    case error
 }
 
 @MainActor
@@ -97,18 +98,9 @@ final class ReadingViewModel {
                 startTimer()
             }
         } catch {
-            print("[Gemini] 오류: \(error) — 기본값으로 독서 진행")
-
-            // Gemini 실패 시 기본값으로 fallback
-            lightingConfig = .default
-            musicCategory = .calmPiano
-            conversations = []
-
-            isLightingReady = true
-            isMusicPlaying = true
-            state = .reading
-            startTime = Date()
-            startTimer()
+            print("[Gemini] 오류: \(error)")
+            errorMessage = "환경세팅에 오류가 발생했어요!"
+            state = .error
         }
     }
 
@@ -155,6 +147,13 @@ final class ReadingViewModel {
         } catch {
             print("[Gemini] 세션 저장 실패: \(error)")
         }
+    }
+
+    func retry() async {
+        errorMessage = nil
+        hasStarted = false
+        state = .setting
+        await startSetup()
     }
 
     // MARK: - Private
