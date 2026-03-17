@@ -132,7 +132,6 @@ extension HomeKitManager: HMAccessoryDelegate {
     /// 액세서리의 특성 값이 변경되면 호출 (외부 앱, 자동화, 물리 제어 등)
     func accessory(_ accessory: HMAccessory, service: HMService,
                    didUpdateValueFor characteristic: HMCharacteristic) {
-        print("[HomeKit] 특성 변경 감지: \(accessory.name) - \(characteristic.characteristicType) = \(String(describing: characteristic.value))")
         // 디바운싱: 150ms 내 연속 변경을 최종 1회로 합침 (밝기 슬라이더 등)
         pendingUpdateTask?.cancel()
         pendingUpdateTask = Task { @MainActor in
