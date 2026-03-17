@@ -58,6 +58,11 @@ final class ReadingViewModel {
         hasStarted = true
         print("[Gemini] API 요청 시작 (1회)")
 
+        // 세팅 중 밝기 펄스 시작 (UI 펄스와 동기)
+        if let controller = lightingController {
+            await controller.startBrightnessPulse(base: 80, range: 50)
+        }
+
         do {
             let environment = try await geminiService.generateReadingEnvironment(for: book)
 
@@ -69,10 +74,12 @@ final class ReadingViewModel {
             print("[Gemini] 조명: H\(environment.lighting.hue) S\(environment.lighting.saturation) B\(environment.lighting.brightness)")
             print("[Gemini] 대화 주제: \(environment.conversations.count)개")
 
-            // HomeKit 조명 설정
+            // 펄스 중지 → Gemini 색상 적용
+            AppLightingService.shared.isReadingActive = true
             if let controller = lightingController, let config = lightingConfig {
+                await controller.stopBrightnessPulse()
                 do {
-                    try await controller.applyLighting(config)
+                    try await controller.applyLightingWithPowerOn(config)
                     print("[Lighting] 조명 설정 완료")
                 } catch {
                     print("[Lighting] 조명 설정 실패: \(error.localizedDescription)")
@@ -98,6 +105,9 @@ final class ReadingViewModel {
                 startTimer()
             }
         } catch {
+            if let controller = lightingController {
+                await controller.stopBrightnessPulse()
+            }
             print("[Gemini] 오류: \(error)")
             errorMessage = "환경세팅에 오류가 발생했어요!"
             state = .error
@@ -109,9 +119,11 @@ final class ReadingViewModel {
         timerTask = nil
         audioPlayerService.stop()
         isMusicPlaying = false
+        AppLightingService.shared.isReadingActive = false
 
-        // 조명 리셋 (fire-and-forget)
+        // 펄스 중지 + 조명 리셋 (fire-and-forget)
         if let controller = lightingController {
+            Task { await controller.stopBrightnessPulse() }
             Task {
                 do {
                     try await controller.resetLighting()
