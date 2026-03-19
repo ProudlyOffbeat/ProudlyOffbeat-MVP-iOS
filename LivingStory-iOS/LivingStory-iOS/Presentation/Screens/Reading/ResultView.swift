@@ -14,13 +14,17 @@ struct ResultView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text(StringLiterals.Reading.todayBookCount((try? repository.fetchTodaySessions().count) ?? 0))
                     .font(.title2Emphasized)
-                    .padding(.top, 33)
+                    .padding(.top, 18)
+                    .padding(.horizontal, 20)
 
                 ReadingLogCalendar(readDates: (try? repository.fetchReadDates()) ?? [], showNavigation: false)
-                    .padding(.top, 33)
+                    .border(.red)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 20)
+                    
 
                 StatCard(
                     icon: SymbolLiterals.calendar.rawValue,
@@ -28,9 +32,8 @@ struct ResultView: View {
                     value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.bookUnit)",
                     isWide: true
                 )
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, 20)
-
             Spacer()
 
             PrimaryButtonSwiftUI(title: StringLiterals.Reading.homeButton) {
