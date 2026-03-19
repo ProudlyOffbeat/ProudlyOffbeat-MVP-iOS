@@ -20,7 +20,7 @@ final class ScannerGuideView: UIView {
     }()
 
     private let titleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.text = StringLiterals.Scanner.guideTitle
         label.font = .bodyEmphasized
         label.textColor = UIColor(named: "gray10")
@@ -28,7 +28,7 @@ final class ScannerGuideView: UIView {
     }()
 
     private let subtitleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.text = StringLiterals.Scanner.guideSubtitle
         label.font = .subheadlineRegular
         label.textColor = UIColor(named: "gray30")

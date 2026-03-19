@@ -33,14 +33,14 @@ final class StatCardView: UIView {
     }()
 
     private let titleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .subheadlineRegular
         label.textColor = .label
         return label
     }()
 
     private let valueLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .subheadlineEmphasized
         label.textColor = .label
         return label

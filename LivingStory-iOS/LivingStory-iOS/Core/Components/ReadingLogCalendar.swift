@@ -38,7 +38,7 @@ final class ReadingLogCalendarUIView: UIView {
     }()
 
     private let cal = Calendar.current
-    private let weekdayTitles = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+    private let weekdayTitles = StringLiterals.Calendar.weekdays
     private let weekdayColor = UIColor(red: 0.235, green: 0.235, blue: 0.263, alpha: 0.3)
 
     // MARK: - UI Components
@@ -177,9 +177,9 @@ private extension ReadingLogCalendarUIView {
 
     func setupWeekdayRow() {
         for title in weekdayTitles {
-            let label = UILabel()
+            let label = DynamicLabel()
             label.text = title
-            label.font = .systemFont(ofSize: 13, weight: .semibold)
+            label.font = .footnoteEmphasized
             label.textColor = weekdayColor
             label.textAlignment = .center
             weekdayStack.addArrangedSubview(label)
@@ -258,9 +258,9 @@ private extension ReadingLogCalendarUIView {
         }
 
         // 숫자 라벨
-        let label = UILabel()
+        let label = DynamicLabel()
         label.text = "\(day)"
-        label.font = .systemFont(ofSize: 20, weight: .regular)
+        label.font = .title3Regular
         label.textAlignment = .center
         if isToday {
             label.textColor = .white
@@ -402,7 +402,8 @@ final class MonthYearPickerViewController: UIViewController {
     private func setupUI() {
         let doneButton = UIButton(type: .system)
         doneButton.setTitle("완료", for: .normal)
-        doneButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        doneButton.titleLabel?.font = .headlineRegular
+        doneButton.titleLabel?.adjustsFontForContentSizeCategory = true
         doneButton.tintColor = UIColor(named: "yellow0")
         doneButton.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
 
@@ -454,9 +455,9 @@ extension MonthYearPickerViewController: UIPickerViewDataSource, UIPickerViewDel
     }
 
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
-        let label = (view as? UILabel) ?? UILabel()
+        let label = (view as? DynamicLabel) ?? DynamicLabel()
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: 20, weight: .regular)
+        label.font = .title3Regular
         label.text = component == 0 ? yearTitles[row] : monthTitles[row]
         return label
     }
@@ -479,7 +480,7 @@ struct ReadingLogCalendar: View {
     @State private var displayedMonth = Date()
 
     private let calendar = Calendar.current
-    private let weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+    private let weekdays = StringLiterals.Calendar.weekdays
     private let weekdayColor = Color(red: 0.235, green: 0.235, blue: 0.263).opacity(0.3)
 
     var body: some View {
@@ -527,7 +528,7 @@ struct ReadingLogCalendar: View {
         HStack {
             ForEach(weekdays, id: \.self) { day in
                 Text(day)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.footnoteEmphasized)
                     .foregroundStyle(weekdayColor)
                     .frame(maxWidth: .infinity)
             }
@@ -566,7 +567,7 @@ struct ReadingLogCalendar: View {
         let isRead = isReadDay(day)
 
         return Text("\(day)")
-            .font(.system(size: 20, weight: .regular))
+            .font(.title3Regular)
             .foregroundStyle(isToday ? .white : isRead ? .yellow0 : .primary)
             .frame(maxWidth: .infinity)
             .frame(height: 44)

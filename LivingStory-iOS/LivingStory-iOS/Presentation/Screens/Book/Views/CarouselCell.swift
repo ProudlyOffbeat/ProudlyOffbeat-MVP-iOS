@@ -31,7 +31,7 @@ final class CarouselCell: UICollectionViewCell {
     }()
 
     private let titleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .bodyEmphasized
         label.textColor = UIColor(named: "gray10")
         label.numberOfLines = 0

@@ -84,14 +84,14 @@ final class CoachMarkOverlayView: UIView {
     private let bubbleView = SpeechBubbleView()
 
     private let titleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .subheadlineEmphasized
         label.textColor = UIColor(named: "gray100")
         return label
     }()
 
     private let messageLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .subheadlineRegular
         label.textColor = UIColor(named: "gray100")
         label.numberOfLines = 0
@@ -99,7 +99,7 @@ final class CoachMarkOverlayView: UIView {
     }()
 
     private let stepLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .footnoteRegular
         label.textColor = UIColor(named: "gray90")
         return label
