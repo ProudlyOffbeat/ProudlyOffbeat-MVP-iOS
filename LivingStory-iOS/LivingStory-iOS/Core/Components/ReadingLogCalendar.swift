@@ -487,7 +487,6 @@ struct ReadingLogCalendar: View {
             headerRow
                 .padding(.horizontal, 16)
             weekdayRow
-                .border(.red)
             dayGrid
                 .padding(.horizontal, 16)
         }
@@ -501,7 +500,7 @@ struct ReadingLogCalendar: View {
         HStack {
             HStack(spacing: 4) {
                 Text(monthYearString)
-                    .font(.title3Emphasized)
+                    .font(.headline)
                 Image(systemName: "chevron.right")
                     .font(.subheadline)
                     .fontWeight(.bold)

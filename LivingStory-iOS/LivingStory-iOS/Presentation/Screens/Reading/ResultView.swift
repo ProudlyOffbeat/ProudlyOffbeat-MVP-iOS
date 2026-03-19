@@ -21,7 +21,6 @@ struct ResultView: View {
                     .padding(.horizontal, 20)
 
                 ReadingLogCalendar(readDates: (try? repository.fetchReadDates()) ?? [], showNavigation: false)
-                    .border(.red)
                     .padding(.horizontal, 12)
                     .padding(.top, 20)
                     
