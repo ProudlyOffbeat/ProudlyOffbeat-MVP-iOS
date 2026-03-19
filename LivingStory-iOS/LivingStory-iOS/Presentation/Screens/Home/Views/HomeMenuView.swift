@@ -103,6 +103,7 @@ private extension HomeMenuView {
         config.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 30)
         
         let button = UIButton(configuration: config)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.addAction(UIAction { [weak self] _ in
             self?.selectedIndex = index
             self?.buildMenuItems()
