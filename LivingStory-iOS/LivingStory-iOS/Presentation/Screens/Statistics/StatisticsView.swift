@@ -94,7 +94,7 @@ struct StatCard: View {
                 }
             }
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
         .padding(.leading, 10)
         .padding(.trailing, 14)
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -32,8 +32,8 @@ enum StringLiterals {
     enum Reading {
         static let settingTitle = "환경 세팅중..."
         static let settingSubtitle = "몇 분 소요될 수 있습니다."
-        static let settingDoneTitle = "환경이 세팅 됐어요. 이제 재밌게 읽으세요!"
-        static let settingDoneSubtitle = "책 흐름에 맞게 분위기가 변할거에요.\n재밌게 책을 읽어보세요."
+        static let settingDoneTitle = "책 분위기에 맞게 환경이 세팅 됐어요!"
+        static let settingDoneSubtitle = "이제 책을 더 재밌게 읽으세요!"
         static let stopSettingAlert = "환경 세팅을 전체 중단할까요?"
         static let stopReadingAlert = "책 읽기를 그만할까요?"
         static let close = "닫기"
@@ -46,7 +46,7 @@ enum StringLiterals {
         static let setupButton = "책 환경 세팅하기"
         static let resultTitle = "읽은 책"
         static let homeButton = "홈으로"
-        static func todayBookCount(_ count: Int) -> String { "오늘 \(count)권의 책을 읽었어요!" }
+        static func todayBookCount(_ count: Int) -> String { "오늘 아이에게\n책을 \(count)번 읽어줬어요!" }
     }
 
     enum Book {
@@ -88,10 +88,10 @@ enum StringLiterals {
 
     enum My {
         static let title = "마이"
-        static let monthlyBookCount = "이번 달 읽은 책 수"
+        static let monthlyBookCount = "이번 달 읽어준 횟수"
         static let totalBookCount = "총 읽은 책 수"
         static let totalReadingTime = "총 읽은 시간"
-        static let bookUnit = "권"
+        static let bookUnit = "번"
         static let hourUnit = "시간"
         static let minuteUnit = "분"
         static let secondUnit = "초"

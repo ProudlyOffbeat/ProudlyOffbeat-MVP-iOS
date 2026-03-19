@@ -21,16 +21,25 @@ struct StopReadingView: View {
         .navigationTitle(bookTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
     }
 
     // MARK: - Subviews
 
     private var conversationSection: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            Text(StringLiterals.Reading.conversationPrompt)
-                .font(.title2Emphasized)
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 8) {
+                Image(.conversation)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 26)
+                Text(StringLiterals.Reading.conversationPrompt)
+                    .font(.title2Emphasized)
+            }
+            
             ScrollView {
-                VStack(spacing: 10) {
+                VStack(spacing: 16) {
                     ForEach(conversations) { item in
                         ConversationCard(
                             question: item.question,
@@ -40,8 +49,6 @@ struct StopReadingView: View {
                 }
             }
         }
-        .padding(.top, 45)
-        .padding(.horizontal, 20)
     }
 
     private var buttonSection: some View {
@@ -49,11 +56,9 @@ struct StopReadingView: View {
             PrimaryButtonSwiftUI(title: StringLiterals.Reading.restartScan, action: {
                     coordinator.restartScanner()
                 })
-                .padding(.horizontal, 20)
             WhiteButtonSwiftUI(title: StringLiterals.Reading.stopReadingButton, action: {
                     coordinator.showResult()
                 })
-                .padding(.horizontal, 20)
         }
     }
 }
@@ -65,14 +70,11 @@ private struct ConversationCard: View {
     let effect: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            CharWrappingText(
-                text: question,
-                font: .bodyEmphasized
-            )
+        VStack(alignment: .leading, spacing: 8) {
+            CharWrappingText(text: question, font: .systemFont(ofSize: 18, weight: .medium), color: .gray10)
             CharWrappingText(
                 text: effect,
-                font: .systemFont(ofSize: 15),
+                font: .systemFont(ofSize: 16, weight: .regular),
                 color: .gray40
             )
         }

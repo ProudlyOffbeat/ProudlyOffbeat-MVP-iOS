@@ -38,7 +38,7 @@ final class ReadingLogCalendarUIView: UIView {
     }()
 
     private let cal = Calendar.current
-    private let weekdayTitles = ["일", "월", "화", "수", "목", "금", "토"]
+    private let weekdayTitles = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
     private let weekdayColor = UIColor(red: 0.235, green: 0.235, blue: 0.263, alpha: 0.3)
 
     // MARK: - UI Components
@@ -479,15 +479,19 @@ struct ReadingLogCalendar: View {
     @State private var displayedMonth = Date()
 
     private let calendar = Calendar.current
-    private let weekdays = ["일", "월", "화", "수", "목", "금", "토"]
+    private let weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
     private let weekdayColor = Color(red: 0.235, green: 0.235, blue: 0.263).opacity(0.3)
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 3) {
             headerRow
+                .padding(.horizontal, 16)
             weekdayRow
             dayGrid
+                .padding(.horizontal, 16)
         }
+        .padding(.top, 13)
+        .padding(.bottom, 17)
     }
 
     // MARK: - Subviews
@@ -496,10 +500,11 @@ struct ReadingLogCalendar: View {
         HStack {
             HStack(spacing: 4) {
                 Text(monthYearString)
-                    .font(.title3Emphasized)
+                    .font(.headline)
                 Image(systemName: "chevron.right")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.yellow0)
             }
             Spacer()
             if showNavigation {
@@ -527,6 +532,7 @@ struct ReadingLogCalendar: View {
                     .frame(maxWidth: .infinity)
             }
         }
+        .padding(.horizontal, 16)
     }
 
     private var dayGrid: some View {
