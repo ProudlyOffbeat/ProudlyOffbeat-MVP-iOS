@@ -91,10 +91,15 @@ enum StringLiterals {
         static let monthlyBookCount = "이번 달 읽어준 횟수"
         static let totalBookCount = "총 읽은 책 수"
         static let totalReadingTime = "총 읽은 시간"
-        static let bookUnit = "번"
+        static let bookUnit = "권"
+        static let readingUnit = "번"
         static let hourUnit = "시간"
         static let minuteUnit = "분"
         static let secondUnit = "초"
+    }
+
+    enum Calendar {
+        static let weekdays = ["일", "월", "화", "수", "목", "금", "토"]
     }
 
     enum Onboarding {
