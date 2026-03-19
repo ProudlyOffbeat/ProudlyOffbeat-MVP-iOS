@@ -137,7 +137,7 @@ private extension MyViewController {
         monthlyCard.configure(
             icon: .calendar,
             title: StringLiterals.My.monthlyBookCount,
-            value: "\(monthlyCount)\(StringLiterals.My.bookUnit)"
+            value: "\(monthlyCount)\(StringLiterals.My.readingUnit)"
         )
         totalBookCard.configure(
             icon: .books,

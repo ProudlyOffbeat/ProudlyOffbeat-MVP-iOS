@@ -28,7 +28,7 @@ struct ResultView: View {
                 StatCard(
                     icon: SymbolLiterals.calendar.rawValue,
                     title: StringLiterals.My.monthlyBookCount,
-                    value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.bookUnit)",
+                    value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.readingUnit)",
                     isWide: true
                 )
                 .padding(.horizontal, 20)

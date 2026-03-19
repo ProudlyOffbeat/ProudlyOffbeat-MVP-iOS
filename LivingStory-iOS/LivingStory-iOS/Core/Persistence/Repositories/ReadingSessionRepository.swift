@@ -93,7 +93,7 @@ final class ReadingSessionRepository: ReadingSessionRepositoryProtocol {
         )
         return try context.fetch(request).map { $0.toProfile() }
     }
-    
+
     func fetchMonthlyBookCount() throws -> Int {
         let calendar = Calendar.current
         let now = Date()
@@ -107,8 +107,10 @@ final class ReadingSessionRepository: ReadingSessionRepositoryProtocol {
             endOfMonth as NSDate
         )
         let sessions = try context.fetch(request)
-        let uniqueISBNs = Set(sessions.compactMap { $0.book?.isbn })
-        return uniqueISBNs.count
+        // TODO: 고유 책 수가 아닌 읽어준 횟수(세션 수) 기준으로 변경
+        // let uniqueISBNs = Set(sessions.compactMap { $0.book?.isbn })
+        // return uniqueISBNs.count
+        return sessions.count
     }
 
     func fetchTotalBookCount() throws -> Int {
