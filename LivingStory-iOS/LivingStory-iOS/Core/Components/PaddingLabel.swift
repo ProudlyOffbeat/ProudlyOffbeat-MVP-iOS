@@ -14,6 +14,7 @@ final class PaddingLabel: UILabel {
     init(padding: UIEdgeInsets = UIEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)) {
         self.padding = padding
         super.init(frame: .zero)
+        adjustsFontForContentSizeCategory = true
     }
     
     @available(*, unavailable)

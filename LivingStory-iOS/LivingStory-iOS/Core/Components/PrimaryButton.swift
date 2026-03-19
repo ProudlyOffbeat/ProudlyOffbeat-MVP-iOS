@@ -53,6 +53,7 @@ final class PrimaryButton: UIButton {
             return outgoing
         }
         self.configuration = config
+        self.titleLabel?.adjustsFontForContentSizeCategory = true
     }
 
     @available(*, unavailable)

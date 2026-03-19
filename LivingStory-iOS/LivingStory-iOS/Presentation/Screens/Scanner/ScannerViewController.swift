@@ -49,7 +49,7 @@ final class ScannerViewController: UIViewController {
     // MARK: - UI Components
 
     private let titleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.text = StringLiterals.Scanner.title
         label.font = .bodyEmphasized
         label.textColor = UIColor(named: "gray10")

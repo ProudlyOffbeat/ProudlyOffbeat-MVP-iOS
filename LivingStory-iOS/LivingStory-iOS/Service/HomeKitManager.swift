@@ -35,6 +35,13 @@ final class HomeKitManager: NSObject {
         }
     }
 
+    /// 기기의 전원 상태를 토글 (on ↔ off)
+    func togglePower(for deviceId: UUID) async throws {
+        guard let characteristic = findPowerCharacteristic(for: deviceId) else { return }
+        let currentValue = (characteristic.value as? Bool) ?? false
+        try await characteristic.writeValue(!currentValue)
+    }
+
     /// 모든 구독 대상 특성의 최신 값을 HomeKit에서 읽어옴 (포그라운드 복귀 시 호출)
     func refreshAllCharacteristics() async {
         let subscribableTypes: Set<String> = [
@@ -178,6 +185,22 @@ private extension HomeKitManager {
                 }
             }
         }
+    }
+
+    // MARK: - Characteristic Lookup
+
+    /// deviceId에 해당하는 액세서리의 전원(PowerState) 특성을 찾아 반환
+    func findPowerCharacteristic(for deviceId: UUID) -> HMCharacteristic? {
+        for home in homeManager.homes {
+            for room in home.rooms {
+                for accessory in room.accessories where accessory.uniqueIdentifier == deviceId {
+                    return accessory.services
+                        .flatMap(\.characteristics)
+                        .first { $0.characteristicType == HMCharacteristicTypePowerState }
+                }
+            }
+        }
+        return nil
     }
 
     // MARK: - Mapping

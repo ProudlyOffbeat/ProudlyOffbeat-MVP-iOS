@@ -12,7 +12,7 @@ final class RoomHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "RoomHeaderView"
 
     private let titleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .headlineRegular
         label.textColor = UIColor(named: "gray10")
         return label

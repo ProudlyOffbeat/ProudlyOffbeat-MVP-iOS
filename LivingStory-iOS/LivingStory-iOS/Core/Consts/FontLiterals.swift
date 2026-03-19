@@ -35,6 +35,7 @@ extension UIFont {
     // MARK: Title
     static let title1Emphasized: UIFont = scaled(.title1, size: 28, weight: .bold)
     static let title2Emphasized: UIFont = scaled(.title2, size: 22, weight: .bold)
+    static let title3Regular: UIFont = scaled(.title3, size: 20, weight: .regular)
     static let title3Emphasized: UIFont = scaled(.title3, size: 20, weight: .semibold)
 
     // MARK: Headline / Subheadline
@@ -43,11 +44,13 @@ extension UIFont {
     static let subheadlineEmphasized: UIFont = scaled(.subheadline, size: 15, weight: .semibold)
 
     // MARK: Body
+    static let bodyLargeMedium: UIFont = scaled(.body, size: 18, weight: .medium)
     static let bodyRegular: UIFont = scaled(.body, size: 17, weight: .regular)
     static let bodyMedium: UIFont = scaled(.body, size: 17, weight: .medium)
     static let bodyEmphasized: UIFont = scaled(.body, size: 17, weight: .semibold)
 
     // MARK: Callout
+    static let calloutRegular: UIFont = scaled(.callout, size: 16, weight: .regular)
     static let calloutEmphasized: UIFont = scaled(.callout, size: 16, weight: .semibold)
 
     // MARK: Footnote
@@ -78,6 +81,7 @@ extension Font {
     // MARK: Title
     static let title1Emphasized: Font = .system(.title, weight: .bold)
     static let title2Emphasized: Font = .system(.title2, weight: .bold)
+    static let title3Regular: Font = .system(.title3, weight: .regular)
     static let title3Emphasized: Font = .system(.title3, weight: .semibold)
 
     // MARK: Headline / Subheadline
@@ -86,11 +90,13 @@ extension Font {
     static let subheadlineEmphasized: Font = .system(.subheadline, weight: .semibold)
 
     // MARK: Body
+    static let bodyLargeMedium: Font = .system(size: 18, weight: .medium)
     static let bodyRegular: Font = .system(.body, weight: .regular)
     static let bodyMedium: Font = .system(.body, weight: .medium)
     static let bodyEmphasized: Font = .system(.body, weight: .semibold)
 
     // MARK: Callout
+    static let calloutRegular: Font = .system(.callout, weight: .regular)
     static let calloutEmphasized: Font = .system(.callout, weight: .semibold)
 
     // MARK: Footnote

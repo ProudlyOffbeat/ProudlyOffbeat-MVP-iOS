@@ -27,6 +27,7 @@ final class DarkRoundedButton: UIButton {
             return outgoing
         }
         configuration = config
+        titleLabel?.adjustsFontForContentSizeCategory = true
     }
 
     @available(*, unavailable)

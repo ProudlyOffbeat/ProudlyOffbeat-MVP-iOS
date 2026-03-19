@@ -8,7 +8,7 @@
 import UIKit
 
 final class HomeDeviceCardView: UIView {
-    
+
     private var homeDeviceType: HomeDeviceType
     private var homeDeviceState: Bool = false
     
@@ -27,13 +27,13 @@ final class HomeDeviceCardView: UIView {
     }()
     
     private let deviceNameLabel: UILabel = {
-        let nameLabel = UILabel()
+        let nameLabel = DynamicLabel()
         nameLabel.font = .subheadlineEmphasized
         return nameLabel
     }()
     
     private let deviceStatusLabel: UILabel = {
-        let stateLabel = UILabel()
+        let stateLabel = DynamicLabel()
         stateLabel.font = .footnoteRegular
         return stateLabel
     }()
@@ -52,10 +52,11 @@ final class HomeDeviceCardView: UIView {
         self.homeDeviceType = deviceType
         
         super.init(frame: .zero)
-        
+
         setupStyle()
         setupHierarchy()
         setupLayout()
+        setupAccessibility()
         updateAppearance()
     }
     
@@ -77,6 +78,7 @@ extension HomeDeviceCardView {
         deviceNameLabel.text = device.name
         deviceStatusLabel.text = device.status
         updateAppearance()
+        updateAccessibilityLabel()
     }
 }
 
@@ -86,7 +88,19 @@ private extension HomeDeviceCardView {
         layer.cornerRadius = 20
         clipsToBounds = true
     }
-    
+
+    func setupAccessibility() {
+        isAccessibilityElement = true
+        accessibilityTraits = .button
+        accessibilityHint = "이중 탭하여 전원을 전환합니다"
+    }
+
+    func updateAccessibilityLabel() {
+        let deviceTypeName = homeDeviceType == .light ? "조명" : "스피커"
+        let stateName = homeDeviceState ? "켜짐" : "꺼짐"
+        accessibilityLabel = "\(deviceNameLabel.text ?? "") \(deviceTypeName), \(stateName)"
+    }
+
     func setupHierarchy() {
         addSubview(homeIconBackgroundView)
         homeIconBackgroundView.addSubview(homeIconDeviceImageView)

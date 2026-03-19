@@ -50,6 +50,7 @@ final class HomeViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         homeDataSource.configure(with: roomCollectionView)
+        roomCollectionView.delegate = self
         setupEmptyStateActions()
         bindHomeKit()
 
@@ -176,6 +177,37 @@ private extension HomeViewController {
             section.boundarySupplementaryItems = [header]
 
             return section
+        }
+    }
+}
+
+// MARK: - UICollectionViewDelegate (기기 탭 토글)
+
+extension HomeViewController: UICollectionViewDelegate {
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let device = homeDataSource.device(at: indexPath) else { return }
+
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        // 탭 애니메이션
+        if let cell = collectionView.cellForItem(at: indexPath) {
+            UIView.animate(withDuration: 0.1, animations: {
+                cell.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+            }) { _ in
+                UIView.animate(withDuration: 0.1) {
+                    cell.transform = .identity
+                }
+            }
+        }
+
+        Task {
+            do {
+                try await homeKitManager.togglePower(for: device.id)
+            } catch {
+                print("[HomeKit] 전원 토글 실패: \(error.localizedDescription)")
+            }
         }
     }
 }

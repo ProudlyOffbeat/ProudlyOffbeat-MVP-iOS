@@ -57,7 +57,7 @@ struct StatisticsView: View {
     private var statsSection: some View {
             VStack(spacing: 12) {
                 HStack(spacing: 10) {
-                    StatCard(icon: SymbolLiterals.calendar.rawValue, title: StringLiterals.My.monthlyBookCount, value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.bookUnit)")
+                    StatCard(icon: SymbolLiterals.calendar.rawValue, title: StringLiterals.My.monthlyBookCount, value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.readingUnit)")
                     StatCard(icon: SymbolLiterals.books.rawValue, title: StringLiterals.My.totalBookCount, value: "\((try? repository.fetchTotalBookCount()) ?? 0)\(StringLiterals.My.bookUnit)")
                 }
                 StatCard(icon: SymbolLiterals.clock.rawValue, title: StringLiterals.My.totalReadingTime, value: totalTimeString, isWide: true)

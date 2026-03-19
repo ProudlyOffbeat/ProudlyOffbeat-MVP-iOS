@@ -20,7 +20,7 @@ final class ScannerResultContentView: UIView {
     }()
 
     let statusLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .subheadlineRegular
         label.textColor = UIColor(named: "gray30")
         label.textAlignment = .center

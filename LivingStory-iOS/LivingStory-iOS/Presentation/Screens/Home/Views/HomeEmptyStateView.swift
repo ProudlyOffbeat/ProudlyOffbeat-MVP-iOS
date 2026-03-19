@@ -23,7 +23,7 @@ final class HomeEmptyStateView: UIView {
     }()
 
     private let titleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .title3Emphasized
         label.textColor = UIColor(named: "gray10")
         label.textAlignment = .center
@@ -31,7 +31,7 @@ final class HomeEmptyStateView: UIView {
     }()
 
     private let subtitleLabel: UILabel = {
-        let label = UILabel()
+        let label = DynamicLabel()
         label.font = .subheadlineRegular
         label.textColor = UIColor(named: "gray40")
         label.textAlignment = .center

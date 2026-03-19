@@ -54,6 +54,10 @@ final class HomeDataSource {
         }
     }
 
+    func device(at indexPath: IndexPath) -> DeviceModel? {
+        diffableDataSource.itemIdentifier(for: indexPath)
+    }
+
     func applySnapshot(for home: HomeModel) {
         var snapshot = NSDiffableDataSourceSnapshot<RoomModel, DeviceModel>()
         for room in home.rooms {

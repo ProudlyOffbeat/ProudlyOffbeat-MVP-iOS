@@ -71,10 +71,10 @@ private struct ConversationCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            CharWrappingText(text: question, font: .systemFont(ofSize: 18, weight: .medium), color: .gray10)
+            CharWrappingText(text: question, font: .bodyLargeMedium, color: .gray10)
             CharWrappingText(
                 text: effect,
-                font: .systemFont(ofSize: 16, weight: .regular),
+                font: .calloutRegular,
                 color: .gray40
             )
         }
