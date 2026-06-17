@@ -4,6 +4,8 @@
 //
 //  Created by 문창재 on 2/12/26.
 //
+//  책 읽기 종료 → 결과창 (디자인 2635 / 2669)
+//
 
 import SwiftUI
 
@@ -12,50 +14,197 @@ struct ResultView: View {
     let coordinator: AppCoordinator
     let repository: ReadingSessionRepositoryProtocol
 
+    // TODO: 연속일(streak) 데이터 연동 — 현재 더미 고정값
+    private let flameCount = 12
+
+    private var todaySessions: [ReadingSessionProfile] {
+        (try? repository.fetchTodaySessions()) ?? []
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(StringLiterals.Reading.todayBookCount((try? repository.fetchTodaySessions().count) ?? 0))
-                    .font(.title2Medium)
-                    .padding(.top, 18)
-                    .padding(.horizontal, 20)
+        ZStack {
+            Color.black.ignoresSafeArea()
 
-                ReadingLogCalendar(readDates: (try? repository.fetchReadDates()) ?? [], showNavigation: false)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 20)
-                    
+            VStack(spacing: 0) {
+                header
 
-                StatCard(
-                    icon: SymbolLiterals.calendar.rawValue,
-                    title: StringLiterals.My.monthlyBookCount,
-                    value: "\((try? repository.fetchMonthlyBookCount()) ?? 0)\(StringLiterals.My.readingUnit)",
-                    isWide: true
-                )
+                Spacer().frame(height: 48)
+
+                flameRow
+
+                Spacer().frame(height: 52)
+
+                BookStackAnimationView()
+
+                Spacer().frame(height: 16)
+
+                Text(StringLiterals.Reading.todayReadBooks(todaySessions.count))
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(6)
+                    .tracking(0.5)
+
+                Spacer().frame(height: 52)
+
+                bookThumbnails
+
+                Spacer()
+
+                PrimaryButtonSwiftUI(title: StringLiterals.Reading.homeButton) {
+                    coordinator.popToHome()
+                }
                 .padding(.horizontal, 20)
+                .padding(.bottom, 30)
             }
-            Spacer()
-
-            PrimaryButtonSwiftUI(title: StringLiterals.Reading.homeButton) {
-                coordinator.popToHome()
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            // 하단 버튼을 물리 화면 바닥에서 30pt에 고정 (다른 화면과 통일)
+            .ignoresSafeArea(.container, edges: .bottom)
         }
-        .navigationTitle(StringLiterals.Reading.resultTitle)
-        .navigationBarTitleDisplayMode(.inline)
+        .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
-        .background(
-            RadialGradient(
-                colors: [
-                    Color(red: 1, green: 0.77, blue: 0.016).opacity(0.2),
-                    Color(red: 1, green: 0.77, blue: 0.016).opacity(0)
-                ],
-                center: .center,
-                startRadius: 0,
-                endRadius: 305
-            )
-            .frame(width: 589, height: 610)
-            .offset(y: 150)
+        .toolbar(.hidden, for: .navigationBar)
+    }
+
+    // MARK: - Subviews
+
+    private var header: some View {
+        ZStack {
+            Text(StringLiterals.Reading.resultTitle)
+                .font(.headlineRegular)
+                .foregroundStyle(.white)
+
+            HStack {
+                Button {
+                    coordinator.pop()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .glassEffect(.regular, in: Circle())
+                }
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private var flameRow: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "flame.fill")
+                .font(.system(size: 18))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            BookStackAnimationView.gradientColors[0], // 노랑
+                            BookStackAnimationView.gradientColors[1]   // 연두
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            Text("\(flameCount)")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+    }
+
+    @ViewBuilder
+    private var bookThumbnails: some View {
+        let books = todaySessions.map(\.bookProfile)
+        if !books.isEmpty {
+            // 적으면 가운데 정렬, 많으면(6권 등) 가로 스크롤
+            GeometryReader { geo in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .top, spacing: 16) {
+                        ForEach(Array(books.enumerated()), id: \.offset) { _, book in
+                            ResultBookThumbnail(coverURL: book.bookCoverImageURL, title: book.bookTitle)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .frame(minWidth: geo.size.width, alignment: .center)
+                }
+            }
+            .frame(height: 124)
+        }
+    }
+}
+
+// MARK: - Book Thumbnail
+
+private struct ResultBookThumbnail: View {
+    let coverURL: URL?
+    let title: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            cover
+                .frame(width: 72, height: 96)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(width: 72, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private var cover: some View {
+        if let coverURL {
+            AsyncImage(url: coverURL) { phase in
+                switch phase {
+                case .success(let image):
+                    image.resizable().scaledToFill()
+                default:
+                    Color(hex: 0x2C2C2E)
+                }
+            }
+        } else {
+            Color(hex: 0x2C2C2E)
+        }
+    }
+}
+
+// MARK: - Color Helper
+
+private extension Color {
+    init(hex: UInt) {
+        self.init(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
         )
     }
 }
+
+// MARK: - Preview
+
+#if DEBUG
+private struct PreviewResultRepository: ReadingSessionRepositoryProtocol {
+    func saveSession(_ session: ReadingSessionProfile, bookISBN: String) throws {}
+    func fetchAllSessions() throws -> [ReadingSessionProfile] { ReadingSessionProfile.mockList }
+    func findSession(by id: UUID) throws -> ReadingSessionProfile? { nil }
+    func deleteSession(by id: UUID) throws {}
+    func fetchTodaySessions() throws -> [ReadingSessionProfile] {
+        // 가로 스크롤 확인용 6권
+        (0..<6).map { _ in ReadingSessionProfile.mock }
+    }
+    func fetchMonthlyBookCount() throws -> Int { 5 }
+    func fetchTotalBookCount() throws -> Int { 12 }
+    func fetchTotalSeconds() throws -> Int { 3600 }
+    func fetchReadDates() throws -> Set<DateComponents> { [] }
+}
+
+#Preview {
+    NavigationStack {
+        ResultView(
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            repository: PreviewResultRepository()
+        )
+    }
+}
+#endif

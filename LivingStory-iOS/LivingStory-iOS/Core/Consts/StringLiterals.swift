@@ -52,6 +52,7 @@ enum StringLiterals {
         static let readAnotherBook = "다른 책 읽기"
         static let finishReading = "책 읽기 종료"
         static func todayBookCount(_ count: Int) -> String { "오늘 아이에게\n책을 \(count)번 읽어줬어요!" }
+        static func todayReadBooks(_ count: Int) -> String { "오늘 \(count)권의 책을\n읽어줬어요!" }
     }
 
     enum Book {
