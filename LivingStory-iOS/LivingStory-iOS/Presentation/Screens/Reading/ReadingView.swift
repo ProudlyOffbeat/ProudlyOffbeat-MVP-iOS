@@ -14,27 +14,33 @@ struct ReadingView: View {
 
     @State private var isPulsing = false
     @State private var showStopAlert = false
-    @State private var showColorWheel = false
-    
+    @State private var isFinishing = false
+
     var body: some View {
-        VStack {
-            Spacer()
-            statusContent
+        VStack(spacing: 0) {
+            header
+
             if viewModel.state == .reading {
-                controlPanel
-                    .padding(.horizontal, 20)
-                    .padding(.top, 24)
+                readingDoneLayout
+            } else {
+                settingLayout
             }
-            Spacer()
-            actionButton
-                .padding(.horizontal, 20)
         }
-        .navigationTitle(viewModel.book.bookTitle)
-        .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .background { pulseBackground }
+        .overlay {
+            if isFinishing {
+                CheckmarkTransitionView {
+                    coordinator.showStopReading(
+                        bookTitle: viewModel.book.bookTitle,
+                        conversations: viewModel.conversations
+                    )
+                }
+                .transition(.opacity)
+            }
+        }
         .preferredColorScheme(.dark)
-        .toolbarColorScheme(.dark, for: .navigationBar)
         .onAppear {
             withAnimation(
                 .easeInOut(duration: 2.5)
@@ -53,7 +59,8 @@ struct ReadingView: View {
                 if viewModel.state == .setting {
                     coordinator.pop()
                 } else {
-                    coordinator.showStopReading(bookTitle: viewModel.book.bookTitle, conversations: viewModel.conversations)
+                    // 독서 종료: 체크 전환 인터랙션 후 StopReadingView로 이동
+                    withAnimation(.easeInOut(duration: 0.25)) { isFinishing = true }
                 }
             }
         } message: {
@@ -79,31 +86,101 @@ struct ReadingView: View {
             await viewModel.startSetup()
         }
     }
-    
-    // MARK: - Subviews
-    
-    private var statusContent: some View {
+
+    // MARK: - Layouts
+
+    /// 커스텀 헤더 (책 제목) — 전역 네비바를 숨기므로 navigationTitle 대신 직접 표시
+    private var header: some View {
+        Text(viewModel.book.bookTitle)
+            .font(.headlineRegular)
+            .foregroundStyle(.white)
+            .lineLimit(1)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+    }
+
+    /// 세팅 중 (·error): 중앙 아이콘 + 문구 + '환경 세팅 중지'
+    private var settingLayout: some View {
+        VStack {
+            Spacer()
+            settingStatus
+            Spacer()
+            actionButton
+                .padding(.horizontal, 20)
+        }
+    }
+
+    /// 세팅 완료(독서 중): 아이콘 + '환경 세팅 완료!' + 컨트롤 카드 + '그만 읽기'
+    private var readingDoneLayout: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 24)
+
+            doneStatus
+
+            Spacer().frame(height: 52)
+
+            ControlCard(
+                lightingColor: lightingColor,
+                brightness: viewModel.lightingConfig?.brightness ?? 50
+            )
+            .padding(.horizontal, 20)
+
+            Spacer()
+
+            actionButton
+                .padding(.horizontal, 20)
+        }
+    }
+
+    // MARK: - Status Content
+
+    private var settingStatus: some View {
         VStack(spacing: 28) {
-            Image(viewModel.state == .setting ? .home : .musicNoteHouse)
+            Image(.home)
                 .resizable()
                 .scaledToFit()
-                .foregroundStyle(.white)
                 .frame(height: 79)
-                .id(viewModel.state)
-            
+                .foregroundStyle(.white.opacity(0.22))
+
             VStack(spacing: 6) {
-                Text(viewModel.state == .setting ? StringLiterals.Reading.settingTitle : StringLiterals.Reading.settingDoneTitle)
-                    .font(.body2Regular)
+                Text(StringLiterals.Reading.settingTitle)
+                    .font(.bodyRegular)
                     .foregroundStyle(.white)
-                Text(viewModel.state == .setting ? StringLiterals.Reading.settingSubtitle : StringLiterals.Reading.settingDoneSubtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(.white)
-                    .opacity(0.5)
+                Text(StringLiterals.Reading.settingSubtitle)
+                    .font(.subheadlineRegular)
+                    .foregroundStyle(.white.opacity(0.5))
                     .multilineTextAlignment(.center)
             }
         }
     }
-    
+
+    private var doneStatus: some View {
+        VStack(spacing: 28) {
+            Image(.musicNoteHouse)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 72)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color(hex: 0x92CFB1), Color(hex: 0xBFEE68), Color(hex: 0xFFCB24)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+            VStack(spacing: 12) {
+                Text(StringLiterals.Reading.settingDoneTitle)
+                    .font(.system(size: 20))
+                    .foregroundStyle(.white)
+                Text(StringLiterals.Reading.settingDoneSubtitle)
+                    .font(.system(size: 18))
+                    .foregroundStyle(.white.opacity(0.5))
+            }
+            .multilineTextAlignment(.center)
+        }
+    }
+
     private var actionButton: some View {
         PrimaryButtonSwiftUI(
             title: viewModel.state == .setting ? StringLiterals.Reading.stopSettingButton : StringLiterals.Reading.stopReadingButton
@@ -112,7 +189,9 @@ struct ReadingView: View {
         }
         .environment(\.colorScheme, .dark)
     }
-    
+
+    // MARK: - Helpers
+
     private var lightingColor: Color {
         guard let config = viewModel.lightingConfig else {
             return .yellow0
@@ -123,196 +202,6 @@ struct ReadingView: View {
             brightness: Double(config.brightness) / 100.0
         )
     }
-    
-    // MARK: - Control Panel
-    private var controlPanel: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // 반응 로그
-            HStack {
-                Text(viewModel.lastAction ?? "대기")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.7))
-                Spacer()
-                if let ms = viewModel.lastLatencyMs {
-                    Text("\(ms)ms")
-                        .font(.caption.monospaced())
-                        .foregroundStyle(.white.opacity(0.9))
-                }
-            }
-
-            // 반응시간 통계 (latencyHistory 있을 때)
-            if let avg = viewModel.avgLatencyMs,
-               let minV = viewModel.minLatencyMs,
-               let maxV = viewModel.maxLatencyMs {
-                HStack(spacing: 14) {
-                    latencyStat("평균", value: avg)
-                    latencyStat("최소", value: minV)
-                    latencyStat("최대", value: maxV)
-                    Spacer()
-                    Button {
-                        viewModel.clearLatencyHistory()
-                    } label: {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.5))
-                    }
-                }
-                .font(.caption2.monospaced())
-                .foregroundStyle(.white.opacity(0.6))
-            }
-
-            // 볼륨
-            HStack(spacing: 10) {
-                Image(systemName: "speaker.wave.1.fill")
-                    .foregroundStyle(.white)
-                Slider(
-                    value: Binding(
-                        get: { viewModel.volume },
-                        set: { viewModel.setVolume($0) }
-                    ),
-                    in: 0...1
-                )
-                .tint(.white)
-                Image(systemName: "speaker.wave.3.fill")
-                    .foregroundStyle(.white)
-            }
-            
-            // 음악 카테고리 (가로 스크롤 10개 버튼)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(MusicCategory.allCases, id: \.self) { category in
-                        Button {
-                            viewModel.changeMusic(to: category)
-                        } label: {
-                            Text(category.rawValue)
-                                .font(.caption)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 7)
-                                .background(
-                                    viewModel.musicCategory == category
-                                    ? Color.white.opacity(0.35)
-                                    : Color.white.opacity(0.12)
-                                )
-                                .foregroundStyle(.white)
-                                .clipShape(Capsule())
-                        }
-                    }
-                }
-            }
-
-            // 조명 프리셋 팔레트 + 커스텀 색상환
-            HStack(spacing: 10) {
-                // Gemini 추천 버튼 (있을 때만)
-                if let geminiConfig = viewModel.geminiRecommendedLighting {
-                    Button {
-                        viewModel.applyGeminiRecommended()
-                    } label: {
-                        VStack(spacing: 4) {
-                            Circle()
-                                .fill(
-                                    Color(
-                                        hue: Double(geminiConfig.hue) / 360.0,
-                                        saturation: Double(geminiConfig.saturation) / 100.0,
-                                        brightness: Double(geminiConfig.brightness) / 100.0
-                                    )
-                                )
-                                .frame(width: 32, height: 32)
-                                .overlay(
-                                    Circle()
-                                        .stroke(.yellow, lineWidth: 2)
-                                )
-                            Text("AI")
-                                .font(.caption2)
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-
-                ForEach(LightingPreset.allCases, id: \.self) { preset in
-                    Button {
-                        viewModel.applyPreset(preset)
-                    } label: {
-                        VStack(spacing: 4) {
-                            Circle()
-                                .fill(preset.previewColor)
-                                .frame(width: 32, height: 32)
-                                .overlay(
-                                    Circle()
-                                        .stroke(.white.opacity(0.4), lineWidth: 1)
-                                )
-                            Text(preset.rawValue)
-                                .font(.caption2)
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-
-                // 커스텀 원형 색상환 (탭 시 sheet로 열림)
-                Button {
-                    showColorWheel = true
-                } label: {
-                    VStack(spacing: 4) {
-                        Circle()
-                            .fill(
-                                AngularGradient(
-                                    colors: [.red, .yellow, .green, .cyan, .blue, .purple, .red],
-                                    center: .center
-                                )
-                            )
-                            .frame(width: 32, height: 32)
-                            .overlay(
-                                Circle()
-                                    .stroke(.white.opacity(0.4), lineWidth: 1)
-                            )
-                        Text("커스텀")
-                            .font(.caption2)
-                            .foregroundStyle(.white)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .sheet(isPresented: $showColorWheel) {
-                ColorWheelSheet(viewModel: viewModel)
-                    .presentationDetents([.medium, .large])
-            }
-
-            // 밝기 (손 뗄 때 즉시 전송)
-            HStack(spacing: 10) {
-                Image(systemName: "sun.min.fill")
-                    .foregroundStyle(.white)
-                Slider(
-                    value: Binding(
-                        get: { Double(viewModel.lightingConfig?.brightness ?? 80) },
-                        set: { viewModel.updateLighting(brightness: Int($0)) }
-                    ),
-                    in: 10...100,
-                    onEditingChanged: { isEditing in
-                        if !isEditing {
-                            viewModel.commitLighting()  // 손 뗐을 때 즉시 전송
-                        }
-                    }
-                )
-                .tint(.white)
-                Image(systemName: "sun.max.fill")
-                    .foregroundStyle(.white)
-            }
-        }
-        .padding(16)
-        .background(.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-
-    private func latencyStat(_ label: String, value: Int) -> some View {
-        HStack(spacing: 4) {
-            Text(label)
-                .foregroundStyle(.white.opacity(0.4))
-            Text("\(value)ms")
-                .foregroundStyle(.white.opacity(0.85))
-        }
-    }
-
 
     private var pulseBackground: some View {
         ZStack {
@@ -338,130 +227,195 @@ struct ReadingView: View {
     }
 }
 
-// MARK: - LightingPreset Preview Color
+// MARK: - Control Card (조명 / 음악)
 
-extension LightingPreset {
-    var previewColor: Color {
-        let c = config
-        return Color(
-            hue: Double(c.hue) / 360.0,
-            saturation: Double(c.saturation) / 100.0,
-            brightness: Double(c.brightness) / 100.0
+private struct ControlCard: View {
+    let lightingColor: Color
+    let brightness: Int
+
+    var body: some View {
+        VStack(spacing: 16) {
+            EnvControlRow(
+                systemImage: "lightbulb.fill",
+                title: "조명",
+                valueLabel: "밝기",
+                percentText: "\(brightness)%",
+                fraction: Double(brightness) / 100.0
+            ) {
+                Circle()
+                    .fill(lightingColor)
+                    .frame(width: 56, height: 56)
+            }
+
+            Rectangle()
+                .fill(Color.white.opacity(0.08))
+                .frame(height: 1)
+                .padding(.horizontal, 8)
+
+            EnvControlRow(
+                systemImage: "speaker.wave.2.fill",
+                title: "음악",
+                valueLabel: "볼륨",
+                percentText: "50%",          // 추천 볼륨 데이터 없음 → 고정 더미
+                fraction: 0.5
+            ) {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: 0xCCBFE5), Color(hex: 0x6E5BB8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 56, height: 56)
+                    .overlay {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.white)
+                    }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(Color(hex: 0x1C1C1E), in: RoundedRectangle(cornerRadius: 24))
+    }
+}
+
+private struct EnvControlRow<Leading: View>: View {
+    let systemImage: String
+    let title: String
+    let valueLabel: String
+    let percentText: String
+    let fraction: Double
+    @ViewBuilder let leading: () -> Leading
+
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 15, weight: .semibold))
+                    Text(title)
+                        .font(.system(size: 18, weight: .medium))
+                }
+                .foregroundStyle(.white)
+
+                Spacer()
+
+                AdjustPill()
+            }
+
+            HStack(spacing: 20) {
+                leading()
+
+                VStack(spacing: 0) {
+                    HStack {
+                        Text(valueLabel)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.white.opacity(0.7))
+                        Spacer()
+                        Text(percentText)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(.white)
+                    }
+
+                    EnvSlider(fraction: fraction)
+                }
+            }
+        }
+    }
+}
+
+private struct AdjustPill: View {
+    var body: some View {
+        // 동작 보류 (시각 전용) — 추후 조정 화면 연동
+        HStack(spacing: 4) {
+            Image(systemName: "slider.horizontal.3")
+                .font(.system(size: 11, weight: .semibold))
+            Text("조정")
+                .font(.system(size: 14, weight: .medium))
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(Color.fillTertiary, in: Capsule())
+    }
+}
+
+/// 비상호작용 슬라이더 (추천값 표시 전용)
+private struct EnvSlider: View {
+    let fraction: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let f = min(max(fraction, 0), 1)
+
+            ZStack {
+                // 눈금 5개 (트랙 아래)
+                HStack(spacing: 0) {
+                    ForEach(0..<5, id: \.self) { index in
+                        Circle()
+                            .fill(Color.white.opacity(0.2))
+                            .frame(width: 4, height: 4)
+                        if index < 4 { Spacer(minLength: 0) }
+                    }
+                }
+                .offset(y: 9)
+
+                // 트랙
+                Capsule()
+                    .fill(Color.fillPrimary)
+                    .frame(height: 6)
+
+                // 채움 (값 비율)
+                HStack(spacing: 0) {
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: w * f, height: 6)
+                    Spacer(minLength: 0)
+                }
+
+                // 노브
+                Capsule()
+                    .fill(.white)
+                    .frame(width: 30, height: 28)
+                    .shadow(color: .black.opacity(0.2), radius: 5, y: 3)
+                    .position(x: min(max(w * f, 15), w - 15), y: geo.size.height / 2)
+            }
+        }
+        .frame(height: 50)
+    }
+}
+
+// MARK: - Colors (Figma 다크 토큰)
+
+private extension Color {
+    static let fillTertiary = Color(red: 118 / 255, green: 118 / 255, blue: 128 / 255).opacity(0.24)
+    static let fillPrimary = Color(red: 120 / 255, green: 120 / 255, blue: 128 / 255).opacity(0.36)
+
+    init(hex: UInt) {
+        self.init(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
         )
     }
 }
 
-// MARK: - Color Wheel Sheet
+// MARK: - Preview
 
-struct ColorWheelSheet: View {
-    let viewModel: ReadingViewModel
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(spacing: 24) {
-            // 헤더 (제목 + 적용 버튼)
-            HStack {
-                Text("색상 선택")
-                    .font(.headline)
-                Spacer()
-                Button("적용") {
-                    viewModel.commitLighting()
-                    dismiss()
-                }
-                .fontWeight(.semibold)
-            }
+#Preview("컨트롤 카드") {
+    ZStack {
+        Color.black.ignoresSafeArea()
+        ControlCard(lightingColor: Color(hue: 0.11, saturation: 0.85, brightness: 1.0), brightness: 50)
             .padding(.horizontal, 20)
-            .padding(.top, 20)
-
-            // 원형 색상환
-            CircularColorWheel(
-                hue: Double(viewModel.lightingConfig?.hue ?? 0),
-                saturation: Double(viewModel.lightingConfig?.saturation ?? 0),
-                onChange: { newHue, newSat in
-                    viewModel.updateLighting(hue: newHue, saturation: newSat)
-                }
-            )
-            .frame(width: 320, height: 320)
-
-            Spacer()
-        }
-        .frame(maxWidth: .infinity)
-        .background(Color(UIColor.systemBackground))
     }
-}
-
-// MARK: - Circular Color Wheel
-
-struct CircularColorWheel: View {
-    let hue: Double         // 0-360
-    let saturation: Double  // 0-100
-    let onChange: (Int, Int) -> Void
-
-    var body: some View {
-        GeometryReader { geometry in
-            let size = min(geometry.size.width, geometry.size.height)
-            let radius = size / 2
-
-            ZStack {
-                // 1. 색상환 (각도별 Hue)
-                Circle()
-                    .fill(
-                        AngularGradient(
-                            gradient: Gradient(colors: [
-                                .red, .yellow, .green, .cyan, .blue, .purple, .red
-                            ]),
-                            center: .center,
-                            startAngle: .degrees(0),
-                            endAngle: .degrees(360)
-                        )
-                    )
-
-                // 2. 채도 그라디언트 (중심은 흰색)
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            gradient: Gradient(colors: [.white, .white.opacity(0)]),
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: radius
-                        )
-                    )
-
-                // 3. 현재 위치 표시 인디케이터
-                let angleRad = hue * .pi / 180.0
-                let distance = (saturation / 100.0) * radius
-                let indicatorX = radius + CGFloat(distance * cos(angleRad))
-                let indicatorY = radius + CGFloat(distance * sin(angleRad))
-
-                Circle()
-                    .strokeBorder(.white, lineWidth: 3)
-                    .background(Circle().fill(.clear))
-                    .frame(width: 22, height: 22)
-                    .shadow(color: .black.opacity(0.3), radius: 2)
-                    .position(x: indicatorX, y: indicatorY)
-            }
-            .frame(width: size, height: size)
-            .contentShape(Circle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        let dx = value.location.x - radius
-                        let dy = value.location.y - radius
-                        let dist = sqrt(dx * dx + dy * dy)
-
-                        // 반지름 밖 터치는 원 가장자리로 클램프
-                        let clampedDist = min(dist, radius)
-
-                        // 각도 계산 (0도 = 오른쪽, 시계방향)
-                        var angle = atan2(dy, dx) * 180 / .pi
-                        if angle < 0 { angle += 360 }
-
-                        let hueDeg = Int(angle) % 360
-                        let satPercent = Int((clampedDist / radius) * 100)
-
-                        onChange(hueDeg, satPercent)
-                    }
-            )
-        }
-    }
+    .preferredColorScheme(.dark)
 }
