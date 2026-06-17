@@ -2,7 +2,7 @@
 //  ConversationView.swift
 //  LivingStory-iOS
 //
-//  아이와 대화 나누기 — 책에 대한 대화 주제 리스트
+//  아이와 대화 나누기 — 책에 대한 대화 주제 아코디언 리스트
 //  (책 읽기 완료 화면의 '아이와 대화 나누기'에서 진입)
 //
 
@@ -10,8 +10,10 @@ import SwiftUI
 
 struct ConversationView: View {
     let coordinator: AppCoordinator
-    let bookTitle: String
     let conversations: [ConversationProfile]
+
+    /// 펼쳐진 카드 인덱스 (한 번에 하나만, 첫 카드 기본 펼침)
+    @State private var expandedIndex: Int? = 0
 
     var body: some View {
         ZStack {
@@ -22,28 +24,22 @@ struct ConversationView: View {
                 header
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Image(.conversation)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 26)
-                            Text(StringLiterals.Reading.conversationPrompt)
-                                .font(.title2Emphasized)
-                                .foregroundStyle(.white)
-                        }
-
-                        VStack(spacing: 16) {
-                            ForEach(conversations) { item in
-                                ConversationCard(
-                                    question: item.question,
-                                    effect: item.effect
-                                )
+                    VStack(spacing: 12) {
+                        ForEach(Array(conversations.enumerated()), id: \.element.id) { index, item in
+                            ConversationAccordionCard(
+                                index: index,
+                                effect: item.effect,
+                                question: item.question,
+                                isExpanded: expandedIndex == index
+                            ) {
+                                withAnimation(.easeInOut(duration: 0.25)) {
+                                    expandedIndex = (expandedIndex == index) ? nil : index
+                                }
                             }
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 12)
+                    .padding(.top, 4)
                 }
             }
         }
@@ -56,47 +52,83 @@ struct ConversationView: View {
 
     private var header: some View {
         ZStack {
-            Text(bookTitle)
+            Text(StringLiterals.Reading.conversationTitle)
                 .font(.headlineRegular)
                 .foregroundStyle(.white)
-                .lineLimit(1)
 
             HStack {
                 Button {
                     coordinator.pop()
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(.white)
                         .frame(width: 44, height: 44)
+                        .glassEffect(.regular, in: Circle())
                 }
                 Spacer()
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }
 }
 
-// MARK: - Conversation Card
+// MARK: - Accordion Card
 
-private struct ConversationCard: View {
-    let question: String
+private struct ConversationAccordionCard: View {
+    let index: Int
     let effect: String
+    let question: String
+    let isExpanded: Bool
+    let onTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            CharWrappingText(text: question, font: .bodyLargeMedium, color: .gray10)
-            CharWrappingText(
-                text: effect,
-                font: .calloutRegular,
-                color: .gray40
-            )
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 12) {
+                numberBadge
+                Text(effect)
+                    .font(.system(size: 16))
+                    .foregroundStyle(Color(hex: 0xBFEE68))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+
+            if isExpanded {
+                Text(question)
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundStyle(.white)
+                    .lineSpacing(8)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 4)
+                    .padding(.bottom, 6)
+            }
         }
-        .padding(14)
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.yellow90)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .background(Color(hex: 0x2C2C2E), in: RoundedRectangle(cornerRadius: 30))
+        .contentShape(RoundedRectangle(cornerRadius: 30))
+        .onTapGesture(perform: onTap)
+    }
+
+    private var numberBadge: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "bubble.left.fill")
+                .font(.system(size: 11))
+            Text(String(format: "%02d", index + 1))
+                .font(.system(size: 13, weight: .semibold))
+        }
+        .foregroundStyle(Color(hex: 0x121212))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            LinearGradient(
+                colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
+                startPoint: .leading,
+                endPoint: .trailing
+            ),
+            in: Capsule()
+        )
     }
 }
 
@@ -111,3 +143,16 @@ private extension Color {
         )
     }
 }
+
+// MARK: - Preview
+
+#if DEBUG
+#Preview {
+    NavigationStack {
+        ConversationView(
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            conversations: ReadingEnvironment.mock.toConversationProfiles()
+        )
+    }
+}
+#endif

@@ -46,6 +46,7 @@ enum StringLiterals {
         static let setupButton = "책 환경 세팅하기"
         static let resultTitle = "읽은 책"
         static let homeButton = "홈으로"
+        static let conversationTitle = "대화 나누기"
         static let readingDoneTitle = "책 읽기 완료!"
         static let talkWithChild = "아이와 대화 나누기"
         static let readAnotherBook = "다른 책 읽기"

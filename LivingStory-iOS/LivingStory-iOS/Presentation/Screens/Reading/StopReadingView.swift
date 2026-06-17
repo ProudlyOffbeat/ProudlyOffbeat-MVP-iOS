@@ -67,10 +67,7 @@ struct StopReadingView: View {
 
     private var talkButton: some View {
         Button {
-            coordinator.showConversation(
-                bookTitle: book.bookTitle,
-                conversations: conversations
-            )
+            coordinator.showConversation(conversations: conversations)
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "bubble.left.fill")

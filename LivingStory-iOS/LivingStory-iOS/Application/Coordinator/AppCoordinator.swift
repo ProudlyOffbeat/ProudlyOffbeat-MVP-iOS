@@ -137,8 +137,8 @@ final class AppCoordinator: Coordinator {
     }
 
     /// 아이와 대화 나누기 화면 (SwiftUI)
-    func showConversation(bookTitle: String, conversations: [ConversationProfile]) {
-        let view = ConversationView(coordinator: self, bookTitle: bookTitle, conversations: conversations)
+    func showConversation(conversations: [ConversationProfile]) {
+        let view = ConversationView(coordinator: self, conversations: conversations)
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
