@@ -103,7 +103,6 @@ struct StopReadingView: View {
             PrimaryButtonSwiftUI(title: StringLiterals.Reading.finishReading) {
                 coordinator.showResult()
             }
-            .environment(\.colorScheme, .dark)
         }
     }
 }

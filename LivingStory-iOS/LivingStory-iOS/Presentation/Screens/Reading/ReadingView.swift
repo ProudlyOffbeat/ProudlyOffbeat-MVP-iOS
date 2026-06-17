@@ -187,7 +187,6 @@ struct ReadingView: View {
         ) {
             showStopAlert = true
         }
-        .environment(\.colorScheme, .dark)
     }
 
     // MARK: - Helpers
