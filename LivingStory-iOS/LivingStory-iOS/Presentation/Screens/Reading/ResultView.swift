@@ -28,7 +28,7 @@ struct ResultView: View {
             VStack(spacing: 0) {
                 header
 
-                Spacer().frame(height: 48)
+                Spacer()
 
                 flameRow
 
@@ -36,7 +36,7 @@ struct ResultView: View {
 
                 BookStackAnimationView()
 
-                Spacer().frame(height: 16)
+                Spacer().frame(height: 30)
 
                 Text(StringLiterals.Reading.todayReadBooks(todaySessions.count))
                     .font(.system(size: 24, weight: .medium))
