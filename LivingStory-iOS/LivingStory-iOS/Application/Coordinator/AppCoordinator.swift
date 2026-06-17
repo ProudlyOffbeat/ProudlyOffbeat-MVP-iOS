@@ -129,9 +129,16 @@ final class AppCoordinator: Coordinator {
     }
 
     // MARK: - 마이 탭 네비게이션
-    /// 독서 중단 화면 (SwiftUI)
-    func showStopReading(bookTitle: String, conversations: [ConversationProfile]) {
-        let view = StopReadingView(coordinator: self, bookTitle: bookTitle, conversations: conversations)
+    /// 책 읽기 완료 화면 (SwiftUI)
+    func showStopReading(book: BookProfileModel, conversations: [ConversationProfile]) {
+        let view = StopReadingView(coordinator: self, book: book, conversations: conversations)
+        let hostingVC = UIHostingController(rootView: view)
+        (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
+    }
+
+    /// 아이와 대화 나누기 화면 (SwiftUI)
+    func showConversation(bookTitle: String, conversations: [ConversationProfile]) {
+        let view = ConversationView(coordinator: self, bookTitle: bookTitle, conversations: conversations)
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }

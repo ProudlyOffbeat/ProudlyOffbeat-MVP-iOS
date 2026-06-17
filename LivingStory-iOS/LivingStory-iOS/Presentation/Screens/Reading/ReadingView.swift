@@ -33,7 +33,7 @@ struct ReadingView: View {
             if isFinishing {
                 CheckmarkTransitionView {
                     coordinator.showStopReading(
-                        bookTitle: viewModel.book.bookTitle,
+                        book: viewModel.book,
                         conversations: viewModel.conversations
                     )
                 }
@@ -411,11 +411,27 @@ private extension Color {
 
 // MARK: - Preview
 
-#Preview("컨트롤 카드") {
-    ZStack {
-        Color.black.ignoresSafeArea()
-        ControlCard(lightingColor: Color(hue: 0.11, saturation: 0.85, brightness: 1.0), brightness: 50)
-            .padding(.horizontal, 20)
+#if DEBUG
+#Preview("세팅 중") {
+    NavigationStack {
+        ReadingView(
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            viewModel: ReadingViewModel(previewBook: .mockISBN, state: .setting)
+        )
     }
-    .preferredColorScheme(.dark)
 }
+
+#Preview("독서 중") {
+    NavigationStack {
+        ReadingView(
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            viewModel: ReadingViewModel(
+                previewBook: .mockISBN,
+                state: .reading,
+                lightingConfig: LightingConfig(hue: 40, saturation: 80, brightness: 70),
+                musicCategory: .forest
+            )
+        )
+    }
+}
+#endif

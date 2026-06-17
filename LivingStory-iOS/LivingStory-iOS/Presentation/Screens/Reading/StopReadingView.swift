@@ -4,83 +4,135 @@
 //
 //  Created by 문창재 on 2/8/26.
 //
+//  책 읽기 완료 화면 (디자인 2757)
+//
 
 import SwiftUI
 
 struct StopReadingView: View {
     let coordinator: AppCoordinator
-    let bookTitle: String
+    let book: BookProfileModel
     let conversations: [ConversationProfile]
 
     var body: some View {
-        VStack {
-            conversationSection
-            Spacer()
-            buttonSection
+        ZStack {
+            Color(hex: 0x1C1C1E)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                Spacer().frame(height: 40)
+
+                bookSection
+
+                Spacer().frame(height: 48)
+
+                talkButton
+
+                Spacer()
+
+                bottomButtons
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
+            }
+            .ignoresSafeArea(.container, edges: .bottom)
         }
-        .navigationTitle(bookTitle)
-        .navigationBarTitleDisplayMode(.inline)
+        .preferredColorScheme(.dark)
+        // 네비바 공간은 유지(콘텐츠 위치 고정), 타이틀·뒤로가기·배경만 숨김
         .navigationBarBackButtonHidden(true)
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 
     // MARK: - Subviews
 
-    private var conversationSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(.conversation)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 26)
-                Text(StringLiterals.Reading.conversationPrompt)
-                    .font(.title2Medium)
-            }
-            
-            ScrollView {
-                VStack(spacing: 16) {
-                    ForEach(conversations) { item in
-                        ConversationCard(
-                            question: item.question,
-                            effect: item.effect
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private var buttonSection: some View {
-        VStack(spacing: 14) {
-            PrimaryButtonSwiftUI(title: StringLiterals.Reading.restartScan, action: {
-                    coordinator.restartScanner()
-                })
-            WhiteButtonSwiftUI(title: StringLiterals.Reading.stopReadingButton, action: {
-                    coordinator.showResult()
-                })
-        }
-    }
-}
-
-// MARK: - Subviews
-
-private struct ConversationCard: View {
-    let question: String
-    let effect: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            CharWrappingText(text: question, font: .body2Medium, color: .gray10)
-            CharWrappingText(
-                text: effect,
-                font: .calloutRegular,
-                color: .gray40
+    private var bookSection: some View {
+        VStack(spacing: 24) {
+            BookCoverThumbnail(
+                coverURL: book.bookCoverImageURL,
+                readCount: 4 // TODO: 실제 읽어준 횟수 연동 (현재 더미)
             )
+
+            VStack(spacing: 12) {
+                Text(StringLiterals.Reading.readingDoneTitle)
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundStyle(.white)
+                Text(book.bookTitle)
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color(white: 0.92).opacity(0.7))
+            }
+            .multilineTextAlignment(.center)
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.yellow0)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
+    }
+
+    private var talkButton: some View {
+        Button {
+            coordinator.showConversation(
+                bookTitle: book.bookTitle,
+                conversations: conversations
+            )
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "bubble.left.fill")
+                    .font(.system(size: 13))
+                Text(StringLiterals.Reading.talkWithChild)
+                    .font(.system(size: 15, weight: .medium))
+            }
+            .foregroundStyle(Color(hex: 0xF5F5F5))
+            .padding(.horizontal, 20)
+            .frame(height: 48)
+            .glassEffect(.regular, in: Capsule())
+        }
+    }
+
+    private var bottomButtons: some View {
+        VStack(spacing: 14) {
+            // 다른 책 읽기 (보조 — 흐린 글래스)
+            Button {
+                coordinator.restartScanner()
+            } label: {
+                Capsule()
+                    .frame(height: 52)
+                    .foregroundStyle(.clear)
+                    .glassEffect()
+                    .overlay {
+                        Text(StringLiterals.Reading.readAnotherBook)
+                            .font(.buttonTitle)
+                            .foregroundStyle(Color(hex: 0xBFBFBF))
+                    }
+            }
+
+            // 책 읽기 종료 (주 — 글래스 다크)
+            PrimaryButtonSwiftUI(title: StringLiterals.Reading.finishReading) {
+                coordinator.showResult()
+            }
+            .environment(\.colorScheme, .dark)
+        }
     }
 }
+
+// MARK: - Color Helper
+
+private extension Color {
+    init(hex: UInt) {
+        self.init(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
+        )
+    }
+}
+
+// MARK: - Preview
+
+#if DEBUG
+#Preview {
+    NavigationStack {
+        StopReadingView(
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            book: .mockISBN,
+            conversations: []
+        )
+    }
+}
+#endif

@@ -46,6 +46,10 @@ enum StringLiterals {
         static let setupButton = "책 환경 세팅하기"
         static let resultTitle = "읽은 책"
         static let homeButton = "홈으로"
+        static let readingDoneTitle = "책 읽기 완료!"
+        static let talkWithChild = "아이와 대화 나누기"
+        static let readAnotherBook = "다른 책 읽기"
+        static let finishReading = "책 읽기 종료"
         static func todayBookCount(_ count: Int) -> String { "오늘 아이에게\n책을 \(count)번 읽어줬어요!" }
     }
 
