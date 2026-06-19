@@ -32,11 +32,13 @@ struct StatisticsView: View {
                         .padding(.top, 4)
 
                     monthlySummary
-                        .padding(.horizontal, 20)
                         .padding(.top, 40)
+                        .background(alignment: .top) {
+                            SummaryWave()
+                                .frame(maxWidth: .infinity)
+                        }
 
                     MultiSelectCalendarView()
-                        .padding(.top, 88)
 
                     Divider()
                         .overlay(Color.white.opacity(0.1))
@@ -115,7 +117,10 @@ struct StatisticsView: View {
                 .foregroundStyle(.white)
                 .padding(.top, 16)
             }
+            .padding(.horizontal, 20)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, 88)
     }
 
     // MARK: - Total Books
@@ -151,32 +156,45 @@ struct StatisticsView: View {
 // MARK: - Summary Wave (장식용 그라데이션 물결)
 
 private struct SummaryWave: View {
+    @State private var progress: CGFloat = 0
+
     var body: some View {
-        GeometryReader { geo in
-            let w = geo.size.width
-            let h = geo.size.height
-            Path { path in
-                path.move(to: CGPoint(x: 0, y: h * 0.6))
-                path.addCurve(
-                    to: CGPoint(x: w * 0.5, y: h * 0.55),
-                    control1: CGPoint(x: w * 0.2, y: h * 0.5),
-                    control2: CGPoint(x: w * 0.3, y: h * 0.7)
-                )
-                path.addCurve(
-                    to: CGPoint(x: w, y: h * 0.05),
-                    control1: CGPoint(x: w * 0.72, y: h * 0.38),
-                    control2: CGPoint(x: w * 0.82, y: h * 0.1)
-                )
-            }
+        WaveShape()
+            .trim(from: 0, to: progress)
             .stroke(
                 LinearGradient(
                     colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68), Color(hex: 0x5AC8E8)],
                     startPoint: .leading,
                     endPoint: .trailing
                 ),
-                style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                style: StrokeStyle(lineWidth: 13, lineCap: .round, lineJoin: .round)
             )
-        }
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.1)) {
+                    progress = 1
+                }
+            }
+    }
+}
+
+/// 좌하단(낮음) → 우상단(높음)으로 솟는 물결 라인
+private struct WaveShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width
+        let h = rect.height
+        var path = Path()
+        path.move(to: CGPoint(x: 0, y: h * 0.72))
+        path.addCurve(
+            to: CGPoint(x: w * 0.42, y: h * 0.86),
+            control1: CGPoint(x: w * 0.13, y: h * 0.66),
+            control2: CGPoint(x: w * 0.27, y: h * 0.92)
+        )
+        path.addCurve(
+            to: CGPoint(x: w, y: h * 0.18),
+            control1: CGPoint(x: w * 0.62, y: h * 0.80),
+            control2: CGPoint(x: w * 0.82, y: h * 0.26)
+        )
+        return path
     }
 }
 
