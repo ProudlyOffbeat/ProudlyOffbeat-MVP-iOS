@@ -94,6 +94,9 @@ enum StringLiterals {
 
     enum My {
         static let title = "마이"
+        static let summaryTitle = "내 독서 요약"
+        static let monthlyReadIntro = "이번 달에 책을 이만큼 읽어줬어요!"
+        static let totalReadBooks = "총 읽어준 책"
         static let monthlyBookCount = "이번 달 읽어준 횟수"
         static let totalBookCount = "총 읽은 책 수"
         static let totalReadingTime = "총 읽은 시간"
