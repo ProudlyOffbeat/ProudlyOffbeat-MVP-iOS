@@ -14,6 +14,7 @@ final class AppCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
 
     private var tabBarController: MainTabBarController?
+    private(set) var activeReadingViewModel: ReadingViewModel?
 
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
@@ -118,6 +119,8 @@ final class AppCoordinator: Coordinator {
             book: book,
             lightingController: lightingController
         )
+        activeReadingViewModel = viewModel
+        UIApplication.shared.isIdleTimerDisabled = true
         let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
         hostingVC.title = book.bookTitle
@@ -135,6 +138,8 @@ final class AppCoordinator: Coordinator {
 
     /// 독서 결과 화면 (SwiftUI)
     func showResult() {
+        activeReadingViewModel = nil
+        UIApplication.shared.isIdleTimerDisabled = false
         let view = ResultView(coordinator: self, repository: ReadingSessionRepository())
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
