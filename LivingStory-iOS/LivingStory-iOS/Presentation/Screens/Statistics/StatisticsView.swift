@@ -45,7 +45,7 @@ struct StatisticsView: View {
                         .padding(.horizontal, 8)
 
                     totalBooksSection
-                        .padding(.top, 24)
+                        .padding(.top, 34)
                         .padding(.bottom, 24)
                 }
             }
@@ -57,7 +57,7 @@ struct StatisticsView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    // TODO: 설정 시트
+                    coordinator.showSettings()
                 } label: {
                     Image(systemName: "gearshape.fill")
                         .foregroundStyle(.white)
