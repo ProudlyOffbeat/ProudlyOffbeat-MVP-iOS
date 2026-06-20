@@ -40,6 +40,14 @@ final class AudioPlayerService {
         player = nil
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
+    
+    func setVolume(_ volume: Float) {
+        player?.volume = max(0, min(1,volume))
+    }
+    
+    var currentVolume: Float {
+        player?.volume ?? 1.0
+    }
 
     var isPlaying: Bool {
         player?.isPlaying ?? false

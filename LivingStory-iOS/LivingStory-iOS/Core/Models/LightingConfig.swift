@@ -17,6 +17,25 @@ struct LightingConfig: Codable, Sendable {
     static let `default` = LightingConfig(hue: 40, saturation: 20, brightness: 80)
 }
 
+/// 독서 분위기 프리셋 — 탭 한 번으로 1 write (슬라이더 대체)
+enum LightingPreset: String, CaseIterable, Sendable {
+    case focus = "집중"
+    case warm = "따뜻"
+    case relax = "휴식"
+    case emotion = "감성"
+    case cool = "차분"
+
+    var config: LightingConfig {
+        switch self {
+        case .focus:   return LightingConfig(hue: 210, saturation: 15, brightness: 100)  // 쿨 화이트
+        case .warm:    return LightingConfig(hue: 30,  saturation: 70, brightness: 85)   // 앰버
+        case .relax:   return LightingConfig(hue: 20,  saturation: 55, brightness: 65)   // 따뜻 오렌지
+        case .emotion: return LightingConfig(hue: 280, saturation: 60, brightness: 55)   // 은은한 퍼플
+        case .cool:    return LightingConfig(hue: 200, saturation: 20, brightness: 90)   // 시원한 화이트
+        }
+    }
+}
+
 /// HomeKit 조명 제어 인터페이스
 protocol LightingControllable {
     func applyLighting(_ config: LightingConfig) async throws
