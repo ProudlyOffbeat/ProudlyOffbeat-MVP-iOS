@@ -36,11 +36,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
-
+        appCoordinator?.activeReadingViewModel?.resume()
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
-
+        appCoordinator?.activeReadingViewModel?.pause()
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {

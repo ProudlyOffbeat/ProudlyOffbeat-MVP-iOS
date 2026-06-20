@@ -26,6 +26,15 @@ final class AudioPlayerService {
         player?.play()
     }
 
+    func pause() {
+        player?.pause()
+    }
+
+    func resume() {
+        try? AVAudioSession.sharedInstance().setActive(true)
+        player?.play()
+    }
+
     func stop() {
         player?.stop()
         player = nil
