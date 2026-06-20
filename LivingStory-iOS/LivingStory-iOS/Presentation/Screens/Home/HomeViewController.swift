@@ -19,6 +19,9 @@ final class HomeViewController: UIViewController {
     private var currentHome: HomeModel?
     private var currentEmptyState: HomeState = .noDevices
 
+    /// 토글 진행 중인 디바이스 ID — 재탭 차단 (HomeKit 응답 받기 전까지)
+    private var togglingDeviceIds: Set<UUID> = []
+
     private let homeMenuButton: UIButton = {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 17, weight: .regular)
@@ -31,6 +34,7 @@ final class HomeViewController: UIViewController {
     private lazy var roomCollectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.backgroundColor = .clear
+        collectionView.delaysContentTouches = false   // 탭 즉시 인식 (시스템 ~100ms 지연 제거)
         return collectionView
     }()
 
@@ -186,27 +190,40 @@ private extension HomeViewController {
 extension HomeViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: false)
         guard let device = homeDataSource.device(at: indexPath) else { return }
 
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        // tapped 플래그 — 진행 중이면 재탭 무시
+        guard !togglingDeviceIds.contains(device.id) else { return }
+        togglingDeviceIds.insert(device.id)
 
-        // 탭 애니메이션
-        if let cell = collectionView.cellForItem(at: indexPath) {
-            UIView.animate(withDuration: 0.1, animations: {
-                cell.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-            }) { _ in
-                UIView.animate(withDuration: 0.1) {
-                    cell.transform = .identity
-                }
-            }
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+
+        // 옵티미스틱 UI: 셀 즉시 토글
+        if let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell {
+            var newDevice = device
+            newDevice.isOn.toggle()
+            cell.configure(with: newDevice)
         }
 
-        Task {
+        Task { [weak self] in
+            defer {
+                Task { @MainActor in
+                    self?.togglingDeviceIds.remove(device.id)
+                }
+            }
             do {
-                try await homeKitManager.togglePower(for: device.id)
+                try await self?.homeKitManager.togglePower(for: device.id)
             } catch {
                 print("[HomeKit] 전원 토글 실패: \(error.localizedDescription)")
+                // 실패 시 cell 을 실제 상태로 즉시 복원
+                await MainActor.run { [weak self] in
+                    guard let self,
+                          let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell,
+                          let actualDevice = self.homeDataSource.device(at: indexPath) else { return }
+                    cell.configure(with: actualDevice)
+                }
+                await self?.homeKitManager.refreshAllCharacteristics()
             }
         }
     }
