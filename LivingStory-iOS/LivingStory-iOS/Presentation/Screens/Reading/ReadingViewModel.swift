@@ -20,6 +20,25 @@ final class ReadingViewModel {
     private(set) var musicCategory: MusicCategory?
     private(set) var lightingConfig: LightingConfig?
     private(set) var errorMessage: String?
+    
+    private(set) var volume: Float = 1.0
+    private(set) var lastAction: String?
+    private(set) var lastLatencyMs: Int?
+    private(set) var latencyHistory: [Int] = []
+    private(set) var geminiRecommendedLighting: LightingConfig?
+    private var pendingLightingTask: Task<Void, Never>?
+    private var pendingLightingConfig: LightingConfig?
+    private var lastSentTime: Date = .distantPast
+    private let brightnessThrottle: TimeInterval = 0.2   // 200ms (안정, 실기기 검증됨)
+    private let colorThrottle: TimeInterval = 0.25      // 250ms (H + S 2 characteristic)
+
+    // 반응시간 통계
+    var avgLatencyMs: Int? {
+        guard !latencyHistory.isEmpty else { return nil }
+        return latencyHistory.reduce(0, +) / latencyHistory.count
+    }
+    var maxLatencyMs: Int? { latencyHistory.max() }
+    var minLatencyMs: Int? { latencyHistory.min() }
 
     private(set) var readingSession: ReadingSessionProfile?
 
@@ -68,6 +87,7 @@ final class ReadingViewModel {
 
             musicCategory = environment.musicCategory
             lightingConfig = environment.lighting
+            geminiRecommendedLighting = environment.lighting
             conversations = environment.toConversationProfiles()
 
             print("[Gemini] 음악: \(environment.musicCategory.rawValue)")
@@ -80,6 +100,7 @@ final class ReadingViewModel {
                 await controller.stopBrightnessPulse()
                 do {
                     try await controller.applyLightingWithPowerOn(config)
+                    UserData.lastLightingConfig = config
                     print("[Lighting] 조명 설정 완료")
                 } catch {
                     print("[Lighting] 조명 설정 실패: \(error.localizedDescription)")
@@ -121,16 +142,9 @@ final class ReadingViewModel {
         isMusicPlaying = false
         AppLightingService.shared.isReadingActive = false
 
-        // 펄스 중지 + 조명 리셋 (fire-and-forget)
+        // 펄스 중지 (조명 리셋 안 함 — 질문 화면/다음 진입까지 마지막 조명 유지)
         if let controller = lightingController {
             Task { await controller.stopBrightnessPulse() }
-            Task {
-                do {
-                    try await controller.resetLighting()
-                } catch {
-                    print("[Lighting] 조명 리셋 실패: \(error.localizedDescription)")
-                }
-            }
         }
 
         guard let startTime else { return }
@@ -167,7 +181,133 @@ final class ReadingViewModel {
         state = .setting
         await startSetup()
     }
+    
+    func setVolume(_ value: Float) {
+        audioPlayerService.setVolume(value)
+        volume = value
+        recordAction("볼륨 \(Int(value * 100)) %", latencyMs: 0 )
+    }
+    
+    func changeMusic(to category: MusicCategory) {
+        let start = Date()
+        do {
+            try audioPlayerService.play(category: category)
+            audioPlayerService.setVolume(volume)
+            musicCategory = category
+            isMusicPlaying = true
+            let ms = Int(Date().timeIntervalSince(start)*1000)
+            recordAction("음악 -> \(category.rawValue)", latencyMs: ms)
+        } catch {
+            recordAction("음악 실패 :(error.localizedDescription)", latencyMs: nil)
+        }
+    }
+    
+    /// 드래그 중 — 쓰로틀 (밝기 100ms / 색상 250ms)
+    func updateLighting(hue: Int? = nil, saturation: Int? = nil, brightness: Int? = nil) {
+        let current = lightingConfig ?? .default
+        let newConfig = LightingConfig(
+            hue: hue ?? current.hue,
+            saturation: saturation ?? current.saturation,
+            brightness: brightness ?? current.brightness
+        )
+        lightingConfig = newConfig
+        pendingLightingConfig = newConfig
 
+        // 색상 변경이면 느린 쓰로틀, 밝기만이면 빠른 쓰로틀
+        let isColorChange = hue != nil || saturation != nil
+        let interval = isColorChange ? colorThrottle : brightnessThrottle
+
+        let elapsed = Date().timeIntervalSince(lastSentTime)
+
+        if elapsed >= interval {
+            // Leading: 바로 전송
+            lastSentTime = Date()
+            pendingLightingConfig = nil
+            pendingLightingTask?.cancel()
+            pendingLightingTask = nil
+            Task { [weak self] in
+                await self?.sendLighting(newConfig)
+            }
+        } else if pendingLightingTask == nil {
+            // Trailing: 다음 틱까지 대기 후 최신값 전송
+            let delay = interval - elapsed
+            pendingLightingTask = Task { [weak self] in
+                try? await Task.sleep(for: .milliseconds(Int(delay * 1000)))
+                guard !Task.isCancelled, let self, let config = self.pendingLightingConfig else { return }
+                self.lastSentTime = Date()
+                self.pendingLightingConfig = nil
+                self.pendingLightingTask = nil
+                await self.sendLighting(config)
+            }
+        }
+        // else: 이미 예약됨 → pendingLightingConfig만 최신값 유지
+    }
+
+    /// 손 뗐을 때 — 쓰로틀 취소 + 즉시 전송 (슬라이더 Release)
+    func commitLighting() {
+        guard let config = lightingConfig else { return }
+        pendingLightingTask?.cancel()
+        pendingLightingTask = nil
+        pendingLightingConfig = nil
+        lastSentTime = Date()
+        Task { [weak self] in
+            await self?.sendLighting(config)
+        }
+    }
+
+    /// 프리셋 탭 — 디바운스 없이 즉시 전송 (1 write)
+    func applyPreset(_ preset: LightingPreset) {
+        let newConfig = preset.config
+        lightingConfig = newConfig
+        pendingLightingTask?.cancel()
+        Task { [weak self] in
+            await self?.sendLighting(newConfig)
+        }
+    }
+
+    /// Gemini 추천 조명 재적용
+    func applyGeminiRecommended() {
+        guard let config = geminiRecommendedLighting else { return }
+        lightingConfig = config
+        pendingLightingTask?.cancel()
+        Task { [weak self] in
+            await self?.sendLighting(config)
+        }
+    }
+
+    /// 반응시간 통계 초기화
+    func clearLatencyHistory() {
+        latencyHistory.removeAll()
+    }
+
+    private func sendLighting(_ config: LightingConfig) async {
+        guard let controller = lightingController else { return }
+        let start = Date()
+        do {
+            try await controller.applyLighting(config)
+            UserData.lastLightingConfig = config
+            let ms = Int(Date().timeIntervalSince(start) * 1000)
+            recordAction(
+                "조명 H\(config.hue) S\(config.saturation) B\(config.brightness)",
+                latencyMs: ms
+            )
+        } catch {
+            recordAction("조명 실패: \(error.localizedDescription)", latencyMs: nil)
+        }
+    }
+    
+    private func recordAction(_ text: String, latencyMs: Int?) {
+        lastAction = text
+        lastLatencyMs = latencyMs
+        if let ms = latencyMs {
+            latencyHistory.append(ms)
+            // 최근 50개만 유지 (메모리 제한)
+            if latencyHistory.count > 50 {
+                latencyHistory.removeFirst(latencyHistory.count - 50)
+            }
+        }
+    }
+    
     // MARK: - Private
 
     private func startTimer() {
