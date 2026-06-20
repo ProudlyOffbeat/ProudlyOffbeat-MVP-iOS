@@ -89,7 +89,7 @@ private extension HomeMenuView {
         config.title = title
         config.titleTextAttributesTransformer = .init { attr in
             var attr = attr
-            attr.font = .bodyRegular
+            attr.font = .body2Regular
             return attr
          }
         config.baseForegroundColor = UIColor(named: "gray10")

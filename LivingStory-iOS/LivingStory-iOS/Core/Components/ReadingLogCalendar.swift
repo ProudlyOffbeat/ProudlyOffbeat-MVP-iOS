@@ -179,7 +179,7 @@ private extension ReadingLogCalendarUIView {
         for title in weekdayTitles {
             let label = DynamicLabel()
             label.text = title
-            label.font = .footnoteEmphasized
+            label.font = .footnoteRegular
             label.textColor = weekdayColor
             label.textAlignment = .center
             weekdayStack.addArrangedSubview(label)
@@ -205,7 +205,7 @@ private extension ReadingLogCalendarUIView {
     func updateHeader() {
         var config = monthYearButton.configuration ?? .plain()
         var attr = AttributeContainer()
-        attr.font = UIFont.title3Emphasized
+        attr.font = UIFont.body1SemiBold
         config.attributedTitle = AttributedString(displayedMonth.formatted(monthYearFormatStyle), attributes: attr)
         monthYearButton.configuration = config
     }
@@ -260,7 +260,7 @@ private extension ReadingLogCalendarUIView {
         // 숫자 라벨
         let label = DynamicLabel()
         label.text = "\(day)"
-        label.font = .title3Regular
+        label.font = .body1Regular
         label.textAlignment = .center
         if isToday {
             label.textColor = .white
@@ -402,7 +402,7 @@ final class MonthYearPickerViewController: UIViewController {
     private func setupUI() {
         let doneButton = UIButton(type: .system)
         doneButton.setTitle("완료", for: .normal)
-        doneButton.titleLabel?.font = .headlineRegular
+        doneButton.titleLabel?.font = .body2SemiBold
         doneButton.titleLabel?.adjustsFontForContentSizeCategory = true
         doneButton.tintColor = UIColor(named: "yellow0")
         doneButton.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
@@ -457,7 +457,7 @@ extension MonthYearPickerViewController: UIPickerViewDataSource, UIPickerViewDel
     func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
         let label = (view as? DynamicLabel) ?? DynamicLabel()
         label.textAlignment = .center
-        label.font = .title3Regular
+        label.font = .body1Regular
         label.text = component == 0 ? yearTitles[row] : monthTitles[row]
         return label
     }
@@ -528,7 +528,7 @@ struct ReadingLogCalendar: View {
         HStack {
             ForEach(weekdays, id: \.self) { day in
                 Text(day)
-                    .font(.footnoteEmphasized)
+                    .font(.footnoteRegular)
                     .foregroundStyle(weekdayColor)
                     .frame(maxWidth: .infinity)
             }
@@ -567,7 +567,7 @@ struct ReadingLogCalendar: View {
         let isRead = isReadDay(day)
 
         return Text("\(day)")
-            .font(.title3Regular)
+            .font(.body1Regular)
             .foregroundStyle(isToday ? .white : isRead ? .yellow0 : .primary)
             .frame(maxWidth: .infinity)
             .frame(height: 44)

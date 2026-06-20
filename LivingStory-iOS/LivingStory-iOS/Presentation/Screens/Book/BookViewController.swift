@@ -40,7 +40,7 @@ final class BookViewController: UIViewController {
 
     private let startButton = PrimaryButton(
         title: StringLiterals.Book.startButton,
-        font: .bodyEmphasized,
+        font: .body2SemiBold,
         backgroundColor: UIColor(named: "gray0"),
         cornerRadius: 28
     )
@@ -85,7 +85,7 @@ private extension BookViewController {
         navigationItem.largeTitleDisplayMode = .always
         navigationItem.title = StringLiterals.Book.title
         navigationController?.navigationBar.largeTitleTextAttributes = [
-            .font: UIFont.title1Emphasized
+            .font: UIFont.title1SemiBold
         ]
 
         wormPageControl.numberOfPages = bookDataSource.items.count

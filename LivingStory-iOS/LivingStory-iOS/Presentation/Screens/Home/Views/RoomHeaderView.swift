@@ -13,7 +13,7 @@ final class RoomHeaderView: UICollectionReusableView {
 
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .headlineRegular
+        label.font = .body2SemiBold
         label.textColor = UIColor(named: "gray10")
         return label
     }()

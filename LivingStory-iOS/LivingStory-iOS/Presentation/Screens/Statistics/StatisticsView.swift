@@ -80,17 +80,17 @@ struct StatCard: View {
             if !isWide {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
-                        .font(.subheadlineRegular)
+                        .font(.labelRegular)
                     Text(value)
-                        .font(.subheadlineEmphasized)
+                        .font(.calloutSemiBold)
                 }
             } else {
                 HStack {
                     Text(title)
-                        .font(.subheadlineRegular)
+                        .font(.labelRegular)
                     Spacer()
                     Text(value)
-                        .font(.subheadlineEmphasized)
+                        .font(.calloutSemiBold)
                 }
             }
         }

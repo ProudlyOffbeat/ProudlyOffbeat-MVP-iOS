@@ -81,7 +81,7 @@ private extension HomeViewController {
         navigationItem.largeTitleDisplayMode = .always
 
         navigationController?.navigationBar.largeTitleTextAttributes = [
-            .font: UIFont.title1Emphasized
+            .font: UIFont.title1SemiBold
         ]
 
         let moreBarButton = UIBarButtonItem(customView: homeMenuButton)

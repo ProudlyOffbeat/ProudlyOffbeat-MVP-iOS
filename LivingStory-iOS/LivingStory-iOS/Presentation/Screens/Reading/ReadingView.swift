@@ -87,7 +87,7 @@ struct ReadingView: View {
 
             VStack(spacing: 6) {
                 Text(viewModel.state == .setting ? StringLiterals.Reading.settingTitle : StringLiterals.Reading.settingDoneTitle)
-                    .font(.bodyRegular)
+                    .font(.body2Regular)
                     .foregroundStyle(.white)
                 Text(viewModel.state == .setting ? StringLiterals.Reading.settingSubtitle : StringLiterals.Reading.settingDoneSubtitle)
                     .font(.subheadline)

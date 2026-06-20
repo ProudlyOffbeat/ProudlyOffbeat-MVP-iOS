@@ -28,7 +28,7 @@ final class HomeDeviceCardView: UIView {
     
     private let deviceNameLabel: UILabel = {
         let nameLabel = DynamicLabel()
-        nameLabel.font = .subheadlineEmphasized
+        nameLabel.font = .calloutSemiBold
         return nameLabel
     }()
     
@@ -148,7 +148,7 @@ private extension HomeDeviceCardView {
     func activateStyle() {
         switch homeDeviceType {
         case .light:
-            backgroundColor = UIColor(named: "yellow70")
+            backgroundColor = UIColor(named: "yellow40")
             layer.borderWidth = 1
             layer.borderColor = UIColor(named: "yellow20")? .cgColor
             homeIconBackgroundView.backgroundColor = UIColor(named: "yellow0")
