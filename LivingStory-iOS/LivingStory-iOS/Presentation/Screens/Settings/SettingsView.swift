@@ -1,0 +1,137 @@
+//
+//  SettingsView.swift
+//  LivingStory-iOS
+//
+//  설정 메인 (디자인 897-4792) — 현재 UI만, 값 더미
+//
+
+import SwiftUI
+
+struct SettingsView: View {
+    let coordinator: AppCoordinator
+
+    // TODO: 실제 설정값 연동 (현재 더미)
+    private let childAge = "7살"
+    private let notificationTime = "오후 09:30"
+    private let homeName = "서울 집"
+    private let appVersion = "1.0.0"
+
+    var body: some View {
+        ZStack {
+            Color(hex: 0x1C1C1E).ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    section(StringLiterals.Setting.childInfoSection) {
+                        SettingsRow(title: StringLiterals.Setting.childAge, value: childAge) {
+                            coordinator.showChildAgeSetting()
+                        }
+                    }
+
+                    section(StringLiterals.Setting.notificationSection) {
+                        SettingsRow(title: StringLiterals.Setting.notificationTime, value: notificationTime) {
+                            coordinator.showNotificationTimeSetting()
+                        }
+                    }
+
+                    section(StringLiterals.Setting.environmentSection) {
+                        SettingsRow(title: StringLiterals.Setting.home, value: homeName) {
+                            coordinator.showHomeSelection()
+                        }
+                    }
+
+                    section(StringLiterals.Setting.appInfoSection) {
+                        VStack(spacing: 0) {
+                            SettingsRow(title: StringLiterals.Setting.version, value: appVersion, showChevron: false)
+                            Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 18)
+                            SettingsRow(title: StringLiterals.Setting.privacy) {
+                                // TODO: 개인정보처리방침 연결
+                            }
+                        }
+                    }
+                }
+                .padding(.bottom, 24)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .navigationTitle(StringLiterals.Setting.title)
+        .navigationBarTitleDisplayMode(.large)
+        .toolbarBackground(.hidden, for: .navigationBar)
+    }
+
+    // MARK: - Section
+
+    private func section<Content: View>(
+        _ title: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 14))
+                .foregroundStyle(Color(white: 0.92).opacity(0.4))
+                .padding(.leading, 4)
+
+            content()
+                .background(Color(hex: 0x2C2C2E), in: RoundedRectangle(cornerRadius: 18))
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
+    }
+}
+
+// MARK: - Settings Row
+
+private struct SettingsRow: View {
+    let title: String
+    var value: String? = nil
+    var showChevron: Bool = true
+    var action: (() -> Void)? = nil
+
+    var body: some View {
+        Button {
+            action?()
+        } label: {
+            HStack(spacing: 8) {
+                Text(title)
+                    .font(.system(size: 16))
+                    .foregroundStyle(.white)
+                Spacer()
+                if let value {
+                    Text(value)
+                        .font(.system(size: 16))
+                        .foregroundStyle(Color(white: 0.92).opacity(0.5))
+                }
+                if showChevron {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color(hex: 0xFFCB24))
+                }
+            }
+            .padding(.horizontal, 18)
+            .frame(height: 56)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(action == nil)
+    }
+}
+
+// MARK: - Color Helper
+
+private extension Color {
+    init(hex: UInt) {
+        self.init(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
+        )
+    }
+}
+
+#if DEBUG
+#Preview {
+    NavigationStack {
+        SettingsView(coordinator: AppCoordinator(navigationController: UINavigationController()))
+    }
+}
+#endif

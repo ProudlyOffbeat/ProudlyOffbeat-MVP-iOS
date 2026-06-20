@@ -111,6 +111,33 @@ enum StringLiterals {
         static let weekdays = ["일", "월", "화", "수", "목", "금", "토"]
     }
 
+    enum Setting {
+        static let title = "설정"
+        static let childInfoSection = "아이 정보"
+        static let childAge = "아이 나이"
+        static let notificationSection = "알림"
+        static let notificationTime = "알림 시간"
+        static let environmentSection = "환경 세팅"
+        static let home = "집"
+        static let appInfoSection = "앱 정보"
+        static let version = "버전"
+        static let privacy = "개인정보처리방침"
+        static let done = "완료"
+
+        static let childAgeTitle = "아이 나이 설정"
+        static let childAgeHeadline = "아이의 나이를 알려주세요"
+        static let childAgeSubtitle = "나이에 맞는 대화 주제를 추천해드려요"
+
+        static let notificationTitle = "알림 시간 설정"
+        static let notificationHeadline = "몇시에 책을 읽어주실 건가요?"
+        static let notificationSubtitle = "매일 설정한 시간에 알람을 드릴게요"
+        static let notificationToggle = "알림 설정"
+
+        static let homeTitle = "집 선택"
+        static let homeHeadline = "어디에서 사용할 건가요?"
+        static let homeSubtitle = "나루를 사용할 집을 선택해주세요"
+    }
+
     enum Onboarding {
         static let coachMark1 = "책 읽기 시작하기를 통해 스캔한 책에 맞는 분위기로 조명과 스피커를 세팅할 수 있어요"
         static let coachMark2 = "책 읽기에 사용할 장치를 설정할 수 있어요"

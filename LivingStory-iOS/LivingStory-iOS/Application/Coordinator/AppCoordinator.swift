@@ -194,6 +194,36 @@ final class AppCoordinator: Coordinator {
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
+    // MARK: - 설정
+
+    /// 설정 화면 (SwiftUI)
+    func showSettings() {
+        let view = SettingsView(coordinator: self)
+        let hostingVC = UIHostingController(rootView: view)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
+    }
+
+    /// 아이 나이 설정 (SwiftUI)
+    func showChildAgeSetting() {
+        let view = ChildAgeSettingView(coordinator: self)
+        let hostingVC = UIHostingController(rootView: view)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
+    }
+
+    /// 알림 시간 설정 (SwiftUI)
+    func showNotificationTimeSetting() {
+        let view = NotificationTimeSettingView(coordinator: self)
+        let hostingVC = UIHostingController(rootView: view)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
+    }
+
+    /// 집 선택 (SwiftUI)
+    func showHomeSelection() {
+        let view = HomeSelectionView(coordinator: self)
+        let hostingVC = UIHostingController(rootView: view)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
+    }
+
     // MARK: - 공통
 
     /// 뒤로 가기
