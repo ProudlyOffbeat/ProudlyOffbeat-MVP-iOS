@@ -31,6 +31,7 @@ final class AudioPlayerService {
     }
 
     func resume() {
+        try? AVAudioSession.sharedInstance().setActive(true)
         player?.play()
     }
 
