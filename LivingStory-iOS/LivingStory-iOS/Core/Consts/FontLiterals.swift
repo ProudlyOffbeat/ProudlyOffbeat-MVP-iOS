@@ -1,108 +1,167 @@
 //
-//  AppTypography.swift
+//  FontLiterals.swift
 //  LivingStory-iOS
 //
 //  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  📚 앱 타이포그래피 시스템
+//  📚 앱 타이포그래피 시스템 — Atomic (Pretendard 기반)
 //  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //
-//  🧑‍💻 UIKit 사용법:
-//  ```swift
-//  label.font = .title1
-//  label.font = .body
-//  ```
+//  ✅ Pretendard 정적 otf 5종(Light/Regular/Medium/SemiBold/Bold) 번들 + Info.plist 등록 완료.
 //
-//  📱 SwiftUI 사용법:
-//  ```swift
-//  Text("Hello")
-//      .font(.title1)
-//  ```
+//  ℹ️ Letter Spacing / Line Height는 UIFont·Font에 담을 수 없어 각 토큰 주석에만 표기했습니다.
+//     적용이 필요한 곳에서 UIKit은 NSAttributedString(kern/paragraphStyle),
+//     SwiftUI는 `.tracking()` / `.lineSpacing()` 으로 보완하세요.
+//
+//  🧑‍💻 UIKit:  label.font = .title1SemiBold
+//  📱 SwiftUI: Text("..").font(.title1SemiBold)
 //  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 import UIKit
 import SwiftUI
 
-// UIKit Extension
-//
-// UIFontMetrics.scaledFont(for:) 를 사용하면
-// 설정 → 디스플레이 → 텍스트 크기 변경 시 자동으로 폰트 크기가 조절됩니다.
+// MARK: - Pretendard Name Mapping
+
+private func pretendardName(_ weight: UIFont.Weight) -> String {
+    switch weight {
+    case .light:    return "Pretendard-Light"
+    case .medium:   return "Pretendard-Medium"
+    case .semibold: return "Pretendard-SemiBold"
+    case .bold:     return "Pretendard-Bold"
+    default:        return "Pretendard-Regular"
+    }
+}
+
+// MARK: - UIKit (UIFont)
 
 extension UIFont {
 
-    // MARK: Large Title
-    static let largeTitleEmphasized: UIFont = scaled(.largeTitle, size: 34, weight: .bold)
+    // ───── Large Title ─────
+    /// 56 Medium · LS -4%
+    static let largeTitleMedium = pretendard(.largeTitle, size: 56, weight: .medium)
 
-    // MARK: Title
-    static let title1Emphasized: UIFont = scaled(.title1, size: 28, weight: .bold)
-    static let title2Emphasized: UIFont = scaled(.title2, size: 22, weight: .bold)
-    static let title3Regular: UIFont = scaled(.title3, size: 20, weight: .regular)
-    static let title3Emphasized: UIFont = scaled(.title3, size: 20, weight: .semibold)
+    // ───── Title ─────
+    /// 32 SemiBold
+    static let title1SemiBold = pretendard(.title1, size: 32, weight: .semibold)
+    /// 30 Medium
+    static let title2Medium = pretendard(.title2, size: 30, weight: .medium)
+    /// 26 SemiBold · LS +1%
+    static let title3SemiBold = pretendard(.title3, size: 26, weight: .semibold)
 
-    // MARK: Headline / Subheadline
-    static let headlineRegular: UIFont = scaled(.headline, size: 17, weight: .semibold)
-    static let subheadlineRegular: UIFont = scaled(.subheadline, size: 15, weight: .regular)
-    static let subheadlineEmphasized: UIFont = scaled(.subheadline, size: 15, weight: .semibold)
+    // ───── Headline ─────
+    /// 24 Medium
+    static let headlineMedium = pretendard(.title3, size: 24, weight: .medium)
+    /// 24 Medium · LH 140% · LS +2%
+    static let headlineParagraph = pretendard(.title3, size: 24, weight: .medium)
 
-    // MARK: Body
-    static let bodyLargeMedium: UIFont = scaled(.body, size: 18, weight: .medium)
-    static let bodyRegular: UIFont = scaled(.body, size: 17, weight: .regular)
-    static let bodyMedium: UIFont = scaled(.body, size: 17, weight: .medium)
-    static let bodyEmphasized: UIFont = scaled(.body, size: 17, weight: .semibold)
+    // ───── Body 1 ─────
+    /// 20 SemiBold · LS -2%
+    static let body1SemiBold = pretendard(.body, size: 20, weight: .semibold)
+    /// 20 Medium
+    static let body1Medium = pretendard(.body, size: 20, weight: .medium)
+    /// 20 Regular
+    static let body1Regular = pretendard(.body, size: 20, weight: .regular)
 
-    // MARK: Callout
-    static let calloutRegular: UIFont = scaled(.callout, size: 16, weight: .regular)
-    static let calloutEmphasized: UIFont = scaled(.callout, size: 16, weight: .semibold)
+    // ───── Body 2 ─────
+    /// 18 Bold
+    static let body2Bold = pretendard(.body, size: 18, weight: .bold)
+    /// 18 SemiBold
+    static let body2SemiBold = pretendard(.body, size: 18, weight: .semibold)
+    /// 18 Medium
+    static let body2Medium = pretendard(.body, size: 18, weight: .medium)
+    /// 18 Regular
+    static let body2Regular = pretendard(.body, size: 18, weight: .regular)
+    /// 18 Light · LS +1%
+    static let body2Light = pretendard(.body, size: 18, weight: .light)
 
-    // MARK: Footnote
-    static let footnoteRegular: UIFont = scaled(.footnote, size: 13, weight: .regular)
-    static let footnoteEmphasized: UIFont = scaled(.footnote, size: 13, weight: .semibold)
+    // ───── Callout ─────
+    /// 16 SemiBold · LS +2%
+    static let calloutSemiBold = pretendard(.callout, size: 16, weight: .semibold)
+    /// 16 Medium
+    static let calloutMedium = pretendard(.callout, size: 16, weight: .medium)
+    /// 16 Regular · LH 140%
+    static let calloutParagraph = pretendard(.callout, size: 16, weight: .regular)
+    /// 16 Regular
+    static let calloutRegular = pretendard(.callout, size: 16, weight: .regular)
+    /// 16 Light
+    static let calloutLight = pretendard(.callout, size: 16, weight: .light)
 
-    // MARK: Button Title
-    static let buttonTitle: UIFont = scaled(.body, size: 17, weight: .medium)
+    // ───── Label ─────
+    /// 14 Medium · LS +2%
+    static let labelMediumLoose = pretendard(.subheadline, size: 14, weight: .medium)
+    /// 14 Medium
+    static let labelMedium = pretendard(.subheadline, size: 14, weight: .medium)
+    /// 14 Regular
+    static let labelRegular = pretendard(.subheadline, size: 14, weight: .regular)
+    /// 14 Regular · LH 135% · LS +2%
+    static let labelParagraph = pretendard(.subheadline, size: 14, weight: .regular)
 
-    // MARK: - Helper
+    // ───── Footnote ─────
+    /// 13 Regular · LS -0.6% · LH 18px
+    static let footnoteRegular = pretendard(.footnote, size: 13, weight: .regular)
 
-    private static func scaled(_ textStyle: UIFont.TextStyle, size: CGFloat, weight: UIFont.Weight) -> UIFont {
-        let base = UIFont.systemFont(ofSize: size, weight: weight)
+    // MARK: Helper
+    private static func pretendard(_ textStyle: UIFont.TextStyle, size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let base = UIFont(name: pretendardName(weight), size: size)!
         return UIFontMetrics(forTextStyle: textStyle).scaledFont(for: base)
     }
 }
 
-// SwiftUI Extension
-//
-// SwiftUI의 .body, .title2 등 빌트인 TextStyle은 Dynamic Type을 자동 지원합니다.
-// 여기서는 디자인 시스템의 weight를 유지하면서 TextStyle 기반으로 스케일링합니다.
+// MARK: - SwiftUI (Font)
 
 extension Font {
 
-    // MARK: Large Title
-    static let largeTitleEmphasized: Font = .system(.largeTitle, weight: .bold)
+    // ───── Large Title ─────
+    static let largeTitleMedium = pretendard(56, .medium, .largeTitle)
 
-    // MARK: Title
-    static let title1Emphasized: Font = .system(.title, weight: .bold)
-    static let title2Emphasized: Font = .system(.title2, weight: .bold)
-    static let title3Regular: Font = .system(.title3, weight: .regular)
-    static let title3Emphasized: Font = .system(.title3, weight: .semibold)
+    // ───── Title ─────
+    static let title1SemiBold = pretendard(32, .semibold, .title)
+    static let title2Medium = pretendard(30, .medium, .title2)
+    static let title3SemiBold = pretendard(26, .semibold, .title3)
 
-    // MARK: Headline / Subheadline
-    static let headlineRegular: Font = .system(.headline, weight: .semibold)
-    static let subheadlineRegular: Font = .system(.subheadline, weight: .regular)
-    static let subheadlineEmphasized: Font = .system(.subheadline, weight: .semibold)
+    // ───── Headline ─────
+    static let headlineMedium = pretendard(24, .medium, .title3)
+    static let headlineParagraph = pretendard(24, .medium, .title3)
 
-    // MARK: Body
-    static let bodyLargeMedium: Font = .system(size: 18, weight: .medium)
-    static let bodyRegular: Font = .system(.body, weight: .regular)
-    static let bodyMedium: Font = .system(.body, weight: .medium)
-    static let bodyEmphasized: Font = .system(.body, weight: .semibold)
+    // ───── Body 1 ─────
+    static let body1SemiBold = pretendard(20, .semibold, .body)
+    static let body1Medium = pretendard(20, .medium, .body)
+    static let body1Regular = pretendard(20, .regular, .body)
 
-    // MARK: Callout
-    static let calloutRegular: Font = .system(.callout, weight: .regular)
-    static let calloutEmphasized: Font = .system(.callout, weight: .semibold)
+    // ───── Body 2 ─────
+    static let body2Bold = pretendard(18, .bold, .body)
+    static let body2SemiBold = pretendard(18, .semibold, .body)
+    static let body2Medium = pretendard(18, .medium, .body)
+    static let body2Regular = pretendard(18, .regular, .body)
+    static let body2Light = pretendard(18, .light, .body)
 
-    // MARK: Footnote
-    static let footnoteRegular: Font = .system(.footnote, weight: .regular)
-    static let footnoteEmphasized: Font = .system(.footnote, weight: .semibold)
+    // ───── Callout ─────
+    static let calloutSemiBold = pretendard(16, .semibold, .callout)
+    static let calloutMedium = pretendard(16, .medium, .callout)
+    static let calloutParagraph = pretendard(16, .regular, .callout)
+    static let calloutRegular = pretendard(16, .regular, .callout)
+    static let calloutLight = pretendard(16, .light, .callout)
 
-    // MARK: Button Title
-    static let buttonTitle: Font = .system(.body, weight: .medium)
+    // ───── Label ─────
+    static let labelMediumLoose = pretendard(14, .medium, .subheadline)
+    static let labelMedium = pretendard(14, .medium, .subheadline)
+    static let labelRegular = pretendard(14, .regular, .subheadline)
+    static let labelParagraph = pretendard(14, .regular, .subheadline)
+
+    // ───── Footnote ─────
+    static let footnoteRegular = pretendard(13, .regular, .footnote)
+
+    // MARK: Helper
+    private static func pretendard(_ size: CGFloat, _ weight: Font.Weight, _ relativeTo: Font.TextStyle) -> Font {
+        .custom(pretendardNameFor(weight), size: size, relativeTo: relativeTo)
+    }
+}
+
+private func pretendardNameFor(_ weight: Font.Weight) -> String {
+    switch weight {
+    case .light:    return "Pretendard-Light"
+    case .medium:   return "Pretendard-Medium"
+    case .semibold: return "Pretendard-SemiBold"
+    case .bold:     return "Pretendard-Bold"
+    default:        return "Pretendard-Regular"
+    }
 }

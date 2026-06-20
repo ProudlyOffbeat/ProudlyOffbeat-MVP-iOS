@@ -23,7 +23,7 @@ final class CarouselCell: UICollectionViewCell {
 
     private let tagLabel: PaddingLabel = {
         let label = PaddingLabel()
-        label.font = .footnoteEmphasized
+        label.font = .footnoteRegular
         label.textColor = .gray100
         label.backgroundColor = UIColor(named: "gray10")
         label.clipsToBounds = true
@@ -32,7 +32,7 @@ final class CarouselCell: UICollectionViewCell {
 
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .bodyEmphasized
+        label.font = .body2SemiBold
         label.textColor = UIColor(named: "gray10")
         label.numberOfLines = 0
         return label

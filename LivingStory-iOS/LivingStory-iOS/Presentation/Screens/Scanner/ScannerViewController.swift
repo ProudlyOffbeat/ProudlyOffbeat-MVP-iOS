@@ -51,7 +51,7 @@ final class ScannerViewController: UIViewController {
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
         label.text = StringLiterals.Scanner.title
-        label.font = .bodyEmphasized
+        label.font = .body2SemiBold
         label.textColor = UIColor(named: "gray10")
         label.textAlignment = .center
         return label

@@ -21,7 +21,7 @@ final class ScannerResultContentView: UIView {
 
     let statusLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .subheadlineRegular
+        label.font = .labelRegular
         label.textColor = UIColor(named: "gray30")
         label.textAlignment = .center
         return label
@@ -45,7 +45,7 @@ final class ScannerResultContentView: UIView {
 
     let retryButton = PrimaryButton(
         title: StringLiterals.Scanner.retry,
-        font: .bodyEmphasized,
+        font: .body2SemiBold,
         backgroundColor: .black,
         cornerRadius: 28
     )

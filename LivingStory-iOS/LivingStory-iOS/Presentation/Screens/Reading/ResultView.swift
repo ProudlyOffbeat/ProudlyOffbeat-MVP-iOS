@@ -16,7 +16,7 @@ struct ResultView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(StringLiterals.Reading.todayBookCount((try? repository.fetchTodaySessions().count) ?? 0))
-                    .font(.title2Emphasized)
+                    .font(.title2Medium)
                     .padding(.top, 18)
                     .padding(.horizontal, 20)
 

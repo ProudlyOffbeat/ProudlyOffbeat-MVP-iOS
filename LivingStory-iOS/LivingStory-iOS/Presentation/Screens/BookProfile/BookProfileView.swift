@@ -87,9 +87,9 @@ private struct BookCoverSection: View {
             VStack(alignment: .leading, spacing: 12) {
                 Spacer()
                 Text(title)
-                    .font(.title2Emphasized)
+                    .font(.title2Medium)
                 Text(plot)
-                    .font(.bodyRegular)
+                    .font(.body2Regular)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 40)

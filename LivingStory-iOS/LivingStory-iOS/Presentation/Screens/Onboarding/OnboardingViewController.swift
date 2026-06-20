@@ -36,7 +36,7 @@ final class OnboardingViewController: UIViewController {
     private let subtitleLabel: UILabel = {
         let label = DynamicLabel()
         label.text = "나루, 이야기가 머무는 곳"
-        label.font = .bodyEmphasized
+        label.font = .body2SemiBold
         label.textColor = .white
         label.textAlignment = .center
         return label

@@ -23,7 +23,7 @@ final class DarkRoundedButton: UIButton {
         )
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
             var outgoing = incoming
-            outgoing.font = UIFont.bodyEmphasized
+            outgoing.font = UIFont.body2SemiBold
             return outgoing
         }
         configuration = config

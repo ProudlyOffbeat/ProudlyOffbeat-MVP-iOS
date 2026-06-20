@@ -35,7 +35,7 @@ struct StopReadingView: View {
                     .scaledToFit()
                     .frame(width: 26)
                 Text(StringLiterals.Reading.conversationPrompt)
-                    .font(.title2Emphasized)
+                    .font(.title2Medium)
             }
             
             ScrollView {
@@ -71,7 +71,7 @@ private struct ConversationCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            CharWrappingText(text: question, font: .bodyLargeMedium, color: .gray10)
+            CharWrappingText(text: question, font: .body2Medium, color: .gray10)
             CharWrappingText(
                 text: effect,
                 font: .calloutRegular,
@@ -80,7 +80,7 @@ private struct ConversationCard: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.yellow90)
+        .background(.yellow0)
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 }

@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "appiconNaru-iOS-Default-1024x1024@2x.png",
+      "filename" : "Naru-new-Icon-iOS-Default-1024x1024@1x.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "appiconNaru-iOS-Dark-1024x1024@2x.png",
+      "filename" : "Naru-new-Icon-iOS-Dark-1024x1024@1x.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "appiconNaru-iOS-ClearLight-1024x1024@2x.png",
+      "filename" : "Naru-new-Icon-iOS-TintedDark-1024x1024@1x.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

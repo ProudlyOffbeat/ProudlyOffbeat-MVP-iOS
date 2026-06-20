@@ -85,14 +85,14 @@ final class CoachMarkOverlayView: UIView {
 
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .subheadlineEmphasized
+        label.font = .calloutSemiBold
         label.textColor = UIColor(named: "gray100")
         return label
     }()
 
     private let messageLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .subheadlineRegular
+        label.font = .labelRegular
         label.textColor = UIColor(named: "gray100")
         label.numberOfLines = 0
         return label
@@ -464,7 +464,7 @@ private extension CoachMarkOverlayView {
         config.attributedTitle = AttributedString(
             title,
             attributes: AttributeContainer([
-                .font: UIFont.footnoteEmphasized,
+                .font: UIFont.footnoteRegular,
                 .foregroundColor: fgColor ?? .white
             ])
         )

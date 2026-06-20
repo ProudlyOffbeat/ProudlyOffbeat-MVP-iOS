@@ -31,7 +31,7 @@ final class PrimaryButton: UIButton {
 
     init(
         title: String,
-        font: UIFont = .headlineRegular,
+        font: UIFont = .body2SemiBold,
         backgroundColor: UIColor? = UIColor(named: "blue0"),
         foregroundColor: UIColor = .white,
         cornerRadius: CGFloat = 22,
@@ -77,7 +77,7 @@ struct PrimaryButtonSwiftUI: View {
                 .glassEffect()
                 .overlay {
                     Text(title)
-                        .font(.buttonTitle)
+                        .font(.body2Medium)
                         .foregroundStyle(.white)
                 }
         }
@@ -96,7 +96,7 @@ struct WhiteButtonSwiftUI: View {
                 .glassEffect()
                 .overlay {
                     Text(title)
-                        .font(.buttonTitle)
+                        .font(.body2Medium)
                         .foregroundStyle(.black)
                         .opacity(0.7)
                 }

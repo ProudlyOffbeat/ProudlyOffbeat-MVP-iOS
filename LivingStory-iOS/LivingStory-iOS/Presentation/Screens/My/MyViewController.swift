@@ -72,7 +72,7 @@ private extension MyViewController {
         navigationItem.largeTitleDisplayMode = .always
         navigationItem.title = StringLiterals.My.title
         navigationController?.navigationBar.largeTitleTextAttributes = [
-            .font: UIFont.title1Emphasized
+            .font: UIFont.title1SemiBold
         ]
 
         let settingsBarButton = UIBarButtonItem(customView: settingsButton)
