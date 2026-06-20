@@ -26,6 +26,14 @@ final class AudioPlayerService {
         player?.play()
     }
 
+    func pause() {
+        player?.pause()
+    }
+
+    func resume() {
+        player?.play()
+    }
+
     func stop() {
         player?.stop()
         player = nil

@@ -48,6 +48,18 @@ final class ReadingViewModel {
         self.lightingController = lightingController
     }
 
+    // MARK: - App Lifecycle
+
+    func pause() {
+        guard state == .reading else { return }
+        audioPlayerService.pause()
+    }
+
+    func resume() {
+        guard state == .reading else { return }
+        audioPlayerService.resume()
+    }
+
     // MARK: - Public
 
     func startSetup() async {
