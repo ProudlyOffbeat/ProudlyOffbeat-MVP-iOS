@@ -100,12 +100,16 @@ struct ReadingView: View {
 
     /// 세팅 중 (·error): 중앙 아이콘 + 문구 + '환경 세팅 중지'
     private var settingLayout: some View {
-        VStack {
-            Spacer()
+        ZStack {
+            // Figma: 콘텐츠 블록 = 화면 세로 중심 -30pt
             settingStatus
-            Spacer()
-            actionButton
-                .padding(.horizontal, 20)
+                .offset(y: -30)
+
+            VStack {
+                Spacer()
+                actionButton
+                    .padding(.horizontal, 20)
+            }
         }
     }
 
@@ -138,10 +142,10 @@ struct ReadingView: View {
             Image(.home)
                 .resizable()
                 .scaledToFit()
-                .frame(height: 79)
-                .foregroundStyle(.white.opacity(0.22))
+                .frame(height: 60)
+                .foregroundStyle(Color(hex: 0xEBEBF5).opacity(0.3)) // Figma: Labels/Tertiary
 
-            VStack(spacing: 6) {
+            VStack(spacing: 12) {
                 Text(StringLiterals.Reading.settingTitle)
                     .font(.body1Regular)
                     .foregroundStyle(.white)
@@ -202,23 +206,27 @@ struct ReadingView: View {
 
     private var pulseBackground: some View {
         ZStack {
-            Color.black
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: viewModel.state == .setting
-                            ? [.yellow0, .yellow20, .clear]
-                            : [lightingColor, lightingColor.opacity(0.4), .clear],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 305
+            // Figma: 세팅 화면 base = Backgrounds/Secondary, 독서 중은 몰입용 검정
+            (viewModel.state == .setting ? Color.backgroundSecondary : Color.black)
+
+            if viewModel.state == .setting {
+                // Figma: 흰색 타원 글로우(610×610, 중앙), opacity 0↔100 왕복
+                Circle()
+                    .fill(
+                        EllipticalGradient(
+                            stops: [
+                                .init(color: .white.opacity(0.2), location: 0),
+                                .init(color: .white.opacity(0), location: 1)
+                            ],
+                            center: .center
+                        )
                     )
-                )
-                .frame(width: 610, height: 610)
-                .scaleEffect(isPulsing ? 1.0 : 0.85)
-                .opacity(isPulsing ? 0.4 : 0.1)
-                .blur(radius: 50)
-                .animation(.easeInOut(duration: 1.5), value: viewModel.state)
+                    .frame(width: 610, height: 610)
+                    .opacity(isPulsing ? 1.0 : 0.0)
+                    .animation(.easeInOut(duration: 1.5), value: viewModel.state)
+            } else {
+                EmptyView()
+            }
         }
         .ignoresSafeArea()
     }
@@ -274,7 +282,7 @@ private struct ControlCard: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Color(hex: 0x1C1C1E), in: RoundedRectangle(cornerRadius: 24))
+        .background(Color.backgroundSecondary, in: RoundedRectangle(cornerRadius: 24))
     }
 }
 
