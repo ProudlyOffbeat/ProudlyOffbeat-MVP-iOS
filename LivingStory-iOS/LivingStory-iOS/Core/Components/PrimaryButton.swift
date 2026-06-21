@@ -76,7 +76,7 @@ struct PrimaryButtonSwiftUI: View {
                 .glassEffect()
                 .overlay {
                     Text(title)
-                        .font(.body2Medium)
+                        .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(.white)
                 }
         }

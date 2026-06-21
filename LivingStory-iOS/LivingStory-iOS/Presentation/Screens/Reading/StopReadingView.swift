@@ -94,7 +94,7 @@ struct StopReadingView: View {
                     .glassEffect()
                     .overlay {
                         Text(StringLiterals.Reading.readAnotherBook)
-                            .font(.buttonTitle)
+                            .font(.system(size: 17, weight: .medium))
                             .foregroundStyle(Color(hex: 0xBFBFBF))
                     }
             }
