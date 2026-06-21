@@ -122,11 +122,8 @@ struct ReadingView: View {
 
             Spacer().frame(height: 52)
 
-            ControlCard(
-                lightingColor: lightingColor,
-                brightness: viewModel.lightingConfig?.brightness ?? 50
-            )
-            .padding(.horizontal, 20)
+            ControlCard(viewModel: viewModel, lightingColor: lightingColor)
+                .padding(.horizontal, 20)
 
             Spacer()
 
@@ -235,8 +232,31 @@ struct ReadingView: View {
 // MARK: - Control Card (조명 / 음악)
 
 private struct ControlCard: View {
+    let viewModel: ReadingViewModel
     let lightingColor: Color
-    let brightness: Int
+
+    /// 채움 색(그라데이션). 네이티브 Slider tint로 넘기면 단색으로 뭉개질 수 있음(의도).
+    private static let fill = LinearGradient(
+        colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+
+    /// 밝기: 드래그 중 쓰로틀 전송(updateLighting), 손 뗌 시 즉시(commitLighting)
+    private var brightnessBinding: Binding<Double> {
+        Binding(
+            get: { Double(viewModel.lightingConfig?.brightness ?? 50) },
+            set: { viewModel.updateLighting(brightness: Int($0.rounded())) }
+        )
+    }
+
+    /// 볼륨: 0~1 → audioPlayerService 즉시 반영
+    private var volumeBinding: Binding<Double> {
+        Binding(
+            get: { Double(viewModel.volume) },
+            set: { viewModel.setVolume(Float($0)) }
+        )
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -244,8 +264,12 @@ private struct ControlCard: View {
                 systemImage: "lightbulb.fill",
                 title: "조명",
                 valueLabel: "밝기",
-                percentText: "\(brightness)%",
-                fraction: Double(brightness) / 100.0
+                value: brightnessBinding,
+                range: 0...100,
+                fill: Self.fill,
+                onEditingChanged: { editing in
+                    if !editing { viewModel.commitLighting() }
+                }
             ) {
                 Circle()
                     .fill(lightingColor)
@@ -261,8 +285,9 @@ private struct ControlCard: View {
                 systemImage: "speaker.wave.2.fill",
                 title: "음악",
                 valueLabel: "볼륨",
-                percentText: "50%",          // 추천 볼륨 데이터 없음 → 고정 더미
-                fraction: 0.5
+                value: volumeBinding,
+                range: 0...1,
+                fill: Self.fill
             ) {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(
@@ -290,9 +315,17 @@ private struct EnvControlRow<Leading: View>: View {
     let systemImage: String
     let title: String
     let valueLabel: String
-    let percentText: String
-    let fraction: Double
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let fill: LinearGradient
+    var onEditingChanged: (Bool) -> Void = { _ in }
     @ViewBuilder let leading: () -> Leading
+
+    private var percent: Int {
+        let span = range.upperBound - range.lowerBound
+        guard span > 0 else { return 0 }
+        return Int((((value - range.lowerBound) / span) * 100).rounded())
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -319,12 +352,12 @@ private struct EnvControlRow<Leading: View>: View {
                             .font(.labelRegular)
                             .foregroundStyle(.white.opacity(0.7))
                         Spacer()
-                        Text(percentText)
+                        Text("\(percent)%")
                             .font(.labelMedium)
                             .foregroundStyle(.white)
                     }
 
-                    EnvSlider(fraction: fraction)
+                    TickSlider(value: $value, in: range, fill: fill, onEditingChanged: onEditingChanged)
                 }
             }
         }
@@ -347,55 +380,48 @@ private struct AdjustPill: View {
     }
 }
 
-/// 비상호작용 슬라이더 (추천값 표시 전용)
-private struct EnvSlider: View {
-    let fraction: Double
+/// 네이티브 Slider — iOS 26 `ticks:` 로 틱 기본 제공. (수제 오버레이 불필요)
+/// tint에 그라데이션을 주지만 UISlider 브리지 특성상 단색으로 뭉개질 수 있음(의도).
+private struct TickSlider: View {
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let fill: LinearGradient
+    var onEditingChanged: (Bool) -> Void
+
+    init(
+        value: Binding<Double>,
+        in range: ClosedRange<Double>,
+        fill: LinearGradient,
+        onEditingChanged: @escaping (Bool) -> Void = { _ in }
+    ) {
+        self._value = value
+        self.range = range
+        self.fill = fill
+        self.onEditingChanged = onEditingChanged
+    }
+
+    /// 범위 양끝 포함 5개 틱 위치
+    private var tickValues: [Double] {
+        let lo = range.lowerBound
+        let hi = range.upperBound
+        return (0..<5).map { lo + (hi - lo) * Double($0) / 4 }
+    }
 
     var body: some View {
-        GeometryReader { geo in
-            let w = geo.size.width
-            let f = min(max(fraction, 0), 1)
-
-            ZStack {
-                // 눈금 5개 (트랙 아래)
-                HStack(spacing: 0) {
-                    ForEach(0..<5, id: \.self) { index in
-                        Circle()
-                            .fill(Color.white.opacity(0.2))
-                            .frame(width: 4, height: 4)
-                        if index < 4 { Spacer(minLength: 0) }
-                    }
-                }
-                .offset(y: 9)
-
-                // 트랙
-                Capsule()
-                    .fill(Color.fillPrimary)
-                    .frame(height: 6)
-
-                // 채움 (값 비율)
-                HStack(spacing: 0) {
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: w * f, height: 6)
-                    Spacer(minLength: 0)
-                }
-
-                // 노브
-                Capsule()
-                    .fill(.white)
-                    .frame(width: 30, height: 28)
-                    .shadow(color: .black.opacity(0.2), radius: 5, y: 3)
-                    .position(x: min(max(w * f, 15), w - 15), y: geo.size.height / 2)
-            }
-        }
-        .frame(height: 50)
+        Slider(
+            value: $value,
+            in: range,
+            label: { EmptyView() },
+            ticks: {
+                SliderTick(tickValues[0])
+                SliderTick(tickValues[1])
+                SliderTick(tickValues[2])
+                SliderTick(tickValues[3])
+                SliderTick(tickValues[4])
+            },
+            onEditingChanged: onEditingChanged
+        )
+        .tint(fill)
     }
 }
 
@@ -403,7 +429,6 @@ private struct EnvSlider: View {
 
 private extension Color {
     static let fillTertiary = Color(red: 118 / 255, green: 118 / 255, blue: 128 / 255).opacity(0.24)
-    static let fillPrimary = Color(red: 120 / 255, green: 120 / 255, blue: 128 / 255).opacity(0.36)
 
     init(hex: UInt) {
         self.init(
