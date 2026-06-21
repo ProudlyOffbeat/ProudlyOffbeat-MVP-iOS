@@ -237,40 +237,6 @@ private struct StatBookThumbnail: View {
     }
 }
 
-// MARK: - Stat Card (현재 미사용 — 추후 재사용 대비 보존)
-
-struct StatCard: View {
-    let icon: String
-    let title: String
-    let value: String
-    var isWide: Bool = false
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(systemName: icon)
-            if !isWide {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title).font(.subheadlineRegular)
-                    Text(value).font(.subheadlineEmphasized)
-                }
-            } else {
-                HStack {
-                    Text(title).font(.subheadlineRegular)
-                    Spacer()
-                    Text(value).font(.subheadlineEmphasized)
-                }
-            }
-        }
-        .padding(.vertical, 14)
-        .padding(.leading, 10)
-        .padding(.trailing, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
-    }
-}
-
 // MARK: - Color Helper
 
 private extension Color {
