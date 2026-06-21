@@ -16,7 +16,7 @@ struct StopReadingView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x1C1C1E)
+            Color.backgroundSecondary
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -70,7 +70,7 @@ struct StopReadingView: View {
             coordinator.showConversation(conversations: conversations)
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: "bubble.left.fill")
+                Image(systemName: "ellipsis.message.fill")
                     .font(.system(size: 13))
                 Text(StringLiterals.Reading.talkWithChild)
                     .font(.system(size: 15, weight: .medium))

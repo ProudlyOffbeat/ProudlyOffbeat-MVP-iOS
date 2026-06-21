@@ -23,7 +23,7 @@ struct StatisticsView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x1C1C1E).ignoresSafeArea()
+            Color.backgroundSecondary.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {

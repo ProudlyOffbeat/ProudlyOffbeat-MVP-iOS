@@ -61,6 +61,13 @@ extension Color {
     }
 }
 
+// MARK: - Semantic Colors
+
+extension Color {
+    /// Backgrounds/Secondary — 앱 기본 다크 배경 (#1C1C1E). Figma 토큰명과 1:1.
+    static let backgroundSecondary = Color(hex: 0x1C1C1E)
+}
+
 // MARK: - Gradient Token
 
 /// 하나의 그라데이션 토큰. SwiftUI(`linear`)와 UIKit(`makeLayer()`)에서 동일한 stop으로 사용.

@@ -14,7 +14,7 @@ struct ChildAgeSettingView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x1C1C1E).ignoresSafeArea()
+            Color.backgroundSecondary.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 SettingIntro(

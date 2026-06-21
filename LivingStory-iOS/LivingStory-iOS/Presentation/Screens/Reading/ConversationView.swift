@@ -17,7 +17,7 @@ struct ConversationView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x1C1C1E)
+            Color.backgroundSecondary
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -104,7 +104,7 @@ private struct ConversationAccordionCard: View {
 
     private var numberBadge: some View {
         HStack(spacing: 4) {
-            Image(systemName: "bubble.left.fill")
+            Image(systemName: "ellipsis.message.fill")
                 .font(.system(size: 11))
             Text(String(format: "%02d", index + 1))
                 .font(.system(size: 13, weight: .semibold))
