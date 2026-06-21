@@ -18,16 +18,25 @@ struct ReadingView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-
             if viewModel.state == .reading {
                 readingDoneLayout
             } else {
                 settingLayout
             }
         }
+        .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .navigationBar)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(viewModel.book.bookTitle)
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    // 중단 시 체크 전환 인터랙션 동안엔 제목 숨김 (페이드 함께)
+                    .opacity(isFinishing ? 0 : 1)
+            }
+        }
         .background { pulseBackground }
         .overlay {
             if isFinishing {
@@ -89,17 +98,6 @@ struct ReadingView: View {
 
     // MARK: - Layouts
 
-    /// 커스텀 헤더 (책 제목) — 전역 네비바를 숨기므로 navigationTitle 대신 직접 표시
-    private var header: some View {
-        Text(viewModel.book.bookTitle)
-            .font(.headlineRegular)
-            .foregroundStyle(.white)
-            .lineLimit(1)
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 13)
-    }
-
     /// 세팅 중 (·error): 중앙 아이콘 + 문구 + '환경 세팅 중지'
     private var settingLayout: some View {
         VStack {
@@ -145,10 +143,10 @@ struct ReadingView: View {
 
             VStack(spacing: 6) {
                 Text(StringLiterals.Reading.settingTitle)
-                    .font(.bodyRegular)
+                    .font(.body1Regular)
                     .foregroundStyle(.white)
                 Text(StringLiterals.Reading.settingSubtitle)
-                    .font(.subheadlineRegular)
+                    .font(.body2Regular)
                     .foregroundStyle(.white.opacity(0.5))
                     .multilineTextAlignment(.center)
             }
@@ -171,10 +169,10 @@ struct ReadingView: View {
 
             VStack(spacing: 12) {
                 Text(StringLiterals.Reading.settingDoneTitle)
-                    .font(.system(size: 20))
+                    .font(.body1Regular)
                     .foregroundStyle(.white)
                 Text(StringLiterals.Reading.settingDoneSubtitle)
-                    .font(.system(size: 18))
+                    .font(.body2Regular)
                     .foregroundStyle(.white.opacity(0.5))
             }
             .multilineTextAlignment(.center)
@@ -295,7 +293,7 @@ private struct EnvControlRow<Leading: View>: View {
                     Image(systemName: systemImage)
                         .font(.system(size: 15, weight: .semibold))
                     Text(title)
-                        .font(.system(size: 18, weight: .medium))
+                        .font(.body2Medium)
                 }
                 .foregroundStyle(.white)
 
@@ -310,11 +308,11 @@ private struct EnvControlRow<Leading: View>: View {
                 VStack(spacing: 0) {
                     HStack {
                         Text(valueLabel)
-                            .font(.system(size: 14))
+                            .font(.labelRegular)
                             .foregroundStyle(.white.opacity(0.7))
                         Spacer()
                         Text(percentText)
-                            .font(.system(size: 14, weight: .medium))
+                            .font(.labelMedium)
                             .foregroundStyle(.white)
                     }
 
@@ -332,7 +330,7 @@ private struct AdjustPill: View {
             Image(systemName: "slider.horizontal.3")
                 .font(.system(size: 11, weight: .semibold))
             Text("조정")
-                .font(.system(size: 14, weight: .medium))
+                .font(.labelMedium)
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 14)

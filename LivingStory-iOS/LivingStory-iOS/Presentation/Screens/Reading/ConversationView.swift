@@ -21,8 +21,6 @@ struct ConversationView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                header
-
                 ScrollView {
                     VStack(spacing: 12) {
                         ForEach(Array(conversations.enumerated()), id: \.element.id) { index, item in
@@ -44,33 +42,26 @@ struct ConversationView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .navigationBar)
-    }
-
-    // MARK: - Header
-
-    private var header: some View {
-        ZStack {
-            Text(StringLiterals.Reading.conversationTitle)
-                .font(.headlineRegular)
-                .foregroundStyle(.white)
-
-            HStack {
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
                 Button {
                     coordinator.pop()
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .glassEffect(.regular, in: Circle())
                 }
-                Spacer()
+            }
+            // 제목 색을 시스템 네비바(앱 라이트 고정→검정)에 맡기지 않고 흰색 콘텐츠로 직접 렌더
+            ToolbarItem(placement: .principal) {
+                Text(StringLiterals.Reading.conversationTitle)
+                    .font(.headline)
+                    .foregroundStyle(.white)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
     }
 }
 
