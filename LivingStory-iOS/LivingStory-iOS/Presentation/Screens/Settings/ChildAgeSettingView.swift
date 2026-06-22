@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ChildAgeSettingView: View {
-    let coordinator: AppCoordinator
+    @Environment(\.dismiss) private var dismiss
 
     @State private var age: Int = 13 // 더미 기본값
 
@@ -47,7 +47,7 @@ struct ChildAgeSettingView: View {
                 Spacer()
 
                 PrimaryButtonSwiftUI(title: StringLiterals.Setting.done) {
-                    coordinator.pop()
+                    dismiss()
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
@@ -146,7 +146,7 @@ private extension Color {
 #if DEBUG
 #Preview {
     NavigationStack {
-        ChildAgeSettingView(coordinator: AppCoordinator(navigationController: UINavigationController()))
+        ChildAgeSettingView()
     }
 }
 #endif

@@ -55,10 +55,11 @@ final class AppCoordinator: Coordinator {
             tag: 1
         )
 
-        // Tab 3: 마이
+        // Tab 3: 마이 (MyViewController → StatisticsView 교체)
         let myNav = UINavigationController()
-        let myVC = MyViewController()
-        myVC.coordinator = self
+        let myVC = UIHostingController(
+            rootView: StatisticsView(coordinator: self, repository: ReadingSessionRepository())
+        )
         myNav.setViewControllers([myVC], animated: false)
         myNav.tabBarItem = UITabBarItem(
             title: StringLiterals.TabBar.my,
@@ -196,31 +197,15 @@ final class AppCoordinator: Coordinator {
 
     // MARK: - 설정
 
-    /// 설정 화면 (SwiftUI)
+    /// 설정 플로우 (SwiftUI) — 이 플로우만 SwiftUI NavigationStack(SettingsFlowView)이 네비바를 소유.
+    /// UIKit 호스팅의 native large 타이틀 글리치 회피. 자식(나이·알림·집)은 SwiftUI 스택 내부에서 이동.
     func showSettings() {
-        let view = SettingsView(coordinator: self)
-        let hostingVC = UIHostingController(rootView: view)
-        activeNavigationController?.pushViewController(hostingVC, animated: true)
-    }
-
-    /// 아이 나이 설정 (SwiftUI)
-    func showChildAgeSetting() {
-        let view = ChildAgeSettingView(coordinator: self)
-        let hostingVC = UIHostingController(rootView: view)
-        activeNavigationController?.pushViewController(hostingVC, animated: true)
-    }
-
-    /// 알림 시간 설정 (SwiftUI)
-    func showNotificationTimeSetting() {
-        let view = NotificationTimeSettingView(coordinator: self)
-        let hostingVC = UIHostingController(rootView: view)
-        activeNavigationController?.pushViewController(hostingVC, animated: true)
-    }
-
-    /// 집 선택 (SwiftUI)
-    func showHomeSelection() {
-        let view = HomeSelectionView(coordinator: self)
-        let hostingVC = UIHostingController(rootView: view)
+        let hostingVC = NavBarHiddenHostingController(
+            rootView: SettingsFlowView(coordinator: self)
+        )
+        // SwiftUI가 그리는 바 + UIDatePicker 등 UIKit 크롬을 다크로 (윈도우 Light 고정 무시). 탭바 숨김.
+        hostingVC.overrideUserInterfaceStyle = .dark
+        hostingVC.hidesBottomBarWhenPushed = true
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     let coordinator: AppCoordinator
+    @Binding var path: [SettingsRoute]
 
     // TODO: 실제 설정값 연동 (현재 더미)
     private let childAge = "7살"
@@ -17,46 +18,56 @@ struct SettingsView: View {
     private let appVersion = "1.0.0"
 
     var body: some View {
-        ZStack {
-            Color.backgroundSecondary.ignoresSafeArea()
-
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 0) {
-                    section(StringLiterals.Setting.childInfoSection) {
-                        SettingsRow(title: StringLiterals.Setting.childAge, value: childAge) {
-                            coordinator.showChildAgeSetting()
-                        }
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 0) {
+                section(StringLiterals.Setting.childInfoSection) {
+                    SettingsRow(title: StringLiterals.Setting.childAge, value: childAge) {
+                        path.append(.childAge)
                     }
+                }
 
-                    section(StringLiterals.Setting.notificationSection) {
-                        SettingsRow(title: StringLiterals.Setting.notificationTime, value: notificationTime) {
-                            coordinator.showNotificationTimeSetting()
-                        }
+                section(StringLiterals.Setting.notificationSection) {
+                    SettingsRow(title: StringLiterals.Setting.notificationTime, value: notificationTime) {
+                        path.append(.notification)
                     }
+                }
 
-                    section(StringLiterals.Setting.environmentSection) {
-                        SettingsRow(title: StringLiterals.Setting.home, value: homeName) {
-                            coordinator.showHomeSelection()
-                        }
+                section(StringLiterals.Setting.environmentSection) {
+                    SettingsRow(title: StringLiterals.Setting.home, value: homeName) {
+                        path.append(.home)
                     }
+                }
 
-                    section(StringLiterals.Setting.appInfoSection) {
-                        VStack(spacing: 0) {
-                            SettingsRow(title: StringLiterals.Setting.version, value: appVersion, showChevron: false)
-                            Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 18)
-                            SettingsRow(title: StringLiterals.Setting.privacy) {
-                                // TODO: 개인정보처리방침 연결
-                            }
+                section(StringLiterals.Setting.appInfoSection) {
+                    VStack(spacing: 0) {
+                        SettingsRow(title: StringLiterals.Setting.version, value: appVersion, showChevron: false)
+                        Divider().overlay(Color.white.opacity(0.08)).padding(.horizontal, 18)
+                        SettingsRow(title: StringLiterals.Setting.privacy) {
+                            // TODO: 개인정보처리방침 연결
                         }
                     }
                 }
-                .padding(.bottom, 24)
             }
+            .padding(.bottom, 24)
         }
+        // 배경은 .background로 풀블리드, ScrollView는 세이프에어리어 준수 → Large 타이틀 정상 동작
+        .background(Color.backgroundSecondary.ignoresSafeArea())
         .preferredColorScheme(.dark)
         .navigationTitle(StringLiterals.Setting.title)
         .navigationBarTitleDisplayMode(.large)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            // 설정 루트 → 설정 빠져나가기(UIKit pop으로 Statistics 복귀)
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    coordinator.pop()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+            }
+        }
     }
 
     // MARK: - Section
@@ -131,7 +142,10 @@ private extension Color {
 #if DEBUG
 #Preview {
     NavigationStack {
-        SettingsView(coordinator: AppCoordinator(navigationController: UINavigationController()))
+        SettingsView(
+            coordinator: AppCoordinator(navigationController: UINavigationController()),
+            path: .constant([])
+        )
     }
 }
 #endif

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NotificationTimeSettingView: View {
-    let coordinator: AppCoordinator
+    @Environment(\.dismiss) private var dismiss
 
     // 더미 기본값: 오후 09:30
     @State private var time: Date = {
@@ -55,7 +55,7 @@ struct NotificationTimeSettingView: View {
 
                 Spacer()
                 PrimaryButtonSwiftUI(title: StringLiterals.Setting.done) {
-                    coordinator.pop()
+                    dismiss()
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
@@ -84,7 +84,7 @@ private extension Color {
 #if DEBUG
 #Preview {
     NavigationStack {
-        NotificationTimeSettingView(coordinator: AppCoordinator(navigationController: UINavigationController()))
+        NotificationTimeSettingView()
     }
 }
 #endif

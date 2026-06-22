@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeSelectionView: View {
-    let coordinator: AppCoordinator
+    @Environment(\.dismiss) private var dismiss
 
     // 더미 목록 / 선택
     private let homes = ["서울 집", "남양주 집"]
@@ -32,7 +32,7 @@ struct HomeSelectionView: View {
                 Spacer()
 
                 PrimaryButtonSwiftUI(title: StringLiterals.Setting.done) {
-                    coordinator.pop()
+                    dismiss()
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
@@ -95,7 +95,7 @@ private extension Color {
 #if DEBUG
 #Preview {
     NavigationStack {
-        HomeSelectionView(coordinator: AppCoordinator(navigationController: UINavigationController()))
+        HomeSelectionView()
     }
 }
 #endif
