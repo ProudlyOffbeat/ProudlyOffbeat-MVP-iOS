@@ -32,8 +32,8 @@ enum StringLiterals {
     enum Reading {
         static let settingTitle = "환경 세팅중..."
         static let settingSubtitle = "몇 분 소요될 수 있습니다."
-        static let settingDoneTitle = "책 분위기에 맞게 환경이 세팅 됐어요!"
-        static let settingDoneSubtitle = "이제 책을 더 재밌게 읽으세요!"
+        static let settingDoneTitle = "환경 세팅 완료!"
+        static let settingDoneSubtitle = "이제 재밌게 읽으세요!"
         static let stopSettingAlert = "환경 세팅을 전체 중단할까요?"
         static let stopReadingAlert = "책 읽기를 그만할까요?"
         static let close = "닫기"
@@ -46,7 +46,20 @@ enum StringLiterals {
         static let setupButton = "책 환경 세팅하기"
         static let resultTitle = "읽은 책"
         static let homeButton = "홈으로"
+        static let conversationTitle = "대화 나누기"
+        static let readingDoneTitle = "책 읽기 완료!"
+        static let talkWithChild = "아이와 대화 나누기"
+        static let readAnotherBook = "다른 책 읽기"
+        static let finishReading = "책 읽기 종료"
+        // 에러 알림 · 독서 환경 컨트롤
+        static let retry = "재시도"
+        static let lightingTitle = "조명"
+        static let musicTitle = "음악"
+        static let brightness = "밝기"
+        static let volume = "볼륨"
+        static let adjust = "조정"
         static func todayBookCount(_ count: Int) -> String { "오늘 아이에게\n책을 \(count)번 읽어줬어요!" }
+        static func todayReadBooks(_ count: Int) -> String { "오늘 \(count)권의 책을\n읽어줬어요!" }
     }
 
     enum Book {
@@ -88,6 +101,9 @@ enum StringLiterals {
 
     enum My {
         static let title = "마이"
+        static let summaryTitle = "내 독서 요약"
+        static let monthlyReadIntro = "이번 달에 책을 이만큼 읽어줬어요!"
+        static let totalReadBooks = "총 읽어준 책"
         static let monthlyBookCount = "이번 달 읽어준 횟수"
         static let totalBookCount = "총 읽은 책 수"
         static let totalReadingTime = "총 읽은 시간"
@@ -100,6 +116,35 @@ enum StringLiterals {
 
     enum Calendar {
         static let weekdays = ["일", "월", "화", "수", "목", "금", "토"]
+    }
+
+    enum Setting {
+        static let title = "설정"
+        static let childInfoSection = "아이 정보"
+        static let childAge = "아이 나이"
+        static let notificationSection = "알림"
+        static let notificationTime = "알림 시간"
+        static let environmentSection = "환경 세팅"
+        static let home = "집"
+        static let appInfoSection = "앱 정보"
+        static let version = "버전"
+        static let privacy = "개인정보처리방침"
+        static let done = "완료"
+
+        static let childAgeTitle = "아이 나이 설정"
+        static let childAgeHeadline = "아이의 나이를 알려주세요"
+        static let childAgeSubtitle = "나이에 맞는 대화 주제를 추천해드려요"
+        static let agePrefix = "만"
+        static let ageUnit = "세"
+
+        static let notificationTitle = "알림 시간 설정"
+        static let notificationHeadline = "몇시에 책을 읽어주실 건가요?"
+        static let notificationSubtitle = "매일 설정한 시간에 알람을 드릴게요"
+        static let notificationToggle = "알림 설정"
+
+        static let homeTitle = "집 선택"
+        static let homeHeadline = "어디에서 사용할 건가요?"
+        static let homeSubtitle = "나루를 사용할 집을 선택해주세요"
     }
 
     enum Onboarding {

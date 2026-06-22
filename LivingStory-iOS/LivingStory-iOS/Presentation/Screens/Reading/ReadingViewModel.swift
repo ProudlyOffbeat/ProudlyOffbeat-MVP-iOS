@@ -82,6 +82,24 @@ final class ReadingViewModel {
         audioPlayerService.resume()
     }
 
+#if DEBUG
+    /// SwiftUI 프리뷰 전용 — 원하는 상태/추천값으로 즉시 구성 (네트워크 호출 없음)
+    convenience init(
+        previewBook: BookProfileModel,
+        state: ReadingState,
+        lightingConfig: LightingConfig? = nil,
+        musicCategory: MusicCategory? = nil,
+        conversations: [ConversationProfile] = []
+    ) {
+        self.init(book: previewBook, lightingController: MockLightingController())
+        self.state = state
+        self.lightingConfig = lightingConfig
+        self.musicCategory = musicCategory
+        self.conversations = conversations
+        self.hasStarted = true // startSetup() 조기 종료 → Gemini 호출 차단
+    }
+#endif
+
     // MARK: - Public
 
     func startSetup() async {
