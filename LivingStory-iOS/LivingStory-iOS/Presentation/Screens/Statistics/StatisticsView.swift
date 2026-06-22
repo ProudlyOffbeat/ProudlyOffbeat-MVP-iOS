@@ -84,7 +84,7 @@ struct StatisticsView: View {
                 .font(.system(size: 16))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
+                        colors: [.yellow20, .green0],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -163,7 +163,7 @@ private struct SummaryWave: View {
             .trim(from: 0, to: progress)
             .stroke(
                 LinearGradient(
-                    colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68), Color(hex: 0x5AC8E8)],
+                    colors: [.yellow20, .green0, Color(hex: 0x5AC8E8)],
                     startPoint: .leading,
                     endPoint: .trailing
                 ),
@@ -228,11 +228,11 @@ private struct StatBookThumbnail: View {
                 case .success(let image):
                     image.resizable().scaledToFill()
                 default:
-                    Color(hex: 0x2C2C2E)
+                    Color(.tertiarySystemBackground)
                 }
             }
         } else {
-            Color(hex: 0x2C2C2E)
+            Color(.tertiarySystemBackground)
         }
     }
 }

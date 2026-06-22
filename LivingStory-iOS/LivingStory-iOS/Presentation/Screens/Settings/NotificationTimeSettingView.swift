@@ -33,7 +33,7 @@ struct NotificationTimeSettingView: View {
                 DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
                     .datePickerStyle(.wheel)
                     .labelsHidden()
-                    .tint(Color(hex: 0xFCDF42))
+                    .tint(.yellow60)
                     .environment(\.locale, Locale(identifier: "en_US"))
                     .padding(.top, 83)
 
@@ -44,12 +44,13 @@ struct NotificationTimeSettingView: View {
                     Spacer()
                     Toggle("", isOn: $isOn)
                         .labelsHidden()
-                        .tint(Color(hex: 0xFFCB24))
+                        .tint(.yellow20)
                 }
                 .padding(.leading, 20)
                 .padding(.trailing, 12)
                 .frame(height: 58)
-                .background(Color(hex: 0x2C2C2E), in: RoundedRectangle(cornerRadius: 26))
+                // Backgrounds/Tertiary (iOS 시스템색)
+                .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 26))
                 .padding(.horizontal, 20)
                 .padding(.top, 77)
 
@@ -66,18 +67,6 @@ struct NotificationTimeSettingView: View {
         .navigationTitle(StringLiterals.Setting.notificationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-    }
-}
-
-// MARK: - Color Helper
-
-private extension Color {
-    init(hex: UInt) {
-        self.init(
-            red: Double((hex >> 16) & 0xFF) / 255,
-            green: Double((hex >> 8) & 0xFF) / 255,
-            blue: Double(hex & 0xFF) / 255
-        )
     }
 }
 

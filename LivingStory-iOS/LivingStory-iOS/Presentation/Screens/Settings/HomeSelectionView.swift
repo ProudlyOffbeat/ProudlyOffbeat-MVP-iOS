@@ -59,7 +59,7 @@ struct HomeSelectionView: View {
                         if selectedIndex == index {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 20, weight: .semibold))
-                                .foregroundStyle(Color(hex: 0xFCDF42))
+                                .foregroundStyle(.yellow60)
                         }
                     }
                     .padding(.leading, 20)
@@ -76,7 +76,8 @@ struct HomeSelectionView: View {
                 }
             }
         }
-        .background(Color(hex: 0x2C2C2E), in: RoundedRectangle(cornerRadius: 26))
+        // Backgrounds/Tertiary (iOS 시스템색)
+        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 26))
     }
 }
 

@@ -17,7 +17,8 @@ struct SettingIntro: View {
         VStack(alignment: .leading, spacing: 36) {
             Image(systemName: systemImage)
                 .font(.system(size: 28))
-                .foregroundStyle(Color(white: 0.92).opacity(0.3))
+                // Labels/Tertiary (iOS 시스템색)
+                .foregroundStyle(Color(.tertiaryLabel))
 
             VStack(alignment: .leading, spacing: 12) {
                 Text(headline)
@@ -26,7 +27,8 @@ struct SettingIntro: View {
 
                 Text(subtitle)
                     .font(.system(size: 18, weight: .light))
-                    .foregroundStyle(Color(white: 0.92).opacity(0.7))
+                    // Labels/Secondary (iOS 시스템색)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

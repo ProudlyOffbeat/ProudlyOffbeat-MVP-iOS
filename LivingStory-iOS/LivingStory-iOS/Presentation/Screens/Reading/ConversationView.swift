@@ -80,7 +80,7 @@ private struct ConversationAccordionCard: View {
                 numberBadge
                 Text(effect)
                     .font(.system(size: 16))
-                    .foregroundStyle(Color(hex: 0xBFEE68))
+                    .foregroundStyle(.green0)
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
@@ -97,7 +97,8 @@ private struct ConversationAccordionCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(hex: 0x2C2C2E), in: RoundedRectangle(cornerRadius: 30))
+        // Backgrounds/Tertiary (iOS 시스템색)
+        .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 30))
         .contentShape(RoundedRectangle(cornerRadius: 30))
         .onTapGesture(perform: onTap)
     }
@@ -114,7 +115,7 @@ private struct ConversationAccordionCard: View {
         .padding(.vertical, 6)
         .background(
             LinearGradient(
-                colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
+                colors: [.yellow20, .green0],
                 startPoint: .leading,
                 endPoint: .trailing
             ),

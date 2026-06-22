@@ -28,7 +28,8 @@ struct ChildAgeSettingView: View {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Text("만")
                             .font(.system(size: 22))
-                            .foregroundStyle(Color(white: 0.92).opacity(0.7))
+                            // Labels/Secondary (iOS 시스템색)
+                            .foregroundStyle(Color(.secondaryLabel))
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             Text("\(age)")
                                 .font(.system(size: 66, weight: .semibold))
@@ -85,7 +86,7 @@ private struct AgeSlider: View {
                     Capsule()
                         .fill(
                             LinearGradient(
-                                colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
+                                colors: [.yellow20, .green0],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -126,20 +127,9 @@ private struct AgeSlider: View {
                 Text("\(maxAge)세")
             }
             .font(.system(size: 14))
-            .foregroundStyle(Color(white: 0.92).opacity(0.3))
+            // Labels/Tertiary (iOS 시스템색)
+            .foregroundStyle(Color(.tertiaryLabel))
         }
-    }
-}
-
-// MARK: - Color Helper
-
-private extension Color {
-    init(hex: UInt) {
-        self.init(
-            red: Double((hex >> 16) & 0xFF) / 255,
-            green: Double((hex >> 8) & 0xFF) / 255,
-            blue: Double(hex & 0xFF) / 255
-        )
     }
 }
 

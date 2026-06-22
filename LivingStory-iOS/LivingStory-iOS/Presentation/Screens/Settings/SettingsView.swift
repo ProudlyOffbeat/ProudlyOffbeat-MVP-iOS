@@ -83,7 +83,8 @@ struct SettingsView: View {
                 .padding(.leading, 4)
 
             content()
-                .background(Color(hex: 0x2C2C2E), in: RoundedRectangle(cornerRadius: 18))
+                // Backgrounds/Tertiary (iOS 시스템색)
+                .background(Color(.tertiarySystemBackground), in: RoundedRectangle(cornerRadius: 26))
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
@@ -115,7 +116,7 @@ private struct SettingsRow: View {
                 if showChevron {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color(hex: 0xFFCB24))
+                        .foregroundStyle(.yellow20)
                 }
             }
             .padding(.horizontal, 18)
@@ -124,18 +125,6 @@ private struct SettingsRow: View {
         }
         .buttonStyle(.plain)
         .disabled(action == nil)
-    }
-}
-
-// MARK: - Color Helper
-
-private extension Color {
-    init(hex: UInt) {
-        self.init(
-            red: Double((hex >> 16) & 0xFF) / 255,
-            green: Double((hex >> 8) & 0xFF) / 255,
-            blue: Double(hex & 0xFF) / 255
-        )
     }
 }
 

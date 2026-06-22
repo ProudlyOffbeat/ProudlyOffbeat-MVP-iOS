@@ -140,7 +140,7 @@ struct ReadingView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(height: 60)
-                .foregroundStyle(Color(hex: 0xEBEBF5).opacity(0.3)) // Figma: Labels/Tertiary
+                .foregroundStyle(Color(.tertiaryLabel)) // Labels/Tertiary (iOS 시스템색)
 
             VStack(spacing: 12) {
                 Text(StringLiterals.Reading.settingTitle)
@@ -162,7 +162,7 @@ struct ReadingView: View {
                 .frame(height: 72)
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [Color(hex: 0x92CFB1), Color(hex: 0xBFEE68), Color(hex: 0xFFCB24)],
+                        colors: [Color(hex: 0x92CFB1), .green0, .yellow20],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -237,7 +237,7 @@ private struct ControlCard: View {
 
     /// 채움 색(그라데이션). 네이티브 Slider tint로 넘기면 단색으로 뭉개질 수 있음(의도).
     private static let fill = LinearGradient(
-        colors: [Color(hex: 0xFFCB24), Color(hex: 0xBFEE68)],
+        colors: [.yellow20, .green0],
         startPoint: .leading,
         endPoint: .trailing
     )

@@ -59,7 +59,8 @@ struct StopReadingView: View {
                     .foregroundStyle(.white)
                 Text(book.bookTitle)
                     .font(.system(size: 18))
-                    .foregroundStyle(Color(white: 0.92).opacity(0.7))
+                    // Labels/Secondary (iOS 시스템색)
+                    .foregroundStyle(Color(.secondaryLabel))
             }
             .multilineTextAlignment(.center)
         }
