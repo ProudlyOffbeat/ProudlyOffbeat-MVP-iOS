@@ -10,6 +10,9 @@ enum ReadingState: Sendable {
 @Observable
 final class ReadingViewModel {
 
+    // TODO: 아이 나이 입력(설정) 구현 후 UserData에서 읽어오도록 교체. 현재는 임시 상수.
+    private static let childAge = 6
+
     let book: BookProfileModel
     private(set) var state: ReadingState = .setting
     private(set) var isLightingReady = false
@@ -95,16 +98,19 @@ final class ReadingViewModel {
         }
 
         do {
-            let environment = try await geminiService.generateReadingEnvironment(for: book)
+            // 2-호출 병렬: 질문(그라운딩 ON)·조명음악(JSON 강제)을 동시에 띄워 한 번에 await.
+            async let questionsTask = geminiService.generateQuestions(for: book, age: Self.childAge)
+            async let environmentTask = geminiService.generateLightingAndMusic(for: book)
+            let (conversationDTOs, environment) = try await (questionsTask, environmentTask)
 
             musicCategory = environment.musicCategory
             lightingConfig = environment.lighting
             geminiRecommendedLighting = environment.lighting
-            conversations = environment.toConversationProfiles()
+            conversations = conversationDTOs.map { $0.toProfile() }
 
             print("[Gemini] 음악: \(environment.musicCategory.rawValue)")
             print("[Gemini] 조명: H\(environment.lighting.hue) S\(environment.lighting.saturation) B\(environment.lighting.brightness)")
-            print("[Gemini] 대화 주제: \(environment.conversations.count)개")
+            print("[Gemini] 대화 주제: \(conversationDTOs.count)개")
 
             // 펄스 중지 → Gemini 색상 적용
             AppLightingService.shared.isReadingActive = true
