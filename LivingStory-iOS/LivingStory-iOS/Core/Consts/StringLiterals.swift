@@ -51,6 +51,13 @@ enum StringLiterals {
         static let talkWithChild = "아이와 대화 나누기"
         static let readAnotherBook = "다른 책 읽기"
         static let finishReading = "책 읽기 종료"
+        // 에러 알림 · 독서 환경 컨트롤
+        static let retry = "재시도"
+        static let lightingTitle = "조명"
+        static let musicTitle = "음악"
+        static let brightness = "밝기"
+        static let volume = "볼륨"
+        static let adjust = "조정"
         static func todayBookCount(_ count: Int) -> String { "오늘 아이에게\n책을 \(count)번 읽어줬어요!" }
         static func todayReadBooks(_ count: Int) -> String { "오늘 \(count)권의 책을\n읽어줬어요!" }
     }
@@ -127,6 +134,8 @@ enum StringLiterals {
         static let childAgeTitle = "아이 나이 설정"
         static let childAgeHeadline = "아이의 나이를 알려주세요"
         static let childAgeSubtitle = "나이에 맞는 대화 주제를 추천해드려요"
+        static let agePrefix = "만"
+        static let ageUnit = "세"
 
         static let notificationTitle = "알림 시간 설정"
         static let notificationHeadline = "몇시에 책을 읽어주실 건가요?"

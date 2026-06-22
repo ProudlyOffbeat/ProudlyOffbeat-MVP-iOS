@@ -84,10 +84,10 @@ struct ReadingView: View {
                 set: { _ in }
             )
         ) {
-            Button("재시도", role: .cancel) {
+            Button(StringLiterals.Reading.retry, role: .cancel) {
                 Task { await viewModel.retry() }
             }
-            Button("닫기", role: .destructive) {
+            Button(StringLiterals.Reading.close, role: .destructive) {
                 coordinator.pop()
             }
         }
@@ -262,8 +262,8 @@ private struct ControlCard: View {
         VStack(spacing: 16) {
             EnvControlRow(
                 symbol: .lightbulb,
-                title: "조명",
-                valueLabel: "밝기",
+                title: StringLiterals.Reading.lightingTitle,
+                valueLabel: StringLiterals.Reading.brightness,
                 value: brightnessBinding,
                 range: 0...100,
                 fill: Self.fill,
@@ -283,8 +283,8 @@ private struct ControlCard: View {
 
             EnvControlRow(
                 symbol: .speaker,
-                title: "음악",
-                valueLabel: "볼륨",
+                title: StringLiterals.Reading.musicTitle,
+                valueLabel: StringLiterals.Reading.volume,
                 value: volumeBinding,
                 range: 0...1,
                 fill: Self.fill
@@ -370,7 +370,7 @@ private struct AdjustPill: View {
         HStack(spacing: 4) {
             Image(.sliderHorizontal)
                 .font(.system(size: 11, weight: .semibold))
-            Text("조정")
+            Text(StringLiterals.Reading.adjust)
                 .font(.labelMedium)
         }
         .foregroundStyle(.white)
