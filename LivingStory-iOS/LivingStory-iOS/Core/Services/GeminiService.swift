@@ -63,9 +63,9 @@ final class GeminiService: Sendable {
     // (두 함수는 서로 독립적이라 async let 등으로 동시에 await 하면 wall-clock 손해가 없다.)
 
     /// 호출 A — 책을 웹검색으로 조사해 연령 맞춤 질문 3개를 생성한다.
-    /// 그라운딩 ON이라 JSON 강제가 불가능 → "1) 2) 3)" 번호줄 텍스트를 정규식으로 파싱한다.
+    /// 그라운딩 ON이라 JSON 강제가 불가능 → "번호) 질문 || 효과" 번호줄 텍스트를 정규식으로 파싱한다.
     /// - Parameter age: 아이 나이(연령별 질문 깊이 기준표 적용).
-    func generateQuestions(for book: BookProfileModel, age: Int) async throws -> [String] {
+    func generateQuestions(for book: BookProfileModel, age: Int) async throws -> [ConversationDTO] {
         let prompt = GeminiPrompts.questions(
             bookTitle: book.bookTitle,
             isbn: book.isbn,
@@ -207,23 +207,27 @@ final class GeminiService: Sendable {
         }
     }
 
-    /// 호출 A 응답(번호줄 텍스트)에서 질문만 골라낸다. "1)", "2.", "3]" 등 번호 접두를 허용.
+    /// 호출 A 응답(번호줄 텍스트)에서 "질문 || 효과"를 골라낸다. "1)", "2.", "3]" 등 번호 접두 허용.
     /// 그라운딩 응답엔 인용·잔말이 섞일 수 있어 번호줄만 정규식으로 추출한다(부분 복구 가능).
-    private func parseQuestions(from text: String) throws -> [String] {
-        let questions: [String] = text
+    /// 효과 구분자(||)가 빠진 줄은 질문만 살리고 효과는 빈 값으로 둔다(질문 손실 방지).
+    private func parseQuestions(from text: String) throws -> [ConversationDTO] {
+        let conversations: [ConversationDTO] = text
             .split(separator: "\n", omittingEmptySubsequences: true)
             .compactMap { line in
                 let trimmed = line.trimmingCharacters(in: .whitespaces)
                 guard let range = trimmed.range(of: #"^\d+\s*[\).\]]\s*"#, options: .regularExpression) else {
                     return nil
                 }
-                let question = String(trimmed[range.upperBound...]).trimmingCharacters(in: .whitespaces)
-                return question.isEmpty ? nil : question
+                let body = String(trimmed[range.upperBound...])
+                let parts = body.components(separatedBy: "||")
+                let question = parts[0].trimmingCharacters(in: .whitespaces)
+                let effect = parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) : ""
+                return question.isEmpty ? nil : ConversationDTO(question: question, effect: effect)
             }
 
-        guard !questions.isEmpty else {
+        guard !conversations.isEmpty else {
             throw GeminiError.decodingError("질문 파싱 실패 (번호줄 형식 없음)")
         }
-        return questions
+        return conversations
     }
 }
