@@ -9,13 +9,13 @@ import SwiftUI
 
 /// 아이콘 + 헤드라인 + 서브타이틀 (좌측 정렬)
 struct SettingIntro: View {
-    let systemImage: String
+    let symbol: SymbolLiterals
     let headline: String
     let subtitle: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 36) {
-            Image(systemName: systemImage)
+            Image(symbol)
                 .font(.system(size: 28))
                 // Labels/Tertiary (iOS 시스템색)
                 .foregroundStyle(Color(.tertiaryLabel))

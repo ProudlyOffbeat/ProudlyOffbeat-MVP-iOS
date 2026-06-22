@@ -20,7 +20,7 @@ struct HomeSelectionView: View {
 
             VStack(spacing: 0) {
                 SettingIntro(
-                    systemImage: "house.fill",
+                    symbol: .home,
                     headline: StringLiterals.Setting.homeHeadline,
                     subtitle: StringLiterals.Setting.homeSubtitle
                 )
@@ -57,7 +57,7 @@ struct HomeSelectionView: View {
                             .foregroundStyle(.white)
                         Spacer()
                         if selectedIndex == index {
-                            Image(systemName: "checkmark")
+                            Image(.checkmark)
                                 .font(.system(size: 20, weight: .semibold))
                                 .foregroundStyle(.yellow60)
                         }

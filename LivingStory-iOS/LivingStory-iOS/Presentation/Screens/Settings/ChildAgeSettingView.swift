@@ -18,7 +18,7 @@ struct ChildAgeSettingView: View {
 
             VStack(spacing: 0) {
                 SettingIntro(
-                    systemImage: "figure.and.child.holdinghands",
+                    symbol: .childHands,
                     headline: StringLiterals.Setting.childAgeHeadline,
                     subtitle: StringLiterals.Setting.childAgeSubtitle
                 )

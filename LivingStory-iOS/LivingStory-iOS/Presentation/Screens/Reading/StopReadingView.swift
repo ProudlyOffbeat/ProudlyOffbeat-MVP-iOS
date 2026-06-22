@@ -71,7 +71,7 @@ struct StopReadingView: View {
             coordinator.showConversation(conversations: conversations)
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: "ellipsis.message.fill")
+                Image(.conversation)
                     .font(.system(size: 13))
                 Text(StringLiterals.Reading.talkWithChild)
                     .font(.buttonSmallMedium)

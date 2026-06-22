@@ -67,7 +67,7 @@ struct ResultView: View {
                 Button {
                     coordinator.pop()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(.back)
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(.white)
                 }
@@ -85,7 +85,7 @@ struct ResultView: View {
 
     private var flameRow: some View {
         HStack(spacing: 4) {
-            Image(systemName: "flame.fill")
+            Image(.flame)
                 .font(.system(size: 18))
                 .foregroundStyle(
                     LinearGradient(

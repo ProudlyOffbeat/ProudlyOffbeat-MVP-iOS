@@ -36,6 +36,7 @@ enum SymbolLiterals: String {
     case book = "book.fill"
     case person = "person.fill"
     case settings = "gearshape"
+    case settingsFill = "gearshape.fill"
 
     // MARK: - Navigation
 
@@ -77,6 +78,7 @@ enum SymbolLiterals: String {
     case calendar = "calendar"
     case books = "books.vertical.fill"
     case clock = "clock"
+    case flame = "flame.fill"
 
     // MARK: - Reading
 
@@ -88,6 +90,13 @@ enum SymbolLiterals: String {
     case timer = "timer"
     case moon = "moon.fill"
     case sun = "sun.max.fill"
+    case waveform = "waveform"
+    case sliderHorizontal = "slider.horizontal.3"
+
+    // MARK: - Settings
+
+    case childHands = "figure.and.child.holdinghands"
+    case alarm = "alarm.fill"
 }
 
 // MARK: - SwiftUI Extension

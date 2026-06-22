@@ -50,7 +50,7 @@ struct ConversationView: View {
                 Button {
                     coordinator.pop()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(.back)
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(.white)
                 }
@@ -105,7 +105,7 @@ private struct ConversationAccordionCard: View {
 
     private var numberBadge: some View {
         HStack(spacing: 4) {
-            Image(systemName: "ellipsis.message.fill")
+            Image(.conversation)
                 .font(.system(size: 11))
             Text(String(format: "%02d", index + 1))
                 .font(.footnoteEmphasized)

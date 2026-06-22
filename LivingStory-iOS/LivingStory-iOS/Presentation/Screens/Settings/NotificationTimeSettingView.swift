@@ -25,7 +25,7 @@ struct NotificationTimeSettingView: View {
 
             VStack(spacing: 0) {
                 SettingIntro(
-                    systemImage: "alarm.fill",
+                    symbol: .alarm,
                     headline: StringLiterals.Setting.notificationHeadline,
                     subtitle: StringLiterals.Setting.notificationSubtitle
                 )

@@ -62,7 +62,7 @@ struct SettingsView: View {
                 Button {
                     coordinator.pop()
                 } label: {
-                    Image(systemName: "chevron.left")
+                    Image(.back)
                         .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(.white)
                 }
@@ -114,7 +114,7 @@ private struct SettingsRow: View {
                         .foregroundStyle(Color(white: 0.92).opacity(0.5))
                 }
                 if showChevron {
-                    Image(systemName: "chevron.right")
+                    Image(.forward)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.yellow20)
                 }

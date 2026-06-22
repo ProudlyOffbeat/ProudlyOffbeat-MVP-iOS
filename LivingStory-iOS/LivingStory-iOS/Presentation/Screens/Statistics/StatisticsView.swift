@@ -59,7 +59,7 @@ struct StatisticsView: View {
                 Button {
                     coordinator.showSettings()
                 } label: {
-                    Image(systemName: "gearshape.fill")
+                    Image(.settingsFill)
                         .foregroundStyle(.white)
                 }
             }
@@ -80,7 +80,7 @@ struct StatisticsView: View {
 
     private var flameBadge: some View {
         HStack(spacing: 4) {
-            Image(systemName: "flame.fill")
+            Image(.flame)
                 .font(.system(size: 16))
                 .foregroundStyle(
                     LinearGradient(
@@ -135,7 +135,7 @@ struct StatisticsView: View {
                     .font(.body2Regular)
                     .foregroundStyle(.white)
                 Spacer()
-                Image(systemName: "chevron.right")
+                Image(.forward)
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(Color(white: 0.92).opacity(0.4))
             }

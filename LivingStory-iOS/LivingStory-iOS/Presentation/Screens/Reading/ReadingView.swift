@@ -261,7 +261,7 @@ private struct ControlCard: View {
     var body: some View {
         VStack(spacing: 16) {
             EnvControlRow(
-                systemImage: "lightbulb.fill",
+                symbol: .lightbulb,
                 title: "조명",
                 valueLabel: "밝기",
                 value: brightnessBinding,
@@ -282,7 +282,7 @@ private struct ControlCard: View {
                 .padding(.horizontal, 8)
 
             EnvControlRow(
-                systemImage: "speaker.wave.2.fill",
+                symbol: .speaker,
                 title: "음악",
                 valueLabel: "볼륨",
                 value: volumeBinding,
@@ -299,7 +299,7 @@ private struct ControlCard: View {
                     )
                     .frame(width: 56, height: 56)
                     .overlay {
-                        Image(systemName: "waveform")
+                        Image(.waveform)
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundStyle(.white)
                     }
@@ -312,7 +312,7 @@ private struct ControlCard: View {
 }
 
 private struct EnvControlRow<Leading: View>: View {
-    let systemImage: String
+    let symbol: SymbolLiterals
     let title: String
     let valueLabel: String
     @Binding var value: Double
@@ -331,7 +331,7 @@ private struct EnvControlRow<Leading: View>: View {
         VStack(spacing: 16) {
             HStack {
                 HStack(spacing: 6) {
-                    Image(systemName: systemImage)
+                    Image(symbol)
                         .font(.system(size: 15, weight: .semibold))
                     Text(title)
                         .font(.body2Medium)
@@ -368,7 +368,7 @@ private struct AdjustPill: View {
     var body: some View {
         // 동작 보류 (시각 전용) — 추후 조정 화면 연동
         HStack(spacing: 4) {
-            Image(systemName: "slider.horizontal.3")
+            Image(.sliderHorizontal)
                 .font(.system(size: 11, weight: .semibold))
             Text("조정")
                 .font(.labelMedium)
