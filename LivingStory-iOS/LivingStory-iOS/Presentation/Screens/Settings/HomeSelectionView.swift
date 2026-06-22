@@ -53,7 +53,7 @@ struct HomeSelectionView: View {
                 } label: {
                     HStack {
                         Text(name)
-                            .font(.system(size: 16))
+                            .font(.calloutRegular)
                             .foregroundStyle(.white)
                         Spacer()
                         if selectedIndex == index {

@@ -39,7 +39,7 @@ struct NotificationTimeSettingView: View {
 
                 HStack {
                     Text(StringLiterals.Setting.notificationToggle)
-                        .font(.system(size: 16))
+                        .font(.calloutRegular)
                         .foregroundStyle(.white)
                     Spacer()
                     Toggle("", isOn: $isOn)

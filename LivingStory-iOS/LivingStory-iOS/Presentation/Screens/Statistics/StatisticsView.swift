@@ -71,7 +71,7 @@ struct StatisticsView: View {
     private var titleRow: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(StringLiterals.My.summaryTitle)
-                .font(.system(size: 28, weight: .bold))
+                .font(.title1Emphasized)
                 .foregroundStyle(.white)
             Spacer()
             flameBadge
@@ -90,7 +90,7 @@ struct StatisticsView: View {
                     )
                 )
             Text("\(flameCount)")
-                .font(.system(size: 18, weight: .semibold))
+                .font(.body2SemiBold)
                 .foregroundStyle(.white)
         }
     }
@@ -101,18 +101,18 @@ struct StatisticsView: View {
         ZStack(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(monthLabel)
-                    .font(.system(size: 16))
+                    .font(.calloutRegular)
                     .foregroundStyle(Color(white: 0.92).opacity(0.6))
                 Text(StringLiterals.My.monthlyReadIntro)
-                    .font(.system(size: 20, weight: .regular))
+                    .font(.body1Regular)
                     .foregroundStyle(.white)
                     .padding(.top, 12)
 
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text("\(monthlyCount)")
-                        .font(.system(size: 56, weight: .medium))
+                        .font(.largeTitleMedium)
                     Text(StringLiterals.My.readingUnit)
-                        .font(.system(size: 30, weight: .medium))
+                        .font(.title2Medium)
                 }
                 .foregroundStyle(.white)
                 .padding(.top, 16)
@@ -129,10 +129,10 @@ struct StatisticsView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 8) {
                 Text(StringLiterals.My.totalReadBooks)
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.body2Medium)
                     .foregroundStyle(.white)
                 Text("\(totalReadCount)")
-                    .font(.system(size: 18, weight: .regular))
+                    .font(.body2Regular)
                     .foregroundStyle(.white)
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -211,7 +211,7 @@ private struct StatBookThumbnail: View {
                 .clipShape(RoundedRectangle(cornerRadius: 4))
 
             Text(title)
-                .font(.system(size: 14, weight: .medium))
+                .font(.labelMedium)
                 .foregroundStyle(.white)
                 .opacity(0.7)
                 .lineLimit(1)

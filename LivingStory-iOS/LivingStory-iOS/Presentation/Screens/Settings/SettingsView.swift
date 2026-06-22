@@ -78,7 +78,7 @@ struct SettingsView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.system(size: 14))
+                .font(.labelRegular)
                 .foregroundStyle(Color(white: 0.92).opacity(0.4))
                 .padding(.leading, 4)
 
@@ -105,12 +105,12 @@ private struct SettingsRow: View {
         } label: {
             HStack(spacing: 8) {
                 Text(title)
-                    .font(.system(size: 16))
+                    .font(.calloutRegular)
                     .foregroundStyle(.white)
                 Spacer()
                 if let value {
                     Text(value)
-                        .font(.system(size: 16))
+                        .font(.calloutRegular)
                         .foregroundStyle(Color(white: 0.92).opacity(0.5))
                 }
                 if showChevron {

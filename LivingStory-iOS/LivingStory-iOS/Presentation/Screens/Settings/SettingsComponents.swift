@@ -22,11 +22,11 @@ struct SettingIntro: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 Text(headline)
-                    .font(.system(size: 26, weight: .semibold))
+                    .font(.title3SemiBold)
                     .foregroundStyle(.white)
 
                 Text(subtitle)
-                    .font(.system(size: 18, weight: .light))
+                    .font(.body2Light)
                     // Labels/Secondary (iOS 시스템색)
                     .foregroundStyle(Color(.secondaryLabel))
             }

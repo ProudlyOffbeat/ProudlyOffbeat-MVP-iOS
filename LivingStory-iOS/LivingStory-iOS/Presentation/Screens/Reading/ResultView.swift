@@ -37,7 +37,7 @@ struct ResultView: View {
                 Spacer().frame(height: 30)
 
                 Text(StringLiterals.Reading.todayReadBooks(todaySessions.count))
-                    .font(.system(size: 24, weight: .medium))
+                    .font(.headlineMedium)
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .lineSpacing(6)
@@ -98,7 +98,7 @@ struct ResultView: View {
                     )
                 )
             Text("\(flameCount)")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.body1SemiBold)
                 .foregroundStyle(.white)
         }
     }
@@ -137,7 +137,7 @@ private struct ResultBookThumbnail: View {
                 .clipShape(RoundedRectangle(cornerRadius: 4))
 
             Text(title)
-                .font(.system(size: 14, weight: .medium))
+                .font(.labelMedium)
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .truncationMode(.tail)

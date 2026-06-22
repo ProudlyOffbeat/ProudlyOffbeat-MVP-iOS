@@ -27,15 +27,15 @@ struct ChildAgeSettingView: View {
                 VStack(spacing: 36) {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Text("만")
-                            .font(.system(size: 22))
+                            .font(.display3Regular)
                             // Labels/Secondary (iOS 시스템색)
                             .foregroundStyle(Color(.secondaryLabel))
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             Text("\(age)")
-                                .font(.system(size: 66, weight: .semibold))
+                                .font(.display1SemiBold)
                                 .foregroundStyle(.white)
                             Text("세")
-                                .font(.system(size: 28, weight: .semibold))
+                                .font(.display2SemiBold)
                                 .foregroundStyle(.white)
                         }
                     }
@@ -126,7 +126,7 @@ private struct AgeSlider: View {
                 Spacer()
                 Text("\(maxAge)세")
             }
-            .font(.system(size: 14))
+            .font(.labelRegular)
             // Labels/Tertiary (iOS 시스템색)
             .foregroundStyle(Color(.tertiaryLabel))
         }

@@ -55,10 +55,10 @@ struct StopReadingView: View {
 
             VStack(spacing: 12) {
                 Text(StringLiterals.Reading.readingDoneTitle)
-                    .font(.system(size: 24, weight: .medium))
+                    .font(.headlineMedium)
                     .foregroundStyle(.white)
                 Text(book.bookTitle)
-                    .font(.system(size: 18))
+                    .font(.body2Regular)
                     // Labels/Secondary (iOS 시스템색)
                     .foregroundStyle(Color(.secondaryLabel))
             }
@@ -74,7 +74,7 @@ struct StopReadingView: View {
                 Image(systemName: "ellipsis.message.fill")
                     .font(.system(size: 13))
                 Text(StringLiterals.Reading.talkWithChild)
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.buttonSmallMedium)
             }
             .foregroundStyle(Color(hex: 0xF5F5F5))
             .padding(.horizontal, 20)
@@ -95,7 +95,7 @@ struct StopReadingView: View {
                     .glassEffect()
                     .overlay {
                         Text(StringLiterals.Reading.readAnotherBook)
-                            .font(.system(size: 17, weight: .medium))
+                            .font(.buttonMedium)
                             .foregroundStyle(Color(hex: 0xBFBFBF))
                     }
             }

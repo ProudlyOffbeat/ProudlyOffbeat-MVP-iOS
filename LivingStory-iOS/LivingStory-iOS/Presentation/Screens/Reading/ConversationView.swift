@@ -79,7 +79,7 @@ private struct ConversationAccordionCard: View {
             HStack(spacing: 12) {
                 numberBadge
                 Text(effect)
-                    .font(.system(size: 16))
+                    .font(.calloutRegular)
                     .foregroundStyle(.green0)
                     .lineLimit(1)
                     .truncationMode(.tail)
@@ -87,7 +87,7 @@ private struct ConversationAccordionCard: View {
 
             if isExpanded {
                 Text(question)
-                    .font(.system(size: 24, weight: .medium))
+                    .font(.headlineMedium)
                     .foregroundStyle(.white)
                     .lineSpacing(8)
                     .fixedSize(horizontal: false, vertical: true)
@@ -108,7 +108,7 @@ private struct ConversationAccordionCard: View {
             Image(systemName: "ellipsis.message.fill")
                 .font(.system(size: 11))
             Text(String(format: "%02d", index + 1))
-                .font(.system(size: 13, weight: .semibold))
+                .font(.footnoteEmphasized)
         }
         .foregroundStyle(Color(hex: 0x121212))
         .padding(.horizontal, 10)
