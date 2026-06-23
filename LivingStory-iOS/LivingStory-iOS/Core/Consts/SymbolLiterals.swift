@@ -92,6 +92,8 @@ enum SymbolLiterals: String {
     case sun = "sun.max.fill"
     case waveform = "waveform"
     case sliderHorizontal = "slider.horizontal.3"
+    case eyedropper = "eyedropper"
+    case sparkles = "sparkles"
 
     // MARK: - Settings
 

@@ -58,6 +58,10 @@ enum StringLiterals {
         static let brightness = "밝기"
         static let volume = "볼륨"
         static let adjust = "조정"
+        // 조명 조정 시트
+        static let lightingAdjustTitle = "조명 조정"
+        static let saturation = "채도"
+        static let done = "완료"
         static func todayBookCount(_ count: Int) -> String { "오늘 아이에게\n책을 \(count)번 읽어줬어요!" }
         static func todayReadBooks(_ count: Int) -> String { "오늘 \(count)권의 책을\n읽어줬어요!" }
     }

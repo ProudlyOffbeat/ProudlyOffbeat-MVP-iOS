@@ -110,7 +110,8 @@ final class AppCoordinator: Coordinator {
     /// 독서 중 화면 (SwiftUI)
     func showReading(book: BookProfileModel) {
         let lightingController: any LightingControllable
-        #if DEBUG
+        // 시뮬레이터엔 HomeKit이 없어 Mock, 실기기(Debug/Release 모두)는 실제 제어
+        #if targetEnvironment(simulator)
         lightingController = MockLightingController()
         #else
         lightingController = HomeKitLightingController()
