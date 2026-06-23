@@ -459,7 +459,7 @@ private extension Color {
                 previewBook: .mockISBN,
                 state: .reading,
                 lightingConfig: LightingConfig(hue: 40, saturation: 80, brightness: 70),
-                musicCategory: .forest
+                musicCategory: .fairytale
             )
         )
     }

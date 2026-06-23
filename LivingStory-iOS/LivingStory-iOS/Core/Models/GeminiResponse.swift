@@ -41,7 +41,7 @@ extension ReadingEnvironment {
     }
 
     static let mock = ReadingEnvironment(
-        musicCategory: .fantasy,
+        musicCategory: .dreamy,
         lighting: LightingConfig(hue: 280, saturation: 50, brightness: 65),
         conversations: [
             ConversationDTO(

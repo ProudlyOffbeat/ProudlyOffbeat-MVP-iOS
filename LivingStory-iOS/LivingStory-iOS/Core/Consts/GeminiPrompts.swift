@@ -85,9 +85,11 @@ nonisolated enum GeminiPrompts: Sendable {
         - 밝기(brightness): '수면 유도' 고정 기준 → 10~30. 취침 직전 멜라토닌 분비를 위해 촛불처럼 어둑하게.
         - 채도(saturation): '수면 유도' 고정 기준 → 40~70. 포근하되 자극적이지 않게.
 
-        음악: 차분하고 느린 템포만. musicCategory는 다음 중 하나: \(MusicCategory.promptList)
+        음악: 차분하고 느린 템포만. 책의 분위기·핵심 정서에 가장 어울리는 무드 하나를 아래에서 골라라.
+        musicCategory는 다음 12개 중 하나의 '영문 토큰'으로만 답하라(설명 문구 말고 토큰만):
+        \(MusicCategory.promptList)
 
-        JSON으로만 답하라: { "lighting": {"hue": 0~360 정수, "saturation": 0~100 정수, "brightness": 0~100 정수}, "musicCategory": "..." }
+        JSON으로만 답하라: { "lighting": {"hue": 0~360 정수, "saturation": 0~100 정수, "brightness": 0~100 정수}, "musicCategory": "Warm 등 12개 토큰 중 하나" }
         """
     }
 
@@ -117,7 +119,8 @@ nonisolated enum GeminiPrompts: Sendable {
         }
 
         ## 규칙
-        1. musicCategory는 다음 중 하나: \(MusicCategory.promptList)
+        1. musicCategory는 다음 12개 중 하나의 '영문 토큰'으로만(설명 말고 토큰만):
+        \(MusicCategory.promptList)
         2. lighting은 책 분위기에 맞는 색상/밝기 (hue: 0~360, saturation: 0~100, brightness: 0~100)
         3. conversations는 정확히 3개, 책 내용 기반 대화 주제
         4. 모든 텍스트는 한국어로 작성
