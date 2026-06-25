@@ -39,4 +39,24 @@
         <relationship name="book" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="BookEntity" inverseName="sessions" inverseEntity="BookEntity"/>
         <relationship name="conversations" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ConversationEntity" inverseName="session" inverseEntity="ConversationEntity"/>
     </entity>
+    <entity name="EnvironmentSettingEntity" representedClassName=".EnvironmentSettingEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="childAge" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="homeID" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="readingHour" attributeType="Integer 16" defaultValueString="20" usesScalarValueType="YES"/>
+        <attribute name="readingMinute" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="deviceConfigs" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="DeviceConfigEntity" inverseName="setting" inverseEntity="DeviceConfigEntity"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="homeID"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+    <entity name="DeviceConfigEntity" representedClassName=".DeviceConfigEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="deviceID" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isEnabled" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="kind" attributeType="String"/>
+        <attribute name="roomID" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="setting" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EnvironmentSettingEntity" inverseName="deviceConfigs" inverseEntity="EnvironmentSettingEntity"/>
+    </entity>
 </model>

@@ -21,10 +21,12 @@ final class AppCoordinator: Coordinator {
     }
 
     func start() {
-        if UserData.hasCompletedOnboarding {
-            setupTabBar()
+        if !UserData.hasCompletedOnboarding {
+            showOnboarding()                 // 최초: 스플래시 + 권한
+        } else if !UserData.hasCompletedInitialSetup {
+            showOnboardingSetting()          // 권한은 됐지만 세팅 미완 → 세팅 재개
         } else {
-            showOnboarding()
+            setupTabBar()                    // 둘 다 완료 → 메인 (코치마크 없이)
         }
     }
 
@@ -202,8 +204,29 @@ final class AppCoordinator: Coordinator {
         navigationController.setViewControllers([vc], animated: false)
     }
 
-    /// 온보딩 완료 → 메인 탭 + 코치마크
+    /// 온보딩(권한 결정) 완료 → 첫 세팅(미완료 시) 또는 메인
     func completeOnboarding() {
+        if UserData.hasCompletedInitialSetup {
+            enterMain()
+        } else {
+            showOnboardingSetting()
+        }
+    }
+
+    /// 첫 실행 환경 세팅 플로우 (SwiftUI) — VM 생성·완료 와이어링·주입은 여기서
+    func showOnboardingSetting() {
+        let viewModel = OnboardingFlowViewModel()
+        viewModel.onCompleted = { [weak self] in
+            self?.enterMain()
+        }
+        let view = OnboardingFlowView(viewModel: viewModel)
+        let hostingVC = UIHostingController(rootView: view)
+        navigationController.setNavigationBarHidden(true, animated: false)
+        navigationController.setViewControllers([hostingVC], animated: true)
+    }
+
+    /// 메인 탭 + 코치마크 진입
+    func enterMain() {
         setupTabBar()
         showCoachMarks()
     }

@@ -8,22 +8,23 @@
 //  온보딩 화면 (런치스크린 → HomeKit 권한 요청)
 //  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //
-//  런치스크린과 동일한 배경(yellow0)으로 자연스럽게 이어지며,
-//  HMHomeManager 초기화를 통해 시스템 HomeKit 권한 다이얼로그를 표시한다.
+//  런치스크린과 동일한 검정 배경(.primary)으로 자연스럽게 이어지며,
+//  HomeKitManager(서비스) 초기화를 통해 시스템 HomeKit 권한 다이얼로그를 표시한다.
 //  권한 결과와 무관하게 메인 탭으로 전환한다.
 //  (Home 탭이 자체적으로 권한 상태를 처리)
 //
 
 import UIKit
-import HomeKit
 
-final class OnboardingViewController: UIViewController {
+final class OnboardingViewController: BaseViewController {
 
     // MARK: - Properties
 
     weak var coordinator: AppCoordinator?
-    private var homeManager: HMHomeManager?
-
+    private var homeKitManager: HomeKitManager?
+    
+    override var backgroundStyle: ScreenBackgroundColor { .primary }
+    
     // MARK: - UI Components
 
     private let logoImageView: UIImageView = {
@@ -40,6 +41,15 @@ final class OnboardingViewController: UIViewController {
         label.textColor = .white
         label.textAlignment = .center
         return label
+    }()
+
+    private lazy var contentStackView: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [logoImageView, subtitleLabel])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 44                  // ← 런치스크린 Spacing과 동일
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
     }()
 
     // MARK: - Lifecycle
@@ -62,25 +72,24 @@ final class OnboardingViewController: UIViewController {
 private extension OnboardingViewController {
 
     func setupStyle() {
-        view.backgroundColor = UIColor(named: "yellow0")
+        // 배경은 BaseViewController가 backgroundStyle(.primary)로 처리 → 여기서 따로 칠하지 않음
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
     func setupHierarchy() {
-        view.addSubview(logoImageView)
-        view.addSubview(subtitleLabel)
+        view.addSubview(contentStackView)
     }
 
     func setupLayout() {
         logoImageView.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -30),
+            contentStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            contentStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -40),  // ← 런치스크린과 동일하게
 
-            subtitleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            subtitleLabel.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 14)
+            logoImageView.widthAnchor.constraint(equalToConstant: 150),                              // ← 런치스크린 Width와 동일
+            logoImageView.heightAnchor.constraint(equalTo: logoImageView.widthAnchor,
+                                                  multiplier: 117.0 / 210.0)                          // 210:117 비율
         ])
     }
 }
@@ -89,32 +98,16 @@ private extension OnboardingViewController {
 
 private extension OnboardingViewController {
 
+    /// HomeKitManager(서비스) 초기화로 권한 다이얼로그를 띄우고,
+    /// 권한 결과(허용/거부)와 무관하게 메인으로 진입한다.
     func requestHomeKitPermission() {
-        let manager = HMHomeManager()
-        homeManager = manager
-        manager.delegate = self
+        let manager = HomeKitManager()
+        homeKitManager = manager
+        manager.onHomesUpdated = { [weak self] _ in self?.proceedToMain() }
+        manager.onPermissionDenied = { [weak self] in self?.proceedToMain() }
 
-        // 이미 권한이 결정된 상태면 delegate가 안 올 수 있으므로 바로 진입
-        let status = manager.authorizationStatus
-        if status.contains(.determined) {
-            proceedToMain()
-        }
-    }
-}
-
-// MARK: - HMHomeManagerDelegate
-
-extension OnboardingViewController: HMHomeManagerDelegate {
-
-    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        proceedToMain()
-    }
-
-    /// 권한 상태 변경 시 호출 (거부 시 homeManagerDidUpdateHomes가 안 올 수 있음)
-    func homeManager(_ manager: HMHomeManager, didUpdate status: HMHomeManagerAuthorizationStatus) {
-        if status.contains(.determined) {
-            proceedToMain()
-        }
+        // 이미 권한이 결정된 상태면 즉시 콜백 → 바로 진입
+        manager.checkInitialStatus()
     }
 }
 
@@ -124,9 +117,8 @@ private extension OnboardingViewController {
 
     func proceedToMain() {
         // 중복 호출 방지
-        guard homeManager != nil else { return }
-        homeManager?.delegate = nil
-        homeManager = nil
+        guard homeKitManager != nil else { return }
+        homeKitManager = nil
 
         UserData.hasCompletedOnboarding = true
         coordinator?.completeOnboarding()
