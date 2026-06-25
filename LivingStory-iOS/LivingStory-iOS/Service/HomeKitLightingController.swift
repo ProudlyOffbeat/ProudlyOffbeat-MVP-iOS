@@ -176,10 +176,7 @@ extension HomeKitLightingController: HMHomeManagerDelegate {
 
     nonisolated func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
         Task { @MainActor in
-            if let continuation = homesLoadedContinuation {
-                homesLoadedContinuation = nil
-                continuation.resume(returning: manager.homes)
-            }
+            self.resumeHomesContinuation(with: manager.homes)
         }
     }
 }
@@ -196,8 +193,13 @@ private extension HomeKitLightingController {
 
         return try await withThrowingTaskGroup(of: [HMHome].self) { group in
             group.addTask { @MainActor in
-                await withCheckedContinuation { continuation in
-                    self.homesLoadedContinuation = continuation
+                await withTaskCancellationHandler {
+                    await withCheckedContinuation { continuation in
+                        self.homesLoadedContinuation = continuation
+                    }
+                } onCancel: {
+                    // 타임아웃/취소 시에도 continuation을 반드시 resume → 누수 방지
+                    Task { @MainActor in self.resumeHomesContinuation(with: []) }
                 }
             }
             group.addTask {
@@ -209,6 +211,13 @@ private extension HomeKitLightingController {
             group.cancelAll()
             return result
         }
+    }
+
+    /// continuation을 한 번만 resume (delegate·취소 양쪽에서 호출, 중복 resume 방지)
+    func resumeHomesContinuation(with homes: [HMHome]) {
+        guard let continuation = homesLoadedContinuation else { return }
+        homesLoadedContinuation = nil
+        continuation.resume(returning: homes)
     }
 
     /// 집 안의 모든 조명 서비스 찾기
