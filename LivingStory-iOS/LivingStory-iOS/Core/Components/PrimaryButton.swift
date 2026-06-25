@@ -65,22 +65,21 @@ final class PrimaryButton: UIButton {
 // MARK: - SwiftUI Version
 
 struct PrimaryButtonSwiftUI: View {
-    @Environment(\.colorScheme) var scheme
     let title: String
+    var height: CGFloat = 52
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Capsule()
-                .frame(height: 52)
-                .foregroundStyle(scheme == .dark ? .clear : .black)
-                .glassEffect()
-                .overlay {
-                    Text(title)
-                        .font(.body2Medium)
-                        .foregroundStyle(.white)
-                }
+            Text(title)
+                .font(.body2Medium)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: height)
+                .contentShape(.capsule)
         }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.tint(.black).interactive(), in: .capsule)   // 검정 글래스(#74)
     }
 }
 

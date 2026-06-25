@@ -54,7 +54,7 @@ final class CoachMarkOverlayView: UIView {
         Step(title: StringLiterals.TabBar.book,
              message: StringLiterals.Onboarding.coachMark1,
              tabIndex: 1),
-        Step(title: StringLiterals.TabBar.home,
+        Step(title: "환경 세팅",
              message: StringLiterals.Onboarding.coachMark2,
              tabIndex: 0),
         Step(title: StringLiterals.TabBar.my,
@@ -64,19 +64,21 @@ final class CoachMarkOverlayView: UIView {
 
     // MARK: - Constants
 
-    private let padding: CGFloat = 16
-    private let titleMsgGap: CGFloat = 4
-    private let msgStepGap: CGFloat = 16
+    private let padding: CGFloat = 16          // 좌우·하단
+    private let topPadding: CGFloat = 14       // 상단
+    private let stepTitleGap: CGFloat = 12     // 1/3 ↔ 제목
+    private let titleMsgGap: CGFloat = 10       // 제목 ↔ 설명
+    private let msgBtnGap: CGFloat = 16        // 설명 ↔ 버튼
     private let arrowTailHeight: CGFloat = 10
     private let bubbleMargin: CGFloat = 20
-    private let maxContentWidth: CGFloat = 220
+    private let maxContentWidth: CGFloat = 300   // 환경 세팅 설명이 한 줄로 들어가게
 
     // MARK: - UI Components
 
     private let dimView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(
-            red: 41/255, green: 41/255, blue: 58/255, alpha: 0.23
+            red: 41/255, green: 41/255, blue: 58/255, alpha: 0.5
         )
         return view
     }()
@@ -85,15 +87,15 @@ final class CoachMarkOverlayView: UIView {
 
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .calloutSemiBold
-        label.textColor = UIColor(named: "gray100")
+        label.font = .body2Bold
+        label.textColor = UIColor(named: "yellow60")
         return label
     }()
 
     private let messageLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .labelRegular
-        label.textColor = UIColor(named: "gray100")
+        label.font = .labelParagraph
+        label.textColor = .label                 // Labels Primary
         label.numberOfLines = 0
         return label
     }()
@@ -101,21 +103,31 @@ final class CoachMarkOverlayView: UIView {
     private let stepLabel: UILabel = {
         let label = DynamicLabel()
         label.font = .footnoteRegular
-        label.textColor = UIColor(named: "gray90")
+        label.textColor = .secondaryLabel         // Labels Secondary
         return label
     }()
 
     private let actionButton: UIButton = {
         var config = UIButton.Configuration.plain()
-        config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
+        config.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 12, bottom: 10, trailing: 12)
         config.cornerStyle = .fixed
-        config.background.cornerRadius = 14
+        config.background.cornerRadius = 10
         let button = UIButton(configuration: config)
-        button.layer.cornerRadius = 14
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor(named: "gray100")?.cgColor
+        button.layer.cornerRadius = 10
+        button.clipsToBounds = true
         return button
     }()
+
+    /// 마지막(시작하기) 버튼용 Gradation 40
+    private lazy var gradientLayer: CAGradientLayer = {
+        let layer = AppGradient.g40.makeLayer()
+        layer.cornerRadius = 10
+        layer.isHidden = true
+        return layer
+    }()
+
+    /// 재사용 햅틱 (prepare로 지연/리소스 최소화)
+    private let haptic = UIImpactFeedbackGenerator(style: .light)
 
     // MARK: - Init
 
@@ -157,7 +169,7 @@ private final class SpeechBubbleView: UIView {
         didSet { setNeedsDisplay() }
     }
 
-    private let bubbleColor = UIColor(white: 0, alpha: 0.75)
+    private let bubbleColor = UIColor.tertiarySystemBackground
     private let cornerRadius: CGFloat = 16
     private let arrowWidth: CGFloat = 28
     private let arrowHeight: CGFloat = 10
@@ -323,10 +335,14 @@ private extension CoachMarkOverlayView {
         bubbleView.addSubview(messageLabel)
         bubbleView.addSubview(stepLabel)
         bubbleView.addSubview(actionButton)
+        actionButton.layer.insertSublayer(gradientLayer, at: 0)   // 마지막 버튼 그라데이션(평소 hidden)
     }
 
     func setupActions() {
+        haptic.prepare()
         actionButton.addAction(UIAction { [weak self] _ in
+            self?.haptic.impactOccurred()
+            self?.haptic.prepare()        // 다음 탭 대비 재준비
             self?.nextStep()
         }, for: .touchUpInside)
     }
@@ -387,54 +403,46 @@ private extension CoachMarkOverlayView {
         let stepSize = stepLabel.sizeThatFits(
             CGSize(width: 50, height: CGFloat.greatestFiniteMagnitude)
         )
-        let btnSize = actionButton.sizeThatFits(
-            CGSize(width: 200, height: CGFloat.greatestFiniteMagnitude)
-        )
-
-        let contentWidth = max(titleSize.width, msgSize.width, stepSize.width + 16 + btnSize.width)
+        let contentWidth = max(titleSize.width, msgSize.width)
         let bubbleWidth = contentWidth + padding * 2
-        let bottomRowHeight = max(stepSize.height, btnSize.height)
-        let bodyHeight = padding + titleSize.height + titleMsgGap + msgSize.height + msgStepGap + bottomRowHeight + padding
+
+        // 버튼은 풀폭, 높이는 텍스트 + 상하 인셋(10)
+        let btnSize = actionButton.sizeThatFits(
+            CGSize(width: contentWidth, height: CGFloat.greatestFiniteMagnitude)
+        )
+        let btnHeight = btnSize.height
+
+        let bodyHeight = topPadding + stepSize.height + stepTitleGap
+            + titleSize.height + titleMsgGap + msgSize.height + msgBtnGap + btnHeight + padding
         let bubbleHeight = bodyHeight + arrowTailHeight
 
-        // 말풍선 중앙 = 탭 중앙 (화살표는 항상 말풍선 가운데)
+        // 말풍선 중앙 = 탭 중앙
         var bubbleX = centerX - bubbleWidth / 2
         bubbleX = max(bubbleMargin, min(bubbleX, bounds.width - bubbleWidth - bubbleMargin))
-
         let bubbleY = tabBarTopY - 16 - bubbleHeight
 
         bubbleView.frame = CGRect(x: bubbleX, y: bubbleY, width: bubbleWidth, height: bubbleHeight)
-        // 화살표: 중앙 기준 + 탭 방향으로 약간 이동
         let arrowOffset: CGFloat = switch data.tabIndex {
-        case 0: -5    // 환경세팅: 살짝 오른쪽
+        case 0: -5    // 환경세팅
         case 2: 15    // 마이
-        default: 0    // 책읽기: 정중앙
+        default: 0    // 책읽기
         }
         bubbleView.arrowPointX = bubbleWidth / 2 + arrowOffset
 
-        // ── 내부 라벨 배치 ──
+        // ── 내부 배치: 1/3 → 제목 → 설명 → 풀폭 버튼 ──
+        var y = topPadding
 
-        var y = padding
+        stepLabel.frame = CGRect(x: padding, y: y, width: contentWidth, height: stepSize.height)
+        y += stepSize.height + stepTitleGap
 
         titleLabel.frame = CGRect(x: padding, y: y, width: contentWidth, height: titleSize.height)
         y += titleSize.height + titleMsgGap
 
         messageLabel.frame = CGRect(x: padding, y: y, width: contentWidth, height: msgSize.height)
-        y += msgSize.height + msgStepGap
+        y += msgSize.height + msgBtnGap
 
-        stepLabel.frame = CGRect(
-            x: padding,
-            y: y + (bottomRowHeight - stepSize.height) / 2,
-            width: stepSize.width,
-            height: stepSize.height
-        )
-
-        actionButton.frame = CGRect(
-            x: bubbleWidth - padding - btnSize.width,
-            y: y + (bottomRowHeight - btnSize.height) / 2,
-            width: btnSize.width,
-            height: btnSize.height
-        )
+        actionButton.frame = CGRect(x: padding, y: y, width: contentWidth, height: btnHeight)
+        gradientLayer.frame = actionButton.bounds
     }
 
     func nextStep() {
@@ -460,16 +468,19 @@ private extension CoachMarkOverlayView {
 
     func updateButtonTitle(_ title: String, isLastStep: Bool) {
         var config = actionButton.configuration ?? .plain()
-        let fgColor = isLastStep ? UIColor(named: "gray0") : UIColor(named: "gray100")
+        // 다음 = 검정 배경 + 흰 글씨 / 시작하기 = Gradation 40 + 어두운 글씨
+        let textColor: UIColor = isLastStep ? (UIColor(named: "gray0") ?? .black) : .label
+        let font = UIFont(name: "Pretendard-SemiBold", size: 14)
+            ?? .systemFont(ofSize: 14, weight: .semibold)
         config.attributedTitle = AttributedString(
             title,
             attributes: AttributeContainer([
-                .font: UIFont.footnoteRegular,
-                .foregroundColor: fgColor ?? .white
+                .font: font,
+                .foregroundColor: textColor
             ])
         )
-        config.background.backgroundColor = isLastStep ? UIColor(named: "gray100") : .clear
+        config.background.backgroundColor = isLastStep ? .clear : (UIColor(named: "gray0") ?? .black)
         actionButton.configuration = config
-        actionButton.layer.borderColor = UIColor(named: "gray100")?.cgColor
+        gradientLayer.isHidden = !isLastStep   // 마지막(시작하기)만 그라데이션
     }
 }
