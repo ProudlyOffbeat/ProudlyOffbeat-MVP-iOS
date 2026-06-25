@@ -35,7 +35,7 @@ final class HomeDataSource {
             ) as? HomeDeviceCardCell else {
                 return UICollectionViewCell()
             }
-            cell.configure(with: device)
+            cell.configure(with: device, index: indexPath.item)
             return cell
         }
 

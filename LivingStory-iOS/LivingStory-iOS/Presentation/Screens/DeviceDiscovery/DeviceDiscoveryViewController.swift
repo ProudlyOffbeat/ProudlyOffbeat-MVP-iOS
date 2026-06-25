@@ -11,7 +11,7 @@
 
 import UIKit
 
-final class DeviceDiscoveryViewController: UIViewController {
+final class DeviceDiscoveryViewController: BaseViewController {
 
     weak var coordinator: AppCoordinator?
 
@@ -23,7 +23,7 @@ final class DeviceDiscoveryViewController: UIViewController {
     }
 
     private func setupUI() {
-        view.backgroundColor = UIColor(named: "gray100")
+        // 배경은 BaseViewController(.secondary)가 처리
         title = "기기 검색"
     }
 

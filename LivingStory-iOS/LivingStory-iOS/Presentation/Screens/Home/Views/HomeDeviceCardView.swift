@@ -11,33 +11,31 @@ final class HomeDeviceCardView: UIView {
 
     private var homeDeviceType: HomeDeviceType
     private var homeDeviceState: Bool = false
-    
-    private let homeIconBackgroundView: UIView = {
-        let view = UIView()
-        view.layer.cornerRadius = 20
-        view.clipsToBounds = true
-        return view
-    }()
-    
+    private var deviceIndex: Int = 0        // 룸 내 순번 (홀/짝으로 ON 색 결정)
+
+    // 그라데이션 보더 (켜졌을 때만 표시)
+    private let borderGradientLayer = CAGradientLayer()
+    private let borderMaskLayer = CAShapeLayer()
+
     private let homeIconDeviceImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        imageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 20)
+        imageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 22)
         return imageView
     }()
-    
+
     private let deviceNameLabel: UILabel = {
         let nameLabel = DynamicLabel()
-        nameLabel.font = .calloutSemiBold
+        nameLabel.font = .calloutMedium          // Callout Medium
         return nameLabel
     }()
-    
+
     private let deviceStatusLabel: UILabel = {
         let stateLabel = DynamicLabel()
-        stateLabel.font = .footnoteRegular
+        stateLabel.font = .labelMedium           // Label Medium
         return stateLabel
     }()
-    
+
     private let labelStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
@@ -45,12 +43,10 @@ final class HomeDeviceCardView: UIView {
         stack.alignment = .leading
         return stack
     }()
-    
+
     //MARK: - 초기화
     init(deviceType: HomeDeviceType) {
-        // 코드베이스 + AutoLayout시 .zero
         self.homeDeviceType = deviceType
-        
         super.init(frame: .zero)
 
         setupStyle()
@@ -59,12 +55,27 @@ final class HomeDeviceCardView: UIView {
         setupAccessibility()
         updateAppearance()
     }
-    
+
     //MARK: - Swift 6 이후부터는 UIView class가 스토리보드 명시적으로 사용하기 때문에 스토리보드 사용안한다는 명시적 확인을 해줘야함.
     // -> Storyboard 디코딩용 init인데, 코드 기반 UI라 @available(*, unavailable)로 사용을 막음.
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // 보더 그라데이션 ring 갱신
+        borderGradientLayer.frame = bounds
+        let lineWidth: CGFloat = 1.5
+        let path = UIBezierPath(
+            roundedRect: bounds.insetBy(dx: lineWidth / 2, dy: lineWidth / 2),
+            cornerRadius: 20
+        )
+        borderMaskLayer.path = path.cgPath
+        borderMaskLayer.lineWidth = lineWidth
+        borderMaskLayer.fillColor = UIColor.clear.cgColor
+        borderMaskLayer.strokeColor = UIColor.black.cgColor   // 불투명 → 보더만 그라데이션 노출
     }
 }
 
@@ -72,9 +83,10 @@ final class HomeDeviceCardView: UIView {
 //MARK: - Public Methods
 
 extension HomeDeviceCardView {
-    func configure(with device: DeviceModel) {
+    func configure(with device: DeviceModel, index: Int) {
         self.homeDeviceType = device.deviceType
         self.homeDeviceState = device.isOn
+        self.deviceIndex = index
         deviceNameLabel.text = device.name
         deviceStatusLabel.text = device.status
         updateAppearance()
@@ -83,10 +95,12 @@ extension HomeDeviceCardView {
 }
 
 private extension HomeDeviceCardView {
-    
+
     func setupStyle() {
         layer.cornerRadius = 20
         clipsToBounds = true
+        borderGradientLayer.mask = borderMaskLayer
+        layer.addSublayer(borderGradientLayer)
     }
 
     func setupAccessibility() {
@@ -102,75 +116,69 @@ private extension HomeDeviceCardView {
     }
 
     func setupHierarchy() {
-        addSubview(homeIconBackgroundView)
-        homeIconBackgroundView.addSubview(homeIconDeviceImageView)
-        
+        addSubview(homeIconDeviceImageView)
         addSubview(labelStackView)
         labelStackView.addArrangedSubview(deviceNameLabel)
         labelStackView.addArrangedSubview(deviceStatusLabel)
     }
-    
+
     func setupLayout() {
-        homeIconBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         homeIconDeviceImageView.translatesAutoresizingMaskIntoConstraints = false
         labelStackView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         NSLayoutConstraint.activate([
-            // 아이콘 배경 ( 상,좌측 14, 크기 38*30)
-            homeIconBackgroundView.topAnchor.constraint(equalTo: topAnchor, constant: 14),
-            homeIconBackgroundView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 14),
-            homeIconBackgroundView.widthAnchor.constraint(equalToConstant: 38),
-            homeIconBackgroundView.heightAnchor.constraint(equalToConstant: 38),
-            
-            // 아이콘 크기 ( 정중앙 )
-            homeIconDeviceImageView.centerXAnchor.constraint(equalTo: homeIconBackgroundView.centerXAnchor),
-            homeIconDeviceImageView.centerYAnchor.constraint(equalTo: homeIconBackgroundView.centerYAnchor),
-            
+            // 아이콘 (상·좌측 14, 박스 없이 심볼만)
+            homeIconDeviceImageView.topAnchor.constraint(equalTo: topAnchor, constant: 18),
+            homeIconDeviceImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+
             // 라벨 스택뷰
-            labelStackView.topAnchor.constraint(equalTo: homeIconBackgroundView.bottomAnchor, constant: 16),
-            labelStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 14),
+            labelStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             labelStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
-            labelStackView.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -14)
+            labelStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
         ])
     }
-    
+
     func updateAppearance() {
         homeIconDeviceImageView.image = homeDeviceType.homeIcon
-        deviceNameLabel.textColor = UIColor(named: "gray10")
-        
+
         if homeDeviceState {
             activateStyle()
         } else {
             inactivateStyle()
         }
     }
-    
+
     func activateStyle() {
-        switch homeDeviceType {
-        case .light:
-            backgroundColor = UIColor(named: "yellow40")
-            layer.borderWidth = 1
-            layer.borderColor = UIColor(named: "yellow20")? .cgColor
-            homeIconBackgroundView.backgroundColor = UIColor(named: "yellow0")
-            homeIconDeviceImageView.tintColor = UIColor(named: "gray100")
-            
-        case .speaker:
-            backgroundColor = UIColor(named: "blue30")
-            layer.borderWidth = 1
-            layer.borderColor = UIColor(named: "blue60")? .cgColor
-            homeIconBackgroundView.backgroundColor = UIColor(named: "blue0")
-            homeIconDeviceImageView.tintColor = UIColor(named: "gray100")
+        let isOddPosition = deviceIndex % 2 == 0   // 룸 내 1·3·5번째 → 노랑
+        if isOddPosition {
+            backgroundColor = UIColor(named: "yellow900")
+            applyBorderGradient(AppGradient.g10)
+            homeIconDeviceImageView.tintColor = UIColor(named: "yellow80")
+            deviceStatusLabel.textColor = UIColor(named: "yellow60")
+        } else {
+            backgroundColor = UIColor(named: "blue800")
+            applyBorderGradient(AppGradient.g20)
+            homeIconDeviceImageView.tintColor = UIColor(named: "blue0")
+            deviceStatusLabel.textColor = UIColor(named: "blue0")
         }
-        deviceNameLabel.textColor = UIColor(named: "gray10")
+        deviceNameLabel.textColor = .white          // Labels Primary
     }
-    
+
     func inactivateStyle() {
-        backgroundColor = UIColor(named: "gray70")
-        layer.borderWidth = 0
-        layer.borderColor = nil
-        homeIconBackgroundView.backgroundColor = UIColor(named: "gray60")
-        homeIconDeviceImageView.tintColor = UIColor(named: "gray50")
-        deviceStatusLabel.textColor = UIColor(named: "gray40")
+        backgroundColor = UIColor(hex: 0x3A3A3C)
+        borderGradientLayer.isHidden = true
+        homeIconDeviceImageView.tintColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.3)
+        deviceNameLabel.textColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.7)
+        deviceStatusLabel.textColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.3)
+    }
+
+    func applyBorderGradient(_ token: GradientToken) {
+        let source = token.makeLayer()
+        borderGradientLayer.colors = source.colors
+        borderGradientLayer.locations = source.locations
+        borderGradientLayer.startPoint = source.startPoint
+        borderGradientLayer.endPoint = source.endPoint
+        borderGradientLayer.isHidden = false
     }
 }
 
