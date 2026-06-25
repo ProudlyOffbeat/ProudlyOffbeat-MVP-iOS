@@ -24,6 +24,7 @@ final class BookDataSource: NSObject, UICollectionViewDataSource {
     func configure(with collectionView: UICollectionView) {
         collectionView.dataSource = self
         collectionView.register(CarouselCell.self, forCellWithReuseIdentifier: CarouselCell.identifier)
+        collectionView.register(BookIntroCell.self, forCellWithReuseIdentifier: BookIntroCell.identifier)
     }
 
     // MARK: - UICollectionViewDataSource
@@ -33,6 +34,14 @@ final class BookDataSource: NSObject, UICollectionViewDataSource {
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        // 첫 번째 카드는 How to use 인트로 디자인
+        if indexPath.item == 0 {
+            return collectionView.dequeueReusableCell(
+                withReuseIdentifier: BookIntroCell.identifier,
+                for: indexPath
+            )
+        }
+
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: CarouselCell.identifier,
             for: indexPath
