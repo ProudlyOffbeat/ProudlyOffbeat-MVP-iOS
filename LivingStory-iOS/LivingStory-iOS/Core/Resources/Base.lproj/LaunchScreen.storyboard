@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <array key="GoogleSansFlex_36pt-Medium.ttf">
+            <string>GoogleSansFlex36pt-Medium</string>
+        </array>
+    </customFonts>
     <scenes>
         <!--View Controller-->
         <scene sceneID="EHf-IW-A2E">
@@ -15,23 +20,30 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NaruLogo" translatesAutoresizingMaskIntoConstraints="NO" id="XOb-mg-cSn">
-                                <rect key="frame" x="74.666666666666686" y="313.33333333333331" width="244" height="165.33333333333331"/>
-                            </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="나루, 이야기가 머무는 곳" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wEK-Jo-LC4">
-                                <rect key="frame" x="114" y="492.66666666666669" width="165" height="21.000000000000057"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <nil key="highlightedColor"/>
-                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="44" translatesAutoresizingMaskIntoConstraints="NO" id="3o9-lU-hKb">
+                                <rect key="frame" x="108.66666666666669" y="310" width="176" height="152.33333333333337"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="NaruLogo" translatesAutoresizingMaskIntoConstraints="NO" id="XOb-mg-cSn">
+                                        <rect key="frame" x="10" y="0.0" width="156" height="87"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="156" id="19U-Nn-MJB"/>
+                                            <constraint firstAttribute="height" constant="87" id="EcK-Ad-8f2"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Naru, Stories Live Here" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wEK-Jo-LC4">
+                                        <rect key="frame" x="0.0" y="131" width="176" height="21.333333333333343"/>
+                                        <fontDescription key="fontDescription" name="GoogleSansFlex36pt-Medium" family="Google Sans Flex 36pt" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                        <color key="backgroundColor" red="0.98431372549019602" green="0.78823529411764703" blue="0.15686274509803921" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="wEK-Jo-LC4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="D2o-x2-AGx"/>
-                            <constraint firstItem="wEK-Jo-LC4" firstAttribute="top" secondItem="XOb-mg-cSn" secondAttribute="bottom" constant="14" id="EcR-Rk-O5I"/>
-                            <constraint firstItem="XOb-mg-cSn" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-30" id="l1W-Yz-e7N"/>
-                            <constraint firstItem="XOb-mg-cSn" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="nSc-Ag-HWb"/>
+                            <constraint firstItem="3o9-lU-hKb" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="00j-6U-3QN"/>
+                            <constraint firstItem="3o9-lU-hKb" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-40" id="pBS-i8-JWc"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -41,6 +53,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="NaruLogo" width="244" height="165.5"/>
+        <image name="NaruLogo" width="210" height="117"/>
     </resources>
 </document>
