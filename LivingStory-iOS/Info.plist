@@ -37,6 +37,8 @@
 		<string>Pretendard-Medium.otf</string>
 		<string>Pretendard-SemiBold.otf</string>
 		<string>Pretendard-Bold.otf</string>
+		<string>GoogleSansFlex_36pt-Medium.ttf</string>
+		<string>PlaywriteUSTrad-Regular.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

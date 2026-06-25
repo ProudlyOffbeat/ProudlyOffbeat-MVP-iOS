@@ -88,6 +88,13 @@ enum SymbolLiterals: String {
     case timer = "timer"
     case moon = "moon.fill"
     case sun = "sun.max.fill"
+
+    // MARK: - Onboarding Setting (단계 상단 아이콘)
+
+    // setupHome/setupLight는 기존 home("house.fill")/lightbulb("lightbulb.fill") 재사용 (중복 방지)
+    case setupSpeaker = "hifispeaker.fill"
+    case setupAge = "figure.2.and.child.holdinghands"
+    case setupTime = "alarm.fill"
 }
 
 // MARK: - SwiftUI Extension
