@@ -10,7 +10,7 @@ import SwiftUI
 struct ChildAgeSettingView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var age: Int = 13 // 더미 기본값
+    @State private var age: Int = UserData.childAge // 저장값으로 초기화
 
     var body: some View {
         ZStack {
@@ -48,6 +48,7 @@ struct ChildAgeSettingView: View {
                 Spacer()
 
                 PrimaryButtonSwiftUI(title: StringLiterals.Setting.done) {
+                    UserData.childAge = age
                     dismiss()
                 }
                 .padding(.horizontal, 20)

@@ -11,11 +11,20 @@ struct SettingsView: View {
     let coordinator: AppCoordinator
     @Binding var path: [SettingsRoute]
 
-    // TODO: 실제 설정값 연동 (현재 더미)
-    private let childAge = "7살"
-    private let notificationTime = "오후 09:30"
+    // 저장값(UserData) 반영 — 루트로 복귀 시 .onAppear가 다시 불려 재로드되므로 즉시 갱신됨
+    @State private var childAge: String = ""
+    @State private var notificationTime: String = ""
+
     private let homeName = "서울 집"
     private let appVersion = "1.0.0"
+
+    /// 오후 09:30 형식
+    private static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "a hh:mm"
+        return formatter
+    }()
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -52,6 +61,7 @@ struct SettingsView: View {
         }
         // 배경은 .background로 풀블리드, ScrollView는 세이프에어리어 준수 → Large 타이틀 정상 동작
         .background(Color.backgroundSecondary.ignoresSafeArea())
+        .onAppear { reload() }
         .preferredColorScheme(.dark)
         .navigationTitle(StringLiterals.Setting.title)
         .navigationBarTitleDisplayMode(.large)
@@ -68,6 +78,14 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Data
+
+    /// 진입/복귀 시 저장값을 화면 상태로 재로드
+    private func reload() {
+        childAge = "\(UserData.childAge)살"
+        notificationTime = Self.timeFormatter.string(from: UserData.notificationTime)
     }
 
     // MARK: - Section

@@ -14,12 +14,21 @@ struct StatisticsView: View {
     let coordinator: AppCoordinator
     let repository: ReadingSessionRepositoryProtocol
 
-    // TODO: 실제 데이터 연동 (현재 전부 더미)
-    private let flameCount = 12
-    private let monthLabel = "2026년 10월"
-    private let monthlyCount = 23
-    private let totalReadCount = 18
-    private let dummyBooks: [BookProfileModel] = [.mock, .mockISBN, .mock, .mockISBN, .mock]
+    // 실제 데이터 (onAppear에서 리포지토리로 로드)
+    @State private var flameCount = 0          // 연속 독서일(스트릭) — 저장값이 아니라 읽은 날짜로 계산
+    @State private var monthlyCount = 0         // 이번 달 읽어준 횟수(세션 수)
+    @State private var totalReadCount = 0       // 누적 고유 책 수(중복 제외)
+    @State private var readBooks: [BookProfileModel] = []  // 누적 고유 책 목록(최근 순)
+    @State private var readDates: Set<DateComponents> = [] // 책 읽은 날짜(달력 표시용)
+    @State private var earliestMonth: Date? = nil         // 최초 독서월(달력 과거 슬라이드 하한)
+
+    /// 상단 "이번 달" 라벨 — 현재 월을 한국어로 표시 (yyyy년 M월)
+    private let monthLabel: String = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy년 M월"
+        return formatter.string(from: Date())
+    }()
 
     var body: some View {
         ZStack {
@@ -38,7 +47,11 @@ struct StatisticsView: View {
                                 .frame(maxWidth: .infinity)
                         }
 
-                    MultiSelectCalendarView()
+                    MultiSelectCalendarView(
+                        readDates: readDates,
+                        today: Date(),
+                        minMonth: earliestMonth
+                    )
 
                     Divider()
                         .overlay(Color.white.opacity(0.1))
@@ -51,6 +64,7 @@ struct StatisticsView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onAppear { load() }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -63,6 +77,72 @@ struct StatisticsView: View {
                         .foregroundStyle(.white)
                 }
             }
+        }
+    }
+
+    // MARK: - Data Loading
+
+    /// 화면 진입 시 리포지토리에서 실제 통계를 읽어 상태에 채운다.
+    /// 새 세션이 저장된 뒤 탭으로 돌아와도 최신 값이 반영되도록 onAppear마다 호출.
+    private func load() {
+        let dates = (try? repository.fetchReadDates()) ?? []
+        readDates = dates
+        flameCount = Self.currentStreak(from: dates, today: Date())
+        earliestMonth = Self.earliestMonth(from: dates)
+
+        monthlyCount = (try? repository.fetchMonthlyBookCount()) ?? 0
+        totalReadCount = (try? repository.fetchTotalBookCount()) ?? 0
+        readBooks = Self.uniqueBooks(from: (try? repository.fetchAllSessions()) ?? [])
+    }
+
+    /// 연속 독서일(스트릭). 오늘부터 거꾸로 "읽은 날"이 끊기지 않은 일수.
+    /// 오늘 아직 안 읽었으면 어제부터 세기 시작(그날이 끝나기 전 스트릭을 잃지 않게).
+    static func currentStreak(from readDates: Set<DateComponents>, today: Date) -> Int {
+        let cal = Calendar(identifier: .gregorian)
+        let readDays: Set<Date> = Set(readDates.compactMap { comps in
+            guard let y = comps.year, let m = comps.month, let d = comps.day else { return nil }
+            return cal.date(from: DateComponents(year: y, month: m, day: d))
+        })
+        guard !readDays.isEmpty else { return 0 }
+
+        let todayStart = cal.startOfDay(for: today)
+        var cursor: Date
+        if readDays.contains(todayStart) {
+            cursor = todayStart
+        } else {
+            // 그레이스: 오늘 미독서면 어제부터. 어제도 비었으면 스트릭 0.
+            guard let yesterday = cal.date(byAdding: .day, value: -1, to: todayStart),
+                  readDays.contains(yesterday) else { return 0 }
+            cursor = yesterday
+        }
+
+        var count = 0
+        while readDays.contains(cursor) {
+            count += 1
+            guard let prev = cal.date(byAdding: .day, value: -1, to: cursor) else { break }
+            cursor = prev
+        }
+        return count
+    }
+
+    /// 가장 처음 책을 읽은 '월'의 1일. 달력 과거 슬라이드 하한으로 쓴다. (기록 없으면 nil)
+    static func earliestMonth(from readDates: Set<DateComponents>) -> Date? {
+        let cal = Calendar(identifier: .gregorian)
+        let monthStarts = readDates.compactMap { comps -> Date? in
+            guard let y = comps.year, let m = comps.month else { return nil }
+            return cal.date(from: DateComponents(year: y, month: m, day: 1))
+        }
+        return monthStarts.min()
+    }
+
+    /// 세션 목록(최근 순)에서 ISBN 기준 중복을 제거한 고유 책 목록.
+    static func uniqueBooks(from sessions: [ReadingSessionProfile]) -> [BookProfileModel] {
+        var seen = Set<String>()
+        return sessions.compactMap { session in
+            let isbn = session.bookProfile.isbn
+            guard !seen.contains(isbn) else { return nil }
+            seen.insert(isbn)
+            return session.bookProfile
         }
     }
 
@@ -143,7 +223,7 @@ struct StatisticsView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 12) {
-                    ForEach(Array(dummyBooks.enumerated()), id: \.offset) { _, book in
+                    ForEach(Array(readBooks.enumerated()), id: \.offset) { _, book in
                         StatBookThumbnail(coverURL: book.bookCoverImageURL, title: book.bookTitle)
                     }
                 }
@@ -254,14 +334,29 @@ private extension Color {
 #if DEBUG
 private struct PreviewStatsRepository: ReadingSessionRepositoryProtocol {
     func saveSession(_ session: ReadingSessionProfile, bookISBN: String) throws {}
-    func fetchAllSessions() throws -> [ReadingSessionProfile] { [] }
+    func fetchAllSessions() throws -> [ReadingSessionProfile] { ReadingSessionProfile.mockList }
     func findSession(by id: UUID) throws -> ReadingSessionProfile? { nil }
     func deleteSession(by id: UUID) throws {}
     func fetchTodaySessions() throws -> [ReadingSessionProfile] { [] }
     func fetchMonthlyBookCount() throws -> Int { 23 }
     func fetchTotalBookCount() throws -> Int { 18 }
     func fetchTotalSeconds() throws -> Int { 0 }
-    func fetchReadDates() throws -> Set<DateComponents> { [] }
+
+    /// 프리뷰 더미: 오늘 포함 최근 연속 3일(스트릭 확인) + 3개월 전 1건(과거 슬라이드 하한 확인)
+    func fetchReadDates() throws -> Set<DateComponents> {
+        let cal = Calendar(identifier: .gregorian)
+        let today = cal.startOfDay(for: Date())
+        var dates = Set<DateComponents>()
+        for offset in 0...2 {
+            if let d = cal.date(byAdding: .day, value: -offset, to: today) {
+                dates.insert(cal.dateComponents([.year, .month, .day], from: d))
+            }
+        }
+        if let past = cal.date(byAdding: .month, value: -3, to: today) {
+            dates.insert(cal.dateComponents([.year, .month, .day], from: past))
+        }
+        return dates
+    }
 }
 
 #Preview {

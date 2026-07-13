@@ -10,14 +10,9 @@ import SwiftUI
 struct NotificationTimeSettingView: View {
     @Environment(\.dismiss) private var dismiss
 
-    // 더미 기본값: 오후 09:30
-    @State private var time: Date = {
-        var comps = DateComponents()
-        comps.hour = 21
-        comps.minute = 30
-        return Calendar.current.date(from: comps) ?? Date()
-    }()
-    @State private var isOn = true
+    // 저장값으로 초기화
+    @State private var time: Date = UserData.notificationTime
+    @State private var isOn: Bool = UserData.notificationEnabled
 
     var body: some View {
         ZStack {
@@ -56,6 +51,8 @@ struct NotificationTimeSettingView: View {
 
                 Spacer()
                 PrimaryButtonSwiftUI(title: StringLiterals.Setting.done) {
+                    UserData.notificationTime = time
+                    UserData.notificationEnabled = isOn
                     dismiss()
                 }
                 .padding(.horizontal, 20)
