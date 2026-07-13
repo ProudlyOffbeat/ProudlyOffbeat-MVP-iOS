@@ -36,6 +36,7 @@ enum SymbolLiterals: String {
     case book = "book.fill"
     case person = "person.fill"
     case settings = "gearshape"
+    case settingsFill = "gearshape.fill"
 
     // MARK: - Navigation
 
@@ -77,6 +78,7 @@ enum SymbolLiterals: String {
     case calendar = "calendar"
     case books = "books.vertical.fill"
     case clock = "clock"
+    case flame = "flame.fill"
 
     // MARK: - Reading
 
@@ -94,7 +96,16 @@ enum SymbolLiterals: String {
     // setupHome/setupLight는 기존 home("house.fill")/lightbulb("lightbulb.fill") 재사용 (중복 방지)
     case setupSpeaker = "hifispeaker.fill"
     case setupAge = "figure.2.and.child.holdinghands"
-    case setupTime = "alarm.fill"
+    case waveform = "waveform"
+    case sliderHorizontal = "slider.horizontal.3"
+    case eyedropper = "eyedropper"
+    case sparkles = "sparkles"
+
+    // MARK: - Settings
+
+    case childHands = "figure.and.child.holdinghands"
+    case alarm = "alarm.fill"
+
 }
 
 // MARK: - SwiftUI Extension

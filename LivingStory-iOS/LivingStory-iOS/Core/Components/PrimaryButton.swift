@@ -71,15 +71,16 @@ struct PrimaryButtonSwiftUI: View {
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.body2Medium)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
+            Capsule()
                 .frame(height: height)
-                .contentShape(.capsule)
+                .foregroundStyle(.clear)
+                .glassEffect()
+                .overlay {
+                    Text(title)
+                        .font(.body2Medium)
+                        .foregroundStyle(.white)
+                }
         }
-        .buttonStyle(.plain)
-        .glassEffect(.regular.tint(.black).interactive(), in: .capsule)   // 검정 글래스(#74)
     }
 }
 

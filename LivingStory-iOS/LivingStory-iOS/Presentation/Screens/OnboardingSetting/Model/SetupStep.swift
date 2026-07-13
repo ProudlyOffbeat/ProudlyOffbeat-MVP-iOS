@@ -42,7 +42,7 @@ enum SetupStep: Int, CaseIterable, Equatable {
         case .light:   .lightbulb     // lightbulb.fill (기존 재사용)
         case .speaker: .setupSpeaker
         case .age:     .setupAge
-        case .time:    .setupTime
+        case .time:    .alarm
         }
     }
 

@@ -20,6 +20,13 @@ struct ConversationDTO: Codable, Sendable {
     let effect: String
 }
 
+/// 2-호출 구조의 호출 B(조명·음악) 응답.
+/// 질문(호출 A)과 분리되어 그라운딩 OFF + JSON 강제로 안전하게 디코딩된다.
+struct LightingMusicResult: Codable, Sendable {
+    let lighting: LightingConfig
+    let musicCategory: MusicCategory
+}
+
 // MARK: - 도메인 모델 변환
 
 extension ConversationDTO {
@@ -34,7 +41,7 @@ extension ReadingEnvironment {
     }
 
     static let mock = ReadingEnvironment(
-        musicCategory: .fantasy,
+        musicCategory: .dreamy,
         lighting: LightingConfig(hue: 280, saturation: 50, brightness: 65),
         conversations: [
             ConversationDTO(

@@ -37,6 +37,8 @@ final class HomeKitLightingController: NSObject, LightingControllable {
     private let homeManager = HMHomeManager()
     private var homesLoadedContinuation: CheckedContinuation<[HMHome], Never>?
     private var pulseTask: Task<Void, Never>?
+    private var lastAppliedConfig: LightingConfig?
+    private var lastPowerState: Bool?
 
     // MARK: - Init
 
@@ -77,10 +79,16 @@ final class HomeKitLightingController: NSObject, LightingControllable {
             throw HomeKitLightingError.noLightsFound
         }
 
+        // 모든 서비스 쓰기 끝난 뒤 상태 기록
+        lastAppliedConfig = config
+        lastPowerState = true
+
         print("[HomeKit] 조명 적용 완료 - H\(config.hue) S\(config.saturation) B\(config.brightness), \(lightServices.count - errors.count)/\(lightServices.count)개 성공")
     }
 
     func resetLighting() async throws {
+        // 상태 리셋 후 적용 → 모든 characteristic 다시 쓰기 보장
+        lastAppliedConfig = nil
         try await applyLighting(.default)
         print("[HomeKit] 조명 리셋 완료 (기본값)")
     }
@@ -166,6 +174,10 @@ final class HomeKitLightingController: NSObject, LightingControllable {
             throw HomeKitLightingError.noLightsFound
         }
 
+        // 초기 세팅 후 상태 기록
+        lastAppliedConfig = config
+        lastPowerState = true
+
         print("[HomeKit] 조명 적용 완료 (PowerOn) - H\(config.hue) S\(config.saturation) B\(config.brightness), \(lightServices.count - errors.count)/\(lightServices.count)개 성공")
     }
 }
@@ -227,34 +239,44 @@ private extension HomeKitLightingController {
         }
     }
 
-    /// 조명 서비스에 전원 켜기 → HSB 값 쓰기 (기존 방식)
+    /// 조명 서비스에 전원 켜기 → HSB 값 쓰기 (변경된 것만)
     func writeLightingValues(_ config: LightingConfig, to service: HMService) async throws {
-        // 전원 켜기
-        if let powerChar = service.characteristics.first(where: {
-            $0.characteristicType == HMCharacteristicTypePowerState
-        }) {
-            try await writeCharacteristic(powerChar, value: true)
+        let previous = lastAppliedConfig
+
+        // 전원 켜기: 아직 안 켜져 있을 때만
+        if lastPowerState != true {
+            if let powerChar = service.characteristics.first(where: {
+                $0.characteristicType == HMCharacteristicTypePowerState
+            }) {
+                try await writeCharacteristic(powerChar, value: true)
+            }
         }
 
-        // 색상 (Hue) - 지원하는 조명만
-        if let hueChar = service.characteristics.first(where: {
-            $0.characteristicType == HMCharacteristicTypeHue
-        }) {
-            try await writeCharacteristic(hueChar, value: Float(config.hue))
+        // 색상 (Hue): 이전 값과 다를 때만
+        if previous?.hue != config.hue {
+            if let hueChar = service.characteristics.first(where: {
+                $0.characteristicType == HMCharacteristicTypeHue
+            }) {
+                try await writeCharacteristic(hueChar, value: Float(config.hue))
+            }
         }
 
-        // 채도 (Saturation) - 지원하는 조명만
-        if let satChar = service.characteristics.first(where: {
-            $0.characteristicType == HMCharacteristicTypeSaturation
-        }) {
-            try await writeCharacteristic(satChar, value: Float(config.saturation))
+        // 채도 (Saturation): 이전 값과 다를 때만
+        if previous?.saturation != config.saturation {
+            if let satChar = service.characteristics.first(where: {
+                $0.characteristicType == HMCharacteristicTypeSaturation
+            }) {
+                try await writeCharacteristic(satChar, value: Float(config.saturation))
+            }
         }
 
-        // 밝기 (Brightness) - 거의 모든 조명이 지원
-        if let brightChar = service.characteristics.first(where: {
-            $0.characteristicType == HMCharacteristicTypeBrightness
-        }) {
-            try await writeCharacteristic(brightChar, value: config.brightness)
+        // 밝기 (Brightness): 이전 값과 다를 때만
+        if previous?.brightness != config.brightness {
+            if let brightChar = service.characteristics.first(where: {
+                $0.characteristicType == HMCharacteristicTypeBrightness
+            }) {
+                try await writeCharacteristic(brightChar, value: config.brightness)
+            }
         }
     }
 

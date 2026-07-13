@@ -65,9 +65,15 @@ final class HomeDataSource {
             snapshot.appendItems(room.devices, toSection: room)
         }
 
-        // 기존 아이템의 콘텐츠도 갱신 (isOn, percentage 변경 반영)
-        let existingItems = diffableDataSource.snapshot().itemIdentifiers
-        let itemsToReconfigure = snapshot.itemIdentifiers.filter { existingItems.contains($0) }
+        // 값이 실제로 바뀐 디바이스만 reconfigure (옵티미스틱 UI 자동 보호)
+        let oldItemsById = Dictionary(
+            diffableDataSource.snapshot().itemIdentifiers.map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let itemsToReconfigure = snapshot.itemIdentifiers.filter { newItem in
+            guard let oldItem = oldItemsById[newItem.id] else { return false }
+            return oldItem.isOn != newItem.isOn || oldItem.percentage != newItem.percentage
+        }
         if !itemsToReconfigure.isEmpty {
             snapshot.reconfigureItems(itemsToReconfigure)
         }

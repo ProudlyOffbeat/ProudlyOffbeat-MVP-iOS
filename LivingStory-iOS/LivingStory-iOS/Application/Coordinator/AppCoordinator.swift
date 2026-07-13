@@ -57,10 +57,11 @@ final class AppCoordinator: Coordinator {
             tag: 1
         )
 
-        // Tab 3: 마이
+        // Tab 3: 마이 (MyViewController → StatisticsView 교체)
         let myNav = UINavigationController()
-        let myVC = MyViewController()
-        myVC.coordinator = self
+        let myVC = UIHostingController(
+            rootView: StatisticsView(coordinator: self, repository: ReadingSessionRepository())
+        )
         myNav.setViewControllers([myVC], animated: false)
         myNav.tabBarItem = UITabBarItem(
             title: StringLiterals.TabBar.my,
@@ -111,7 +112,8 @@ final class AppCoordinator: Coordinator {
     /// 독서 중 화면 (SwiftUI)
     func showReading(book: BookProfileModel) {
         let lightingController: any LightingControllable
-        #if DEBUG
+        // 시뮬레이터엔 HomeKit이 없어 Mock, 실기기(Debug/Release 모두)는 실제 제어
+        #if targetEnvironment(simulator)
         lightingController = MockLightingController()
         #else
         lightingController = HomeKitLightingController()
@@ -131,9 +133,16 @@ final class AppCoordinator: Coordinator {
     }
 
     // MARK: - 마이 탭 네비게이션
-    /// 독서 중단 화면 (SwiftUI)
-    func showStopReading(bookTitle: String, conversations: [ConversationProfile]) {
-        let view = StopReadingView(coordinator: self, bookTitle: bookTitle, conversations: conversations)
+    /// 책 읽기 완료 화면 (SwiftUI)
+    func showStopReading(book: BookProfileModel, conversations: [ConversationProfile]) {
+        let view = StopReadingView(coordinator: self, book: book, conversations: conversations)
+        let hostingVC = UIHostingController(rootView: view)
+        (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
+    }
+
+    /// 아이와 대화 나누기 화면 (SwiftUI)
+    func showConversation(conversations: [ConversationProfile]) {
+        let view = ConversationView(coordinator: self, conversations: conversations)
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
@@ -186,6 +195,20 @@ final class AppCoordinator: Coordinator {
     func showStatistics() {
         let view = StatisticsView(coordinator: self, repository: ReadingSessionRepository())
         let hostingVC = UIHostingController(rootView: view)
+        activeNavigationController?.pushViewController(hostingVC, animated: true)
+    }
+
+    // MARK: - 설정
+
+    /// 설정 플로우 (SwiftUI) — 이 플로우만 SwiftUI NavigationStack(SettingsFlowView)이 네비바를 소유.
+    /// UIKit 호스팅의 native large 타이틀 글리치 회피. 자식(나이·알림·집)은 SwiftUI 스택 내부에서 이동.
+    func showSettings() {
+        let hostingVC = NavBarHiddenHostingController(
+            rootView: SettingsFlowView(coordinator: self)
+        )
+        // SwiftUI가 그리는 바 + UIDatePicker 등 UIKit 크롬을 다크로 (윈도우 Light 고정 무시). 탭바 숨김.
+        hostingVC.overrideUserInterfaceStyle = .dark
+        hostingVC.hidesBottomBarWhenPushed = true
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 

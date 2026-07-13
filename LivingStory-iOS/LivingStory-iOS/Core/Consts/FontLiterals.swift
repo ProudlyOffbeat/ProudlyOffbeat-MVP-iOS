@@ -104,6 +104,22 @@ extension UIFont {
     /// 13 Regular · LS -0.6% · LH 18px
     static let footnoteRegular = pretendard(.footnote, size: 13, weight: .regular)
 
+    // ───── App Custom (Figma 타입스케일 외 · 특정 화면 전용) ─────
+    /// 66 SemiBold — 나이 설정 값
+    static let display1SemiBold = pretendard(.largeTitle, size: 66, weight: .semibold)
+    /// 28 SemiBold — 나이 단위(세)
+    static let display2SemiBold = pretendard(.title1, size: 28, weight: .semibold)
+    /// 22 Regular — 나이 접두(만)
+    static let display3Regular = pretendard(.title1, size: 22, weight: .regular)
+    /// 28 Bold — 통계 타이틀 (Figma Title1/Emphasized)
+    static let title1Emphasized = pretendard(.title1, size: 28, weight: .bold)
+    /// 13 SemiBold — 배지 (Figma Footnote/Emphasized)
+    static let footnoteEmphasized = pretendard(.footnote, size: 13, weight: .semibold)
+    /// 17 Medium — 글래스 버튼
+    static let buttonMedium = pretendard(.body, size: 17, weight: .medium)
+    /// 15 Medium — 글래스 필
+    static let buttonSmallMedium = pretendard(.subheadline, size: 15, weight: .medium)
+
     // MARK: Helper
     private static func pretendard(_ textStyle: UIFont.TextStyle, size: CGFloat, weight: UIFont.Weight) -> UIFont {
         let base = UIFont(name: pretendardName(weight), size: size)!
@@ -154,6 +170,22 @@ extension Font {
 
     // ───── Footnote ─────
     static let footnoteRegular = pretendard(13, .regular, .footnote)
+
+    // ───── App Custom (Figma 타입스케일 외 · 특정 화면 전용) ─────
+    /// 66 SemiBold — 나이 설정 값
+    static let display1SemiBold = pretendard(66, .semibold, .largeTitle)
+    /// 28 SemiBold — 나이 단위(세)
+    static let display2SemiBold = pretendard(28, .semibold, .title)
+    /// 22 Regular — 나이 접두(만)
+    static let display3Regular = pretendard(22, .regular, .title)
+    /// 28 Bold — 통계 타이틀 (Figma Title1/Emphasized)
+    static let title1Emphasized = pretendard(28, .bold, .title)
+    /// 13 SemiBold — 배지 (Figma Footnote/Emphasized)
+    static let footnoteEmphasized = pretendard(13, .semibold, .footnote)
+    /// 17 Medium — 글래스 버튼
+    static let buttonMedium = pretendard(17, .medium, .body)
+    /// 15 Medium — 글래스 필
+    static let buttonSmallMedium = pretendard(15, .medium, .subheadline)
 
     // MARK: Helper
     private static func pretendard(_ size: CGFloat, _ weight: Font.Weight, _ relativeTo: Font.TextStyle) -> Font {

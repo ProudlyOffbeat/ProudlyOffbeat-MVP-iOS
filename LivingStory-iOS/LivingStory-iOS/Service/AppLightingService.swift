@@ -3,9 +3,8 @@
 //  LivingStory-iOS
 //
 //  앱 라이프사이클에 따른 조명 관리
-//  - 앱 실행 시: 디폴트 색상 적용 (꺼져있으면 켜기)
-//  - 백그라운드 진입: 기본 색상(흰색)으로 복원
-//  - 포그라운드 복귀: 디폴트 색상 재적용
+//  - 앱 실행/포그라운드 복귀: 마지막으로 사용된 조명 적용 (없으면 디폴트)
+//  - 백그라운드 진입: 조명 그대로 유지 (마지막 상태 보존)
 //
 
 import UIKit
@@ -30,28 +29,30 @@ final class AppLightingService {
 
     // MARK: - Lifecycle
 
-    /// 앱 시작/포그라운드 복귀 시 호출 — 디폴트 조명 적용 (꺼져있으면 켜기)
+    /// 앱 시작/포그라운드 복귀 시 호출 (꺼져있으면 켜기 포함)
+    /// - 최초 진입: `.default` 적용 (UserData 에 저장 없음)
+    /// - 이후: 마지막으로 적용된 조명 복원
     func applyDefaultLighting() {
+        let config = UserData.lastLightingConfig ?? .default
+        let isFirstLaunch = UserData.lastLightingConfig == nil
         Task {
             do {
-                try await lightingController.applyLightingWithPowerOn(.default)
-                print("[AppLighting] 디폴트 조명 적용 완료")
+                try await lightingController.applyLightingWithPowerOn(config)
+                if isFirstLaunch {
+                    print("[AppLighting] 최초 진입 — 디폴트 조명 적용")
+                } else {
+                    print("[AppLighting] 마지막 조명 복원 — H\(config.hue) S\(config.saturation) B\(config.brightness)")
+                }
             } catch {
-                print("[AppLighting] 디폴트 조명 적용 실패: \(error.localizedDescription)")
+                print("[AppLighting] 조명 적용 실패: \(error.localizedDescription)")
             }
         }
     }
 
-    /// 백그라운드 진입 시 호출 — 디폴트 색상으로 복원
+    /// 백그라운드 진입 시 호출 — 조명 그대로 유지 (no-op)
+    /// 마지막 사용자 조명을 백그라운드에서도 보존, 포그라운드 복귀 시 동일 상태 유지
     func restoreDefault() {
-        Task {
-            do {
-                try await lightingController.applyLighting(.default)
-                print("[AppLighting] 디폴트 복원 완료")
-            } catch {
-                print("[AppLighting] 디폴트 복원 실패: \(error.localizedDescription)")
-            }
-        }
+        // 의도적으로 비워둠 — 백그라운드 진입 시 조명 상태 보존
     }
 
     // MARK: - Observer Setup
