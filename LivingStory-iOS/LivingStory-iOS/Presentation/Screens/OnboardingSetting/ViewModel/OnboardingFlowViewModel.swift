@@ -131,7 +131,8 @@ final class OnboardingFlowViewModel {
     }
 
     private func complete() {
-        // 선택한 집이 있으면 config 저장 (없으면 저장 없이 완료 처리)
+        // 선택한 집이 있으면 config 저장 (없으면 저장할 게 없으므로 그대로 완료)
+        var didPersist = true
         if let homeID = selectedHomeID ?? homes.first?.id {
             let comps = Calendar.current.dateComponents([.hour, .minute], from: readingTime)
             let profile = EnvironmentSettingProfile(
@@ -141,9 +142,19 @@ final class OnboardingFlowViewModel {
                 readingMinute: comps.minute ?? 0,
                 deviceConfigs: buildConfigs()
             )
-            try? repository.save(profile)
+            do {
+                try repository.save(profile)
+            } catch {
+                // 저장 실패(디스크 부족·검증 등)를 삼키지 않고 로깅.
+                didPersist = false
+                print("[Onboarding] 환경 세팅 저장 실패: \(error.localizedDescription)")
+            }
         }
-        UserData.hasCompletedInitialSetup = true
+        // 저장이 성공했거나 저장할 게 없을 때만 완료 도장 → 실패 시 다음 진입에서 재세팅 기회 유지.
+        // (완료 화면 전환·메인 이동 자체는 막지 않아 무한 온보딩은 방지)
+        if didPersist {
+            UserData.hasCompletedInitialSetup = true
+        }
         phase = .completed
 
         // #33 완료 화면을 잠깐 보여준 뒤 메인으로 전환
@@ -174,10 +185,10 @@ final class OnboardingFlowViewModel {
 
     private func bindHomeKit() {
         homeKit.onPermissionDenied = { [weak self] in
-            MainActor.assumeIsolated { self?.scheduleDeniedIfNeeded() }
+            self?.scheduleDeniedIfNeeded()
         }
         homeKit.onHomesUpdated = { [weak self] homes in
-            MainActor.assumeIsolated { self?.handleHomes(homes) }
+            self?.handleHomes(homes)
         }
         homeKit.checkInitialStatus()
     }
