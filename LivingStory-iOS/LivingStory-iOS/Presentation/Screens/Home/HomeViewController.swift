@@ -204,7 +204,7 @@ extension HomeViewController: UICollectionViewDelegate {
         if let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell {
             var newDevice = device
             newDevice.isOn.toggle()
-            cell.configure(with: newDevice)
+            cell.configure(with: newDevice, index: indexPath.item)
         }
 
         Task { [weak self] in
@@ -222,7 +222,7 @@ extension HomeViewController: UICollectionViewDelegate {
                     guard let self,
                           let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell,
                           let actualDevice = self.homeDataSource.device(at: indexPath) else { return }
-                    cell.configure(with: actualDevice)
+                    cell.configure(with: actualDevice, index: indexPath.item)
                 }
                 await self?.homeKitManager.refreshAllCharacteristics()
             }
