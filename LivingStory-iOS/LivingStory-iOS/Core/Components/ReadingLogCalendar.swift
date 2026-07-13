@@ -39,7 +39,7 @@ final class ReadingLogCalendarUIView: UIView {
 
     private let cal = Calendar.current
     private let weekdayTitles = StringLiterals.Calendar.weekdays
-    private let weekdayColor = UIColor(red: 0.235, green: 0.235, blue: 0.263, alpha: 0.3)
+    private let weekdayColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.3)  // Labels Tertiary
 
     // MARK: - UI Components
 
@@ -65,7 +65,7 @@ final class ReadingLogCalendarUIView: UIView {
             .withConfiguration(UIImage.SymbolConfiguration(pointSize: 15, weight: .bold))
         config.baseForegroundColor = .label
         config.imageColorTransformer = UIConfigurationColorTransformer { _ in
-            UIColor(named: "yellow0") ?? .systemYellow
+            UIColor(named: "yellow40") ?? .systemYellow
         }
         let button = UIButton(configuration: config)
         button.addTarget(self, action: #selector(monthYearTapped), for: .touchUpInside)
@@ -76,7 +76,7 @@ final class ReadingLogCalendarUIView: UIView {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
         button.setImage(UIImage(.back)?.withConfiguration(config), for: .normal)
-        button.tintColor = UIColor(named: "yellow0")
+        button.tintColor = UIColor(named: "yellow40")
         button.addTarget(self, action: #selector(prevMonth), for: .touchUpInside)
         return button
     }()
@@ -85,7 +85,7 @@ final class ReadingLogCalendarUIView: UIView {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .medium)
         button.setImage(UIImage(.forward)?.withConfiguration(config), for: .normal)
-        button.tintColor = UIColor(named: "yellow0")
+        button.tintColor = UIColor(named: "yellow40")
         button.addTarget(self, action: #selector(nextMonth), for: .touchUpInside)
         return button
     }()
@@ -252,23 +252,36 @@ private extension ReadingLogCalendarUIView {
         circle.layer.cornerRadius = 22
         circle.clipsToBounds = true
         if isToday {
-            circle.backgroundColor = UIColor(named: "yellow0")
+            // 오늘 — gradation 30 그라데이션 원
+            let gradient = AppGradient.g30.makeLayer()
+            gradient.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
+            gradient.cornerRadius = 22
+            circle.layer.addSublayer(gradient)
         } else if isRead {
+            // 세션 있던 날 — Yellow0 12%
             circle.backgroundColor = UIColor(named: "yellow0")?.withAlphaComponent(0.12)
         }
 
         // 숫자 라벨
         let label = DynamicLabel()
-        label.text = "\(day)"
-        label.font = .body1Regular
         label.textAlignment = .center
+        let dayFont: UIFont
+        let dayColor: UIColor
         if isToday {
-            label.textColor = .white
+            dayFont = .title3Emphasized
+            dayColor = .white
         } else if isRead {
-            label.textColor = UIColor(named: "yellow0")
+            dayFont = .title3Emphasized
+            dayColor = UIColor(named: "yellow40") ?? .systemYellow
         } else {
-            label.textColor = .label
+            dayFont = .title3Regular              // 평일
+            dayColor = .label                      // Labels Primary
         }
+        label.attributedText = NSAttributedString(string: "\(day)", attributes: [
+            .font: dayFont,
+            .foregroundColor: dayColor,
+            .kern: -0.45                           // Letter Spacing -0.45px
+        ])
 
         container.addSubview(circle)
         container.addSubview(label)

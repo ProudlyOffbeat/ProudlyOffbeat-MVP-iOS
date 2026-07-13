@@ -14,11 +14,11 @@ final class HomeKitManager: NSObject {
     private let homeManager = HMHomeManager()
     private var pendingUpdateTask: Task<Void, Never>?
 
-    /// HomeKit에서 집 목록이 업데이트되면 호출되는 콜백
-    var onHomesUpdated: (([HomeModel]) -> Void)?
+    /// HomeKit에서 집 목록이 업데이트되면 호출되는 콜백 (항상 메인에서 호출 — 타입으로 강제)
+    var onHomesUpdated: (@MainActor ([HomeModel]) -> Void)?
 
-    /// HomeKit 권한이 거부되었을 때 호출되는 콜백
-    var onPermissionDenied: (() -> Void)?
+    /// HomeKit 권한이 거부되었을 때 호출되는 콜백 (항상 메인에서 호출 — 타입으로 강제)
+    var onPermissionDenied: (@MainActor () -> Void)?
 
     // MARK: - Init
 

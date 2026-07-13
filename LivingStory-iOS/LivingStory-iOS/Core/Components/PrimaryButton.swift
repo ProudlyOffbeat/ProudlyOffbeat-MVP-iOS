@@ -66,17 +66,18 @@ final class PrimaryButton: UIButton {
 
 struct PrimaryButtonSwiftUI: View {
     let title: String
+    var height: CGFloat = 52
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Capsule()
-                .frame(height: 52)
+                .frame(height: height)
                 .foregroundStyle(.clear)
                 .glassEffect()
                 .overlay {
                     Text(title)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.body2Medium)
                         .foregroundStyle(.white)
                 }
         }

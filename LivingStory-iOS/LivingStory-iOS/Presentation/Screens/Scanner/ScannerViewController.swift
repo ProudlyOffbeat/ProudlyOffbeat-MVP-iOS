@@ -18,7 +18,7 @@ enum ScannerState {
 
 // MARK: - ScannerViewController
 
-final class ScannerViewController: UIViewController {
+final class ScannerViewController: BaseViewController {
 
     // MARK: - Properties
 
@@ -51,21 +51,40 @@ final class ScannerViewController: UIViewController {
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
         label.text = StringLiterals.Scanner.title
-        label.font = .body2SemiBold
-        label.textColor = UIColor(named: "gray10")
+        label.font = .headlineRegular                       // Headline Regular
+        label.textColor = UIColor(hex: 0xF5F5F5)
         label.textAlignment = .center
         return label
     }()
 
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
-        let config = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+        let config = UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)   // SF Pro Medium 17
         button.setImage(UIImage(.close)?.withConfiguration(config), for: .normal)
-        button.tintColor = UIColor(named: "gray50")
-        button.backgroundColor = UIColor(named: "gray90")
-        button.layer.cornerRadius = 15
+        button.tintColor = UIColor(hex: 0x8A8A8A)
+        button.backgroundColor = UIColor(hex: 0x787880).withAlphaComponent(0.32)   // #787880 · 32%
+        button.layer.cornerRadius = 22       // 44×44 원
         button.clipsToBounds = true
         return button
+    }()
+
+    private let grabberView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(hex: 0x333333)
+        view.layer.cornerRadius = 2.5
+        return view
+    }()
+
+    /// X + 타이틀을 묶는 헤더 박스 (좌우 패딩 동일)
+    private let headerBox = UIView()
+
+    private let directSearchButton: UIButton = {
+        var config = UIButton.Configuration.glass()   // 클리어 리퀴드 글래스
+        config.title = StringLiterals.Scanner.directSearch
+        config.baseForegroundColor = .white
+        config.cornerStyle = .capsule
+        config.contentInsets = NSDirectionalEdgeInsets(top: 13, leading: 14, bottom: 13, trailing: 14)
+        return UIButton(configuration: config)
     }()
 
     private let scanningContentView = ScannerScanningContentView()
@@ -115,46 +134,74 @@ extension ScannerViewController: CameraPreviewDelegate {
 private extension ScannerViewController {
 
     func setupStyle() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(hex: 0x1C1C1E)   // 바텀시트 배경
     }
 
     func setupHierarchy() {
-        view.addSubview(titleLabel)
-        view.addSubview(closeButton)
+        view.addSubview(grabberView)
+        view.addSubview(headerBox)
+        headerBox.addSubview(titleLabel)
+        headerBox.addSubview(closeButton)
         view.addSubview(scanningContentView)
         view.addSubview(resultContentView)
+        view.addSubview(directSearchButton)
     }
 
     func setupLayout() {
+        grabberView.translatesAutoresizingMaskIntoConstraints = false
+        headerBox.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         scanningContentView.translatesAutoresizingMaskIntoConstraints = false
         resultContentView.translatesAutoresizingMaskIntoConstraints = false
+        directSearchButton.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            grabberView.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
+            grabberView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            grabberView.widthAnchor.constraint(equalToConstant: 36),
+            grabberView.heightAnchor.constraint(equalToConstant: 5),
 
-            closeButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
-            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            closeButton.widthAnchor.constraint(equalToConstant: 30),
-            closeButton.heightAnchor.constraint(equalToConstant: 30),
+            // 헤더 박스: 그래버서 6, 좌우 패딩 동일(17), 높이 44
+            headerBox.topAnchor.constraint(equalTo: grabberView.bottomAnchor, constant: 6),
+            headerBox.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 17),
+            headerBox.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -17),
+            headerBox.heightAnchor.constraint(equalToConstant: 44),
 
-            scanningContentView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            // X — 박스 왼쪽
+            closeButton.leadingAnchor.constraint(equalTo: headerBox.leadingAnchor),
+            closeButton.centerYAnchor.constraint(equalTo: headerBox.centerYAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: 44),
+            closeButton.heightAnchor.constraint(equalToConstant: 44),
+
+            // 타이틀 — 박스 중앙
+            titleLabel.centerXAnchor.constraint(equalTo: headerBox.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: headerBox.centerYAnchor),
+
+            scanningContentView.topAnchor.constraint(equalTo: headerBox.bottomAnchor, constant: 20),
             scanningContentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scanningContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scanningContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            resultContentView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            resultContentView.topAnchor.constraint(equalTo: headerBox.bottomAnchor, constant: 20),
             resultContentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             resultContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             resultContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            // 직접 검색 — safe area 바로 위, 중앙
+            directSearchButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            directSearchButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
     }
 
     func setupActions() {
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         resultContentView.retryButton.addTarget(self, action: #selector(retryTapped), for: .touchUpInside)
+        directSearchButton.addTarget(self, action: #selector(directSearchTapped), for: .touchUpInside)
+    }
+
+    @objc func directSearchTapped() {
+        // TODO: 직접(수동) 책 검색 화면 연결 (검색 플로우 미구현)
     }
 }
 
@@ -208,16 +255,13 @@ private extension ScannerViewController {
             }
 
         case .success:
-            animator.showSuccess()
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-                guard let self, let book = self.fetchedBook else { return }
-                self.dismiss(animated: true) {
-                    if self.isRestarting {
-                        self.coordinator?.replaceReadingFlow(with: book)
-                    } else {
-                        self.coordinator?.showBookProfile(book: book)
-                    }
+            // 체크표시/완료 애니메이션 없이 바로 다음 페이지로
+            guard let book = fetchedBook else { return }
+            dismiss(animated: true) {
+                if self.isRestarting {
+                    self.coordinator?.replaceReadingFlow(with: book)
+                } else {
+                    self.coordinator?.showBookProfile(book: book)
                 }
             }
 
@@ -229,6 +273,9 @@ private extension ScannerViewController {
     func updateVisibility(for state: ScannerState) {
         scanningContentView.alpha = state == .scanning ? 1 : 0
         scanningContentView.isHidden = state != .scanning
+
+        // 직접 검색은 스캐닝 상태에서만
+        directSearchButton.isHidden = state != .scanning
 
         resultContentView.alpha = state == .scanning ? 0 : 1
         resultContentView.isHidden = state == .scanning
@@ -293,3 +340,4 @@ private extension ScannerViewController {
         state = .scanning
     }
 }
+

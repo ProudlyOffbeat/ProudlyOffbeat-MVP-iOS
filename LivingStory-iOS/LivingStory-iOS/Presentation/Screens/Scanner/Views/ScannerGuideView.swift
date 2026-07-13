@@ -14,7 +14,7 @@ final class ScannerGuideView: UIView {
     private let iconImageView: UIImageView = {
         let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
         let imageView = UIImageView(image: UIImage(.barcode)?.withConfiguration(config))
-        imageView.tintColor = UIColor(named: "gray10")
+        imageView.tintColor = .white                              // Labels Primary
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -22,16 +22,16 @@ final class ScannerGuideView: UIView {
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
         label.text = StringLiterals.Scanner.guideTitle
-        label.font = .body2SemiBold
-        label.textColor = UIColor(named: "gray10")
+        label.font = .body2SemiBold                               // Body2 SemiBold
+        label.textColor = .white                                  // Labels Primary
         return label
     }()
 
     private let subtitleLabel: UILabel = {
         let label = DynamicLabel()
         label.text = StringLiterals.Scanner.guideSubtitle
-        label.font = .labelRegular
-        label.textColor = UIColor(named: "gray30")
+        label.font = .calloutParagraph                            // Callout Paragraph
+        label.textColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.7)  // Labels Secondary
         label.numberOfLines = 0
         return label
     }()

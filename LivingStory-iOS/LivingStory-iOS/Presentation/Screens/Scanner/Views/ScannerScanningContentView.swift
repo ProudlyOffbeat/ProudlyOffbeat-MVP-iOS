@@ -22,7 +22,7 @@ final class ScannerScanningContentView: UIView {
     private let flashlightButton = GlassCircleButton(
         icon: .flashlightOff,
         activeIcon: .flashlightOn,
-        activeColor: .systemBlue,
+        activeColor: UIColor(hex: 0xFFCB24),   // 활성화 시 노랑
         size: 50
     )
 

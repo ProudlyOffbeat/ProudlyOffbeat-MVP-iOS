@@ -30,8 +30,8 @@ final class HomeDeviceCardCell: UICollectionViewCell {
 // MARK: - Public Methods
 
 extension HomeDeviceCardCell {
-    func configure(with device: DeviceModel) {
-        cardView.configure(with: device)
+    func configure(with device: DeviceModel, index: Int) {
+        cardView.configure(with: device, index: index)
     }
 }
 

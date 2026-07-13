@@ -9,7 +9,7 @@ import Foundation
 enum StringLiterals {
 
     enum TabBar {
-        static let home = "환경 세팅"
+        static let home = "기기"
         static let book = "책 읽기"
         static let my = "마이"
     }
@@ -68,7 +68,7 @@ enum StringLiterals {
 
     enum Book {
         static let title = "책 읽기"
-        static let startButton = "책 읽기 시작하기"
+        static let startButton = "책 읽기"
 
         static let tagUsage = "사용법"
         static let tag01 = "01"
@@ -95,6 +95,7 @@ enum StringLiterals {
         static let success = "인식 완료!"
         static let failed = "인식 실패"
         static let retry = "다시 시도"
+        static let directSearch = "직접 검색"
         static let guideTitle = "책 뒷면의 바코드 스캔"
         static let guideSubtitle = "정확한 책의 정보를 가져오기 위해, 읽으실 책의 바코드를 스캔해주세요. 바코드는 주로 뒷면에 위치해 있습니다."
         static let cameraPermissionTitle = "카메라 권한 필요"
@@ -119,7 +120,7 @@ enum StringLiterals {
     }
 
     enum Calendar {
-        static let weekdays = ["일", "월", "화", "수", "목", "금", "토"]
+        static let weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
     }
 
     enum Setting {
@@ -157,5 +158,27 @@ enum StringLiterals {
         static let coachMark3 = "지금까지 내가 책을 읽은 시간과 권 수를 확인할 수 있어요"
         static let next = "다음"
         static let start = "시작하기"
+    }
+
+    enum OnboardingSetting {
+        static let homeTitle = "어디에서 사용할 건가요?"
+        static let homeSubtitle = "나루를 사용할 집을 선택해주세요"
+        static let lightTitle = "사용할 조명을 선택해주세요"
+        static let lightSubtitle = "선택된 조명만 환경 세팅에 사용하게 돼요"
+        static let speakerTitle = "사용할 스피커를 선택해주세요"
+        static let speakerSubtitle = "선택된 스피커만 환경 세팅에 사용하게 돼요"
+        static let ageTitle = "아이의 나이를 알려주세요"
+        static let ageSubtitle = "나이에 맞는 대화 주제를 추천해드려요"
+        static let timeTitle = "몇시에 책을 읽어주실 건가요?"
+        static let timeSubtitle = "매일 설정한 시간에 알림을 드릴게요"
+
+        static let next = "다음"
+        static let done = "완료"
+        static let skip = "건너뛰기"
+
+        static let completeTitle = "세팅 완료!"
+        static let completeSubtitle = "이제 나루를 통해 아이와\n책을 읽어보세요!"
+
+        static func ageValue(_ age: Int) -> String { "만 \(age)세" }
     }
 }

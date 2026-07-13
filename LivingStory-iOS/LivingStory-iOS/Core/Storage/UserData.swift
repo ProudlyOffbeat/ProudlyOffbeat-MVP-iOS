@@ -11,6 +11,10 @@ struct UserData {
     @UserDefault(key: "hasCompletedOnboarding", defaultValue: false)
     static var hasCompletedOnboarding: Bool
 
+    /// 첫 실행 환경 세팅(집/조명/스피커/나이/시간) 완료 여부 — 코치마크처럼 1회만 노출
+    @UserDefault(key: "hasCompletedInitialSetup", defaultValue: false)
+    static var hasCompletedInitialSetup: Bool
+
     // MARK: - 사용자 설정값 (직접 입력 → 영속화)
 
     /// 아이 나이(세). 독서 질문 연령 기준에 사용. 기본 6세(독서 플로우 기본값과 일치).

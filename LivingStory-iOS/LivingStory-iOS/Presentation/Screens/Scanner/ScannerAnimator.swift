@@ -29,11 +29,11 @@ final class ScannerAnimator {
 
         let config = UIImage.SymbolConfiguration(pointSize: 106, weight: .regular)
         resultView.barcodeIconView.image = UIImage(.scanner)?.withConfiguration(config)
-        resultView.barcodeIconView.tintColor = UIColor(named: "gray0")
+        resultView.barcodeIconView.tintColor = .white   // Labels Primary
         resultView.barcodeIconView.addSymbolEffect(.pulse.byLayer)
 
         resultView.statusLabel.isHidden = false
-        resultView.statusLabel.textColor = UIColor(named: "gray50")
+        resultView.statusLabel.textColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.7)  // Labels Secondary
         resultView.failedIcon.isHidden = true
         resultView.successIcon.isHidden = true
 
@@ -98,11 +98,11 @@ final class ScannerAnimator {
 
         let config = UIImage.SymbolConfiguration(pointSize: 106, weight: .regular)
         resultView.barcodeIconView.image = UIImage(.scanner)?.withConfiguration(config)
-        resultView.barcodeIconView.tintColor = UIColor(named: "gray0")
+        resultView.barcodeIconView.tintColor = .white   // Labels Primary
 
         resultView.statusLabel.isHidden = false
         resultView.statusLabel.text = StringLiterals.Scanner.failed
-        resultView.statusLabel.textColor = .systemRed
+        resultView.statusLabel.textColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.7)  // Labels Secondary
         resultView.failedIcon.isHidden = false
         resultView.successIcon.isHidden = true
 

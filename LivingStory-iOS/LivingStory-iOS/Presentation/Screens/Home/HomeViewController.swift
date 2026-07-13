@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class HomeViewController: UIViewController {
+final class HomeViewController: BaseViewController {
 
     // MARK: - Properties
 
@@ -26,9 +26,16 @@ final class HomeViewController: UIViewController {
         let button = UIButton(type: .system)
         let config = UIImage.SymbolConfiguration(pointSize: 17, weight: .regular)
         button.setImage(UIImage(.ellipsis)?.withConfiguration(config), for: .normal)
-        button.tintColor = UIColor(named: "gray10")
+        button.tintColor = .white       // 흰색 아이콘, 배경 클리어
         button.showsMenuAsPrimaryAction = true
         return button
+    }()
+
+    private let homeTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .title1SemiBold
+        label.textColor = .white
+        return label
     }()
 
     private lazy var roomCollectionView: UICollectionView = {
@@ -37,8 +44,6 @@ final class HomeViewController: UIViewController {
         collectionView.delaysContentTouches = false   // 탭 즉시 인식 (시스템 ~100ms 지연 제거)
         return collectionView
     }()
-
-    private let radialGlowView = RadialGlowView()
 
     private let emptyStateView: HomeEmptyStateView = {
         let view = HomeEmptyStateView()
@@ -81,40 +86,36 @@ final class HomeViewController: UIViewController {
 private extension HomeViewController {
 
     func setupHomeNavigation() {
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationItem.largeTitleDisplayMode = .always
-
-        navigationController?.navigationBar.largeTitleTextAttributes = [
-            .font: UIFont.title1SemiBold
-        ]
+        // 타이틀은 nav 바 말고 콘텐츠(homeTitleLabel)에서 직접 그림 → async 타이밍 버그 원천 제거
+        navigationItem.largeTitleDisplayMode = .never
+        navigationItem.title = ""
 
         let moreBarButton = UIBarButtonItem(customView: homeMenuButton)
         navigationItem.rightBarButtonItem = moreBarButton
     }
 
     func setupStyle() {
-        view.backgroundColor = .systemBackground
-        roomCollectionView.contentInset = UIEdgeInsets(top: 44, left: 0, bottom: 0, right: 0)
+        // 배경은 BaseViewController(.secondary)가 처리
+        // 큰 타이틀 추적을 위해 수동 contentInset.top 제거 (시스템이 nav inset 처리)
     }
 
     func setupHierarchy() {
-        view.addSubview(radialGlowView)
+        view.addSubview(homeTitleLabel)
         view.addSubview(roomCollectionView)
         view.addSubview(emptyStateView)
     }
 
     func setupLayout() {
-        radialGlowView.translatesAutoresizingMaskIntoConstraints = false
+        homeTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         roomCollectionView.translatesAutoresizingMaskIntoConstraints = false
         emptyStateView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            radialGlowView.widthAnchor.constraint(equalToConstant: 589),
-            radialGlowView.heightAnchor.constraint(equalToConstant: 610),
-            radialGlowView.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -100),
-            radialGlowView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            homeTitleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            homeTitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
 
-            roomCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            // 타이틀 ↔ 첫 룸 이름 = 38 + 섹션 top inset 8 = 46
+            roomCollectionView.topAnchor.constraint(equalTo: homeTitleLabel.bottomAnchor, constant: 38),
             roomCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             roomCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             roomCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
@@ -203,7 +204,7 @@ extension HomeViewController: UICollectionViewDelegate {
         if let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell {
             var newDevice = device
             newDevice.isOn.toggle()
-            cell.configure(with: newDevice)
+            cell.configure(with: newDevice, index: indexPath.item)
         }
 
         Task { [weak self] in
@@ -221,7 +222,7 @@ extension HomeViewController: UICollectionViewDelegate {
                     guard let self,
                           let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell,
                           let actualDevice = self.homeDataSource.device(at: indexPath) else { return }
-                    cell.configure(with: actualDevice)
+                    cell.configure(with: actualDevice, index: indexPath.item)
                 }
                 await self?.homeKitManager.refreshAllCharacteristics()
             }
@@ -275,22 +276,23 @@ private extension HomeViewController {
             guard let home = currentHome else { return }
             emptyStateView.isHidden = true
             roomCollectionView.isHidden = false
+            homeTitleLabel.isHidden = false
             navigationItem.rightBarButtonItem?.isHidden = false
-            navigationItem.title = home.name
+            homeTitleLabel.text = home.name
             homeDataSource.applySnapshot(for: home)
 
         case .permissionsRequired:
             emptyStateView.isHidden = false
             roomCollectionView.isHidden = true
             navigationItem.rightBarButtonItem?.isHidden = true
-            navigationItem.title = StringLiterals.Home.permissionTitle
+            homeTitleLabel.text = StringLiterals.Home.permissionTitle
             emptyStateView.configure(for: .permissionsRequired)
 
         case .noDevices:
             emptyStateView.isHidden = false
             roomCollectionView.isHidden = true
             navigationItem.rightBarButtonItem?.isHidden = false
-            navigationItem.title = StringLiterals.Home.noDevicesTitle
+            homeTitleLabel.text = StringLiterals.Home.noDevicesTitle
             emptyStateView.configure(for: .noDevices)
         }
     }

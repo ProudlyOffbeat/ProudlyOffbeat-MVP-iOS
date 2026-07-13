@@ -46,10 +46,15 @@ extension UIFont {
     static let title2Medium = pretendard(.title2, size: 30, weight: .medium)
     /// 26 SemiBold · LS +1%
     static let title3SemiBold = pretendard(.title3, size: 26, weight: .semibold)
+    /// 26 Regular
+    static let title3Regular = pretendard(.title3, size: 26, weight: .regular)
+    /// 26 Emphasized (= SemiBold)
+    static let title3Emphasized = pretendard(.title3, size: 26, weight: .semibold)
 
     // ───── Headline ─────
     /// 24 Medium
     static let headlineMedium = pretendard(.title3, size: 24, weight: .medium)
+    static let headlineRegular = pretendard(.headline, size: 17, weight: .regular)   // 표준 Headline 17
     /// 24 Medium · LH 140% · LS +2%
     static let headlineParagraph = pretendard(.title3, size: 24, weight: .medium)
 

@@ -22,8 +22,8 @@ final class WormPageControl: UIView {
 
     var dotSize: CGFloat = 8
     var dotSpacing: CGFloat = 12
-    var activeColor: UIColor = UIColor(named: "gray0") ?? .black
-    var inactiveColor: UIColor = UIColor(named: "gray60") ?? .lightGray
+    var activeColor: UIColor = .white                 // 선택된 점
+    var inactiveColor: UIColor = UIColor(hex: 0x404040)  // 나머지 점
 
     // MARK: - Init
 

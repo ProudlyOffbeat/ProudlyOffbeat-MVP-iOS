@@ -21,16 +21,19 @@ final class ScannerResultContentView: UIView {
 
     let statusLabel: UILabel = {
         let label = DynamicLabel()
-        label.font = .labelRegular
-        label.textColor = UIColor(named: "gray30")
+        label.font = .calloutRegular                                  // Callout Regular
+        label.textColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.7)  // Labels Secondary
         label.textAlignment = .center
         return label
     }()
 
     let failedIcon: UIImageView = {
-        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
-        let imageView = UIImageView(image: UIImage(.error)?.withConfiguration(config))
-        imageView.tintColor = .systemRed
+        // #FF4245 원 + 검정 X
+        let size = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+        let palette = UIImage.SymbolConfiguration(paletteColors: [.black, UIColor(hex: 0xFF4245)])
+        let image = UIImage(systemName: "xmark.circle.fill")?
+            .applyingSymbolConfiguration(size.applying(palette))
+        let imageView = UIImageView(image: image)
         imageView.isHidden = true
         return imageView
     }()
@@ -93,7 +96,7 @@ final class ScannerResultContentView: UIView {
 
         let config = UIImage.SymbolConfiguration(pointSize: 106, weight: .regular)
         barcodeIconView.image = UIImage(.scanner)?.withConfiguration(config)
-        barcodeIconView.tintColor = UIColor(named: "gray0")
+        barcodeIconView.tintColor = .white
         barcodeIconView.transform = .identity
         barcodeIconView.alpha = 1
     }
