@@ -15,6 +15,7 @@ struct ReadingView: View {
     @State private var isPulsing = false
     @State private var showStopAlert = false
     @State private var isFinishing = false
+    @State private var showLightingSheet = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -50,6 +51,9 @@ struct ReadingView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $showLightingSheet) {
+            LightingAdjustSheet(viewModel: viewModel)
+        }
         .onAppear {
             withAnimation(
                 .easeInOut(duration: 2.5)
@@ -122,8 +126,12 @@ struct ReadingView: View {
 
             Spacer().frame(height: 52)
 
-            ControlCard(viewModel: viewModel, lightingColor: lightingColor)
-                .padding(.horizontal, 20)
+            ControlCard(
+                viewModel: viewModel,
+                lightingColor: lightingColor,
+                onAdjustLighting: { showLightingSheet = true }
+            )
+            .padding(.horizontal, 20)
 
             Spacer()
 
@@ -234,6 +242,7 @@ struct ReadingView: View {
 private struct ControlCard: View {
     let viewModel: ReadingViewModel
     let lightingColor: Color
+    let onAdjustLighting: () -> Void
 
     /// 채움 색(그라데이션). 네이티브 Slider tint로 넘기면 단색으로 뭉개질 수 있음(의도).
     private static let fill = LinearGradient(
@@ -269,7 +278,8 @@ private struct ControlCard: View {
                 fill: Self.fill,
                 onEditingChanged: { editing in
                     if !editing { viewModel.commitLighting() }
-                }
+                },
+                onAdjust: onAdjustLighting
             ) {
                 Circle()
                     .fill(lightingColor)
@@ -319,6 +329,7 @@ private struct EnvControlRow<Leading: View>: View {
     let range: ClosedRange<Double>
     let fill: LinearGradient
     var onEditingChanged: (Bool) -> Void = { _ in }
+    var onAdjust: (() -> Void)? = nil
     @ViewBuilder let leading: () -> Leading
 
     private var percent: Int {
@@ -340,7 +351,7 @@ private struct EnvControlRow<Leading: View>: View {
 
                 Spacer()
 
-                AdjustPill()
+                AdjustPill(action: onAdjust)
             }
 
             HStack(spacing: 20) {
@@ -365,8 +376,18 @@ private struct EnvControlRow<Leading: View>: View {
 }
 
 private struct AdjustPill: View {
+    /// nil이면 동작 없는 시각 전용(음악 행), 있으면 탭 → 조정 시트(조명 행)
+    var action: (() -> Void)? = nil
+
     var body: some View {
-        // 동작 보류 (시각 전용) — 추후 조정 화면 연동
+        if let action {
+            Button(action: action) { pill }
+        } else {
+            pill
+        }
+    }
+
+    private var pill: some View {
         HStack(spacing: 4) {
             Image(.sliderHorizontal)
                 .font(.system(size: 11, weight: .semibold))
