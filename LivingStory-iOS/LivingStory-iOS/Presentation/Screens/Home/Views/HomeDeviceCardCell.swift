@@ -25,6 +25,11 @@ final class HomeDeviceCardCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        cardView.resetForReuse()   // 재사용 셀에서 켜짐 애니메이션이 잘못 튀지 않도록 초기화
+    }
 }
 
 // MARK: - Public Methods
