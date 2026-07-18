@@ -109,7 +109,7 @@ struct AnimatedCheckmark: View {
 
 /// 체크 fill 도형과 마스크용 중심선(spine)을 담고, 둘 다 "글리프 실제 경계 기준" 동일 변환으로
 /// rect 중앙에 정렬한다. → 어떤 frame에서도 가로·세로 정중앙, fill·spine은 정확히 겹침.
-private enum CheckArt {
+private nonisolated enum CheckArt {
     static let design = CGSize(width: 96, height: 77)
 
     /// 체크 글리프의 실제(on-path) 바운딩. Figma 절대좌표는 96×77 박스 안에서 위로 치우쳐 있어
