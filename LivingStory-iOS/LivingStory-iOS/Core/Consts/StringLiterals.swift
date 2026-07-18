@@ -17,6 +17,7 @@ enum StringLiterals {
     enum Home {
         static let menuTitle = "모든 집 리스트"
         static let deviceOff = "꺼짐"
+        static let deviceOn = "켜짐"
 
         // 빈 상태 - 권한 필요
         static let permissionTitle = "홈 앱 권한 허용 필요"
@@ -60,6 +61,11 @@ enum StringLiterals {
         static let adjust = "조정"
         // 조명 조정 시트
         static let lightingAdjustTitle = "조명 조정"
+        // 음악 조정 시트
+        static let musicAdjustTitle = "음악 조정"
+        static let musicFilterAll = "전체"
+        // 환경 미리보기
+        static let envPreviewTitle = "환경 미리보기"
         static let saturation = "채도"
         static let done = "완료"
         static func todayBookCount(_ count: Int) -> String { "오늘 아이에게\n책을 \(count)번 읽어줬어요!" }
