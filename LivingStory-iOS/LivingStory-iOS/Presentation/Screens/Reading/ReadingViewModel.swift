@@ -60,7 +60,7 @@ final class ReadingViewModel {
 
     private(set) var readingSession: ReadingSessionProfile?
 
-    private let geminiService: GeminiService
+    private let aiService: any AIService
     private let audioPlayerService: AudioPlayerService
     private let bookRepository: BookRepositoryProtocol
     private let sessionRepository: ReadingSessionRepositoryProtocol
@@ -73,7 +73,7 @@ final class ReadingViewModel {
 
     init(
         book: BookProfileModel,
-        geminiService: GeminiService? = nil,
+        aiService: (any AIService)? = nil,
         audioPlayerService: AudioPlayerService? = nil,
         bookRepository: BookRepositoryProtocol? = nil,
         sessionRepository: ReadingSessionRepositoryProtocol? = nil,
@@ -81,7 +81,7 @@ final class ReadingViewModel {
         preparedEnvironment: PreparedEnvironment? = nil
     ) {
         self.book = book
-        self.geminiService = geminiService ?? GeminiService()
+        self.aiService = aiService ?? GeminiService()
         self.audioPlayerService = audioPlayerService ?? AudioPlayerService()
         self.bookRepository = bookRepository ?? BookRepository()
         self.sessionRepository = sessionRepository ?? ReadingSessionRepository()
@@ -110,13 +110,17 @@ final class ReadingViewModel {
         musicCategory: MusicCategory? = nil,
         conversations: [ConversationProfile] = []
     ) {
-        self.init(book: previewBook, lightingController: MockLightingController())
+        self.init(
+            book: previewBook,
+            aiService: MockAIService(),
+            lightingController: MockLightingController()
+        )
         self.state = state
         self.lightingConfig = lightingConfig
         self.musicCategory = musicCategory
         self.geminiRecommendedMusic = musicCategory
         self.conversations = conversations
-        self.hasStarted = true // startSetup() 조기 종료 → Gemini 호출 차단
+        self.hasStarted = true // 프리뷰는 이미 완성 상태 — 세팅 플로우 재실행 불필요
     }
 #endif
 
@@ -147,12 +151,12 @@ final class ReadingViewModel {
         var music: MusicCategory = .warm
         var convos: [ConversationProfile] = []
         do {
-            async let questionsTask = geminiService.generateQuestions(for: book, age: Self.childAge)
-            async let environmentTask = geminiService.generateLightingAndMusic(for: book)
-            let (conversationDTOs, environment) = try await (questionsTask, environmentTask)
+            async let questionsTask = aiService.generateQuestions(for: book, age: Self.childAge)
+            async let environmentTask = aiService.generateEnvironment(for: book)
+            let (questions, environment) = try await (questionsTask, environmentTask)
             lighting = environment.lighting
             music = environment.musicCategory
-            convos = conversationDTOs.map { $0.toProfile() }
+            convos = questions
             print("[Gemini] 추천 완료: 음악 \(music.rawValue), 대화 \(convos.count)개")
         } catch {
             print("[Gemini] 추천 실패 → 기본 환경 폴백: \(error.localizedDescription)")
@@ -180,9 +184,9 @@ final class ReadingViewModel {
         state = .preview
     }
 
-    /// AI(Gemini) 추천 실패 → 에러별 사용자 안내 문구 (GeminiError.errorDescription 활용: 429·서버코드·네트워크 등)
+    /// AI 추천 실패 → 에러별 사용자 안내 문구 (AIServiceError: 429·서버코드·네트워크 등)
     static func aiFallbackNotice(for error: Error) -> String {
-        if let g = error as? GeminiError, let desc = g.errorDescription {
+        if let aiError = error as? AIServiceError, let desc = aiError.errorDescription {
             return desc
         }
         return "AI 추천을 불러오지 못했어요. 잠시 후 다시 시도해주세요."
@@ -192,14 +196,14 @@ final class ReadingViewModel {
     func retryAIRecommendation() async {
         aiFallbackMessage = nil
         do {
-            async let questionsTask = geminiService.generateQuestions(for: book, age: Self.childAge)
-            async let environmentTask = geminiService.generateLightingAndMusic(for: book)
-            let (conversationDTOs, environment) = try await (questionsTask, environmentTask)
+            async let questionsTask = aiService.generateQuestions(for: book, age: Self.childAge)
+            async let environmentTask = aiService.generateEnvironment(for: book)
+            let (questions, environment) = try await (questionsTask, environmentTask)
             lightingConfig = environment.lighting
             musicCategory = environment.musicCategory
             geminiRecommendedLighting = environment.lighting
             geminiRecommendedMusic = environment.musicCategory
-            conversations = conversationDTOs.map { $0.toProfile() }
+            conversations = questions
             if let controller = lightingController {
                 try? await controller.applyLightingWithPowerOn(environment.lighting)
             }
