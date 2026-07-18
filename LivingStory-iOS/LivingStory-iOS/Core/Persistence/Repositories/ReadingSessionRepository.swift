@@ -126,6 +126,13 @@ final class ReadingSessionRepository: ReadingSessionRepositoryProtocol {
         return sessions.reduce(0) { $0 + Int($1.duration) }
     }
     
+    /// 책(ISBN)별 읽은 횟수 — 세션 수 카운트 (효율적 count 쿼리)
+    func fetchReadCount(forISBN isbn: String) throws -> Int {
+        let request = ReadingSessionEntity.fetchRequest()
+        request.predicate = NSPredicate(format: "book.isbn == %@", isbn)
+        return try context.count(for: request)
+    }
+
     func fetchReadDates() throws -> Set<DateComponents> {
         let request = ReadingSessionEntity.fetchRequest()
         let sessions = try context.fetch(request)

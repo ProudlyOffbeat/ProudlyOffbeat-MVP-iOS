@@ -13,6 +13,8 @@ struct StopReadingView: View {
     let coordinator: AppCoordinator
     let book: BookProfileModel
     let conversations: [ConversationProfile]
+    /// 이 책을 지금까지 몇 번째 읽었는지 (완료 배지 955-2670)
+    var readCount: Int = 1
 
     var body: some View {
         ZStack {
@@ -24,9 +26,11 @@ struct StopReadingView: View {
 
                 bookSection
 
-                Spacer().frame(height: 48)
-
-                talkButton
+                // 대화주제가 있을 때만 "아이와 대화하기" 노출 (AI 실패로 비었으면 숨김)
+                if !conversations.isEmpty {
+                    Spacer().frame(height: 48)
+                    talkButton
+                }
 
                 Spacer()
 
@@ -50,7 +54,7 @@ struct StopReadingView: View {
         VStack(spacing: 24) {
             BookCoverThumbnail(
                 coverURL: book.bookCoverImageURL,
-                readCount: 4 // TODO: 실제 읽어준 횟수 연동 (현재 더미)
+                readCount: readCount   // 실제 읽어준 횟수 (CoreData 세션 카운트)
             )
 
             VStack(spacing: 12) {

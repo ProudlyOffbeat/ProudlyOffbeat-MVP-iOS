@@ -24,6 +24,8 @@ protocol ReadingSessionRepositoryProtocol {
     // MARK: - 스트릭 (기본구현 제공 — 기존 세션 데이터에서 파생)
     func fetchCurrentStreak() throws -> Int
     func hasReadToday() throws -> Bool
+    /// 해당 책(ISBN)을 지금까지 몇 번 읽었는지
+    func fetchReadCount(forISBN isbn: String) throws -> Int
 }
 
 // 세션 데이터에서 파생 — 별도 저장 안 함(진실의 원천은 CoreData 세션). 기존 mock도 자동 충족.
@@ -35,5 +37,9 @@ extension ReadingSessionRepositoryProtocol {
 
     func hasReadToday() throws -> Bool {
         try !fetchTodaySessions().isEmpty
+    }
+
+    func fetchReadCount(forISBN isbn: String) throws -> Int {
+        try fetchAllSessions().filter { $0.bookProfile.isbn == isbn }.count
     }
 }
