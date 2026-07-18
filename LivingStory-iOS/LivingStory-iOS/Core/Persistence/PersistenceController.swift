@@ -39,7 +39,7 @@ final class PersistenceController {
         }
         
         container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
     }
     
     //MARK: 실제 SQLite에 저장하는 함수
