@@ -13,7 +13,7 @@ import Foundation
 
 /// AI가 추천한 독서 환경 (프로바이더 중립).
 /// 프로바이더별 응답 DTO는 각 구현체 안에서 이 타입으로 변환한다.
-struct AIEnvironment: Sendable {
+nonisolated struct AIEnvironment: Sendable {
     let lighting: LightingConfig
     let musicCategory: MusicCategory
 }
@@ -22,7 +22,7 @@ struct AIEnvironment: Sendable {
 
 /// 프로바이더 중립 AI 오류. 호출부는 이 타입만 알면 된다.
 /// 문구는 사용자 안내(graceful degradation)에 그대로 쓰인다.
-enum AIServiceError: LocalizedError, Sendable {
+nonisolated enum AIServiceError: LocalizedError, Sendable {
     case invalidConfiguration
     case network(String)
     case rateLimited
@@ -57,7 +57,7 @@ enum AIServiceError: LocalizedError, Sendable {
 
 /// 독서 환경 추천에 필요한 최소 인터페이스.
 /// 호출부가 실제로 쓰는 두 가지만 노출한다.
-protocol AIService: Sendable {
+nonisolated protocol AIService: Sendable {
 
     /// 책을 조사해 연령에 맞는 대화 주제를 생성한다.
     func generateQuestions(for book: BookProfileModel, age: Int) async throws -> [ConversationProfile]

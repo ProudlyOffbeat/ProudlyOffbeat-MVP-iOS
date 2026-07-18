@@ -18,10 +18,17 @@ struct MockAIService: AIService {
     let environment: AIEnvironment
     let questions: [ConversationProfile]
 
-    init(
+    /// 기본 질문 세트 — 기본 액터 격리를 타지 않도록 nonisolated로 둔다
+    nonisolated static let defaultQuestions: [ConversationProfile] = [
+        ConversationProfile(id: UUID(), question: "주인공은 왜 그런 선택을 했을까?", effect: "인물의 마음을 헤아려요"),
+        ConversationProfile(id: UUID(), question: "너라면 어떻게 했을 것 같아?", effect: "자기 생각을 표현해요"),
+        ConversationProfile(id: UUID(), question: "가장 기억에 남는 장면은 뭐야?", effect: "이야기를 정리해요")
+    ]
+
+    nonisolated init(
         error: AIServiceError? = nil,
         environment: AIEnvironment = .mock,
-        questions: [ConversationProfile] = ConversationProfile.mockList
+        questions: [ConversationProfile] = MockAIService.defaultQuestions
     ) {
         self.error = error
         self.environment = environment
@@ -40,7 +47,8 @@ struct MockAIService: AIService {
 }
 
 extension AIEnvironment {
-    static let mock = AIEnvironment(
+    /// 기본 액터 격리(MainActor)에 묶이면 테스트에서 못 읽으므로 nonisolated로 노출
+    nonisolated static let mock = AIEnvironment(
         lighting: LightingConfig(hue: 40, saturation: 70, brightness: 60),
         musicCategory: .warm
     )

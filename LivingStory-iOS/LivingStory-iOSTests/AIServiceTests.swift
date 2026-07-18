@@ -11,6 +11,7 @@
 import XCTest
 @testable import LivingStory_iOS
 
+@MainActor
 final class AIServiceTests: XCTestCase {
 
     private func stubbedService() -> GeminiService {
@@ -182,7 +183,6 @@ final class AIServiceTests: XCTestCase {
 
     // MARK: - 폴백 안내 문구 (graceful degradation)
 
-    @MainActor
     func test_AIServiceError는_에러별_안내문구가_나온다() {
         XCTAssertEqual(
             ReadingViewModel.aiFallbackNotice(for: AIServiceError.rateLimited),
@@ -194,7 +194,6 @@ final class AIServiceTests: XCTestCase {
         )
     }
 
-    @MainActor
     func test_알수없는_오류는_기본_안내문구로_떨어진다() {
         struct UnknownError: Error {}
 
