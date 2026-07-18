@@ -12,6 +12,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        #if DEBUG
+        StreakDataSeeder.seedIfNeeded()   // -SeedStreakData 실행 시에만 동작
+        #endif
         return true
     }
 
