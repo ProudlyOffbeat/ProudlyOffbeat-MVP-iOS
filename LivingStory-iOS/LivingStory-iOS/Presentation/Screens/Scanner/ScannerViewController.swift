@@ -235,6 +235,9 @@ private extension ScannerViewController {
                 let startTime = Date()
 
                 do {
+                    #if DEBUG
+                    if LaunchArguments.mockBookNotFound { throw NetworkError.noData }   // QA: 책 조회 실패 강제
+                    #endif
                     // 책 조회(Kakao)는 필수 — 실패하면 바깥 catch → .failed (재시도/직접검색)
                     let book = try await ISBNLookupService.shared.lookupBook(isbn: isbn)
                     guard !Task.isCancelled else { return }
@@ -245,6 +248,10 @@ private extension ScannerViewController {
                     var conversations: [ConversationProfile] = []
                     var fallbackMessage: String? = nil
                     do {
+                        #if DEBUG
+                        if LaunchArguments.mockGemini429 { throw NetworkError.invalidResponse(statusCode: 429) }
+                        if LaunchArguments.mockGeminiServerError { throw NetworkError.invalidResponse(statusCode: 500) }
+                        #endif
                         async let envTask = self.geminiService.generateLightingAndMusic(for: book)
                         async let questionsTask = self.geminiService.generateQuestions(for: book, age: UserData.childAge)
                         let (env, conversationDTOs) = try await (envTask, questionsTask)
