@@ -7,7 +7,19 @@
 
 import HomeKit
 
-final class HomeKitManager: NSObject {
+enum HomeKitError: LocalizedError {
+    case characteristicNotFound
+    case timeout
+
+    var errorDescription: String? {
+        switch self {
+        case .characteristicNotFound: return "기기의 전원 특성을 찾을 수 없습니다."
+        case .timeout: return "기기 응답 시간이 초과되었습니다."
+        }
+    }
+}
+
+final class HomeKitManager: NSObject, HomeDataProviding {
 
     // MARK: - Properties
 
@@ -35,11 +47,22 @@ final class HomeKitManager: NSObject {
         }
     }
 
-    /// 기기의 전원 상태를 토글 (on ↔ off)
-    func togglePower(for deviceId: UUID) async throws {
-        guard let characteristic = findPowerCharacteristic(for: deviceId) else { return }
-        let currentValue = (characteristic.value as? Bool) ?? false
-        try await characteristic.writeValue(!currentValue)
+    /// 기기 전원을 명시한 목표값으로 설정. 특성을 못 찾거나 timeout 초과 시 throw → 호출부가 UI를 롤백.
+    /// 목표값을 인자로 받아 "탭한 순간의 의도"와 실제 write를 일치시킨다(현재값 재읽기에 의존하지 않음).
+    func setPower(_ isOn: Bool, for deviceId: UUID, timeout: TimeInterval = 5) async throws {
+        guard let characteristic = findPowerCharacteristic(for: deviceId) else {
+            throw HomeKitError.characteristicNotFound
+        }
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask { try await characteristic.writeValue(isOn) }
+            group.addTask {
+                try await Task.sleep(for: .seconds(timeout))
+                throw HomeKitError.timeout
+            }
+            // 먼저 끝나는 쪽(성공 또는 타임아웃)을 취해 결과 확정, 나머지는 취소.
+            try await group.next()
+            group.cancelAll()
+        }
     }
 
     /// 모든 구독 대상 특성의 최신 값을 HomeKit에서 읽어옴 (포그라운드 복귀 시 호출)

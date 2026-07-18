@@ -13,7 +13,8 @@ final class HomeViewController: BaseViewController {
 
     weak var coordinator: AppCoordinator?
 
-    private let homeKitManager = HomeKitManager()
+    // 실제(HomeKitManager) 또는 목업(MockHomeProvider) — 실행 인자로 결정 (DEBUG)
+    private let homeProvider: HomeDataProviding = HomeProviderFactory.make()
     private let homeDataSource = HomeDataSource()
     private var homes: [HomeModel] = []
     private var currentHome: HomeModel?
@@ -73,11 +74,11 @@ final class HomeViewController: BaseViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        Task { await homeKitManager.refreshAllCharacteristics() }
+        Task { await homeProvider.refreshAllCharacteristics() }
     }
 
     @objc private func handleWillEnterForeground() {
-        Task { await homeKitManager.refreshAllCharacteristics() }
+        Task { await homeProvider.refreshAllCharacteristics() }
     }
 }
 
@@ -194,37 +195,40 @@ extension HomeViewController: UICollectionViewDelegate {
         collectionView.deselectItem(at: indexPath, animated: false)
         guard let device = homeDataSource.device(at: indexPath) else { return }
 
-        // tapped 플래그 — 진행 중이면 재탭 무시
+        // 진행 중이면 재탭 무시 (응답 받을 때까지)
         guard !togglingDeviceIds.contains(device.id) else { return }
         togglingDeviceIds.insert(device.id)
 
+        // 목표값 = 현재 화면에 그려진 상태의 반대 (옵티미스틱 상태 기준)
+        let target = !device.displayIsOn
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
 
-        // 옵티미스틱 UI: 셀 즉시 토글
-        if let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell {
-            var newDevice = device
-            newDevice.isOn.toggle()
-            cell.configure(with: newDevice, index: indexPath.item)
-        }
+        // 옵티미스틱: 모델(단일 진실)에 목표값 반영 → 셀은 자동으로 목표 상태 + "적용 중" 표시.
+        // 셀이 화면에 있든 없든(오프스크린) 모델 기준이라 항상 일관되게 반영된다.
+        homeDataSource.beginToggle(deviceId: device.id, target: target)
 
         Task { [weak self] in
-            defer {
-                Task { @MainActor in
-                    self?.togglingDeviceIds.remove(device.id)
-                }
-            }
+            guard let self else { return }
+            var success = false
             do {
-                try await self?.homeKitManager.togglePower(for: device.id)
+                try await self.homeProvider.setPower(target, for: device.id)
+                success = true
             } catch {
                 print("[HomeKit] 전원 토글 실패: \(error.localizedDescription)")
-                // 실패 시 cell 을 실제 상태로 즉시 복원
-                await MainActor.run { [weak self] in
-                    guard let self,
-                          let cell = collectionView.cellForItem(at: indexPath) as? HomeDeviceCardCell,
-                          let actualDevice = self.homeDataSource.device(at: indexPath) else { return }
-                    cell.configure(with: actualDevice, index: indexPath.item)
+            }
+
+            await MainActor.run {
+                // 성공 → 목표값으로 확정, 실패 → 이전 상태로 롤백 (둘 다 pending 해제)
+                self.homeDataSource.resolveToggle(deviceId: device.id, success: success)
+                self.togglingDeviceIds.remove(device.id)
+                if !success {
+                    UINotificationFeedbackGenerator().notificationOccurred(.error)
                 }
-                await self?.homeKitManager.refreshAllCharacteristics()
+            }
+
+            // 실패 시 실제 기기 상태로 재동기화 (타임아웃이었는데 실제로는 켜졌을 수도 있으니)
+            if !success {
+                await self.homeProvider.refreshAllCharacteristics()
             }
         }
     }
@@ -235,7 +239,7 @@ extension HomeViewController: UICollectionViewDelegate {
 private extension HomeViewController {
 
     func bindHomeKit() {
-        homeKitManager.onHomesUpdated = { [weak self] homes in
+        homeProvider.onHomesUpdated = { [weak self] homes in
             guard let self else { return }
             self.homes = homes
 
@@ -253,13 +257,13 @@ private extension HomeViewController {
             }
         }
 
-        homeKitManager.onPermissionDenied = { [weak self] in
+        homeProvider.onPermissionDenied = { [weak self] in
             self?.homes = []
             self?.currentHome = nil
             self?.updateUI(for: .permissionsRequired)
         }
 
-        homeKitManager.checkInitialStatus()
+        homeProvider.checkInitialStatus()
     }
 }
 
