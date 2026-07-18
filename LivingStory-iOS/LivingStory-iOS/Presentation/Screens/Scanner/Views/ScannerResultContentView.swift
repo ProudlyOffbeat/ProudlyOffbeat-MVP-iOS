@@ -135,7 +135,7 @@ private extension ScannerResultContentView {
             retryButton.topAnchor.constraint(equalTo: centerStack.bottomAnchor, constant: 43),
             retryButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             retryButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            retryButton.heightAnchor.constraint(equalToConstant: 56),
+            retryButton.heightAnchor.constraint(equalToConstant: 52),
         ])
     }
 }

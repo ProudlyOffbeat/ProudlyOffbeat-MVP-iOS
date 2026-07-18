@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SwiftUI
 
 // MARK: - Scanner State
 
@@ -33,11 +32,10 @@ final class ScannerViewController: BaseViewController {
 
     private var detectedISBN: String?
     private var fetchedBook: BookProfileModel?
+    /// 인식중에 미리 받아온 환경 추천 (조명·음악·대화) — 성공 시 독서 화면으로 전달
+    private var preparedEnvironment: PreparedEnvironment?
+    private let geminiService = GeminiService()
     private var lookupTask: Task<Void, Never>?
-
-    /// 직접 검색 버튼 위치 제약 — 상태별 토글 (.scanning: 하단 / .failed: "다시 스캔" 위)
-    private var directSearchScanningConstraint: NSLayoutConstraint!
-    private var directSearchFailedConstraint: NSLayoutConstraint!
 
     let scanningDetent = UISheetPresentationController.Detent.custom(identifier: .init("scanning")) { context in
         context.maximumDetentValue * 0.75
@@ -193,18 +191,10 @@ private extension ScannerViewController {
             resultContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             resultContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            // 직접 검색 — 중앙 정렬 (세로 위치는 상태별 제약으로 토글)
+            // 직접 검색 — safe area 바로 위, 중앙
+            directSearchButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             directSearchButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
-
-        // .scanning: safe area 바로 위 / .failed: "다시 스캔" 버튼 위
-        directSearchScanningConstraint = directSearchButton.bottomAnchor.constraint(
-            equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8
-        )
-        directSearchFailedConstraint = directSearchButton.bottomAnchor.constraint(
-            equalTo: resultContentView.retryButton.topAnchor, constant: -16
-        )
-        directSearchScanningConstraint.isActive = true
     }
 
     func setupActions() {
@@ -214,30 +204,7 @@ private extension ScannerViewController {
     }
 
     @objc func directSearchTapped() {
-        let searchView = BookDirectSearchView(
-            onSelect: { [weak self] book in
-                guard let self else { return }
-                // 검색 시트를 먼저 닫고, 기존 바코드 성공 플로우를 그대로 재사용
-                self.dismiss(animated: true) {
-                    self.fetchedBook = book
-                    self.state = .success
-                }
-            },
-            onClose: { [weak self] in
-                self?.dismiss(animated: true)
-            }
-        )
-
-        let hostingVC = UIHostingController(rootView: searchView)
-        hostingVC.view.backgroundColor = UIColor(hex: 0x1C1C1E)
-
-        if let sheet = hostingVC.sheetPresentationController {
-            sheet.detents = [.large()]
-            sheet.preferredCornerRadius = 32
-            sheet.prefersGrabberVisible = true
-        }
-
-        present(hostingVC, animated: true)
+        // TODO: 직접(수동) 책 검색 화면 연결 (검색 플로우 미구현)
     }
 }
 
@@ -268,9 +235,37 @@ private extension ScannerViewController {
                 let startTime = Date()
 
                 do {
+                    // 책 조회(Kakao)는 필수 — 실패하면 바깥 catch → .failed (재시도/직접검색)
                     let book = try await ISBNLookupService.shared.lookupBook(isbn: isbn)
                     guard !Task.isCancelled else { return }
+
+                    // Gemini 환경추천은 부가 — 실패해도 기본 환경으로 진행하고 미리보기에서 토스트 안내
+                    var lighting = LightingConfig.default
+                    var music: MusicCategory = .warm
+                    var conversations: [ConversationProfile] = []
+                    var fallbackMessage: String? = nil
+                    do {
+                        async let envTask = self.geminiService.generateLightingAndMusic(for: book)
+                        async let questionsTask = self.geminiService.generateQuestions(for: book, age: UserData.childAge)
+                        let (env, conversationDTOs) = try await (envTask, questionsTask)
+                        lighting = env.lighting
+                        music = env.musicCategory
+                        conversations = conversationDTOs.map { $0.toProfile() }
+                    } catch is CancellationError {
+                        return
+                    } catch {
+                        fallbackMessage = ReadingViewModel.aiFallbackNotice(for: error)
+                        print("[Gemini] 추천 실패 → 기본 환경 폴백: \(error.localizedDescription)")
+                    }
+                    guard !Task.isCancelled else { return }
+
                     self.fetchedBook = book
+                    self.preparedEnvironment = PreparedEnvironment(
+                        lighting: lighting,
+                        musicCategory: music,
+                        conversations: conversations,
+                        aiFallbackMessage: fallbackMessage
+                    )
 
                     let elapsed = Date().timeIntervalSince(startTime)
                     if elapsed < 2.0 {
@@ -281,6 +276,7 @@ private extension ScannerViewController {
                 } catch is CancellationError {
                     return
                 } catch {
+                    // 책 조회 실패 → 인식 실패 (기존 재시도/직접검색 흐름)
                     let elapsed = Date().timeIntervalSince(startTime)
                     if elapsed < 2.0 {
                         try? await Task.sleep(nanoseconds: UInt64((2.0 - elapsed) * 1_000_000_000))
@@ -293,11 +289,13 @@ private extension ScannerViewController {
         case .success:
             // 체크표시/완료 애니메이션 없이 바로 다음 페이지로
             guard let book = fetchedBook else { return }
+            let env = preparedEnvironment
             dismiss(animated: true) {
                 if self.isRestarting {
-                    self.coordinator?.replaceReadingFlow(with: book)
+                    self.coordinator?.replaceReadingFlow(with: book, environment: env)
                 } else {
-                    self.coordinator?.showBookProfile(book: book)
+                    // BookProfile 단계를 건너뛰고, 인식중에 받아둔 환경으로 바로 미리보기 진입
+                    self.coordinator?.showReading(book: book, environment: env)
                 }
             }
 
@@ -310,12 +308,8 @@ private extension ScannerViewController {
         scanningContentView.alpha = state == .scanning ? 1 : 0
         scanningContentView.isHidden = state != .scanning
 
-        // 직접 검색은 스캐닝 + 실패 상태에서 노출
-        directSearchButton.isHidden = !(state == .scanning || state == .failed)
-
-        // 위치 제약 토글: 실패 상태에선 "다시 스캔" 위로, 그 외엔 하단
-        directSearchScanningConstraint.isActive = (state != .failed)
-        directSearchFailedConstraint.isActive = (state == .failed)
+        // 직접 검색은 스캐닝 상태에서만
+        directSearchButton.isHidden = state != .scanning
 
         resultContentView.alpha = state == .scanning ? 0 : 1
         resultContentView.isHidden = state == .scanning

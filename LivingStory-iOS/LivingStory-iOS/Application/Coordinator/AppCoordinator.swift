@@ -57,7 +57,7 @@ final class AppCoordinator: Coordinator {
             tag: 1
         )
 
-        // Tab 3: 마이 (MyViewController → StatisticsView 교체)
+        // Tab 3: 마이 (StatisticsView — SwiftUI, 담당: 이토)
         let myNav = UINavigationController()
         let myVC = UIHostingController(
             rootView: StatisticsView(coordinator: self, repository: ReadingSessionRepository())
@@ -109,8 +109,8 @@ final class AppCoordinator: Coordinator {
         activeNavigationController?.pushViewController(hostingVC, animated: true)
     }
 
-    /// 독서 중 화면 (SwiftUI)
-    func showReading(book: BookProfileModel) {
+    /// 독서 중 화면 (SwiftUI). 스캐너에서 환경 추천을 미리 받아온 경우 `environment`로 전달.
+    func showReading(book: BookProfileModel, environment: PreparedEnvironment? = nil) {
         let lightingController: any LightingControllable
         // 시뮬레이터엔 HomeKit이 없어 Mock, 실기기(Debug/Release 모두)는 실제 제어
         #if targetEnvironment(simulator)
@@ -121,7 +121,8 @@ final class AppCoordinator: Coordinator {
 
         let viewModel = ReadingViewModel(
             book: book,
-            lightingController: lightingController
+            lightingController: lightingController,
+            preparedEnvironment: environment
         )
         activeReadingViewModel = viewModel
         UIApplication.shared.isIdleTimerDisabled = true
@@ -129,6 +130,7 @@ final class AppCoordinator: Coordinator {
         let hostingVC = UIHostingController(rootView: view)
         hostingVC.title = book.bookTitle
         hostingVC.navigationItem.largeTitleDisplayMode = .never
+        hostingVC.hidesBottomBarWhenPushed = true
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
 
@@ -163,6 +165,17 @@ final class AppCoordinator: Coordinator {
         activeNavigationController?.popToRootViewController(animated: true)
     }
 
+    /// 환경 미리보기 X → 바로 이전 상태(책 읽기 스캐너 바텀시트)로 복귀
+    func backToScannerFromPreview() {
+        guard let nav = activeNavigationController else { return }
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { [weak self] in
+            self?.showScanner()   // pop 완료 후 스캐너 시트 재present
+        }
+        nav.popViewController(animated: true)
+        CATransaction.commit()
+    }
+
     /// 현재 화면 위에 바코드 스캔 시트 재호출 (독서 플로우 중 "다른 책 스캔")
     func restartScanner() {
         guard let nav = activeNavigationController else { return }
@@ -180,12 +193,30 @@ final class AppCoordinator: Coordinator {
         nav.topViewController?.present(vc, animated: true)
     }
 
-    /// 기존 독서 스택 정리 후 새 책 BookProfileView로 교체
-    func replaceReadingFlow(with book: BookProfileModel) {
+    /// 기존 독서 스택 정리 후 새 책 독서 화면(환경 미리보기)으로 교체
+    func replaceReadingFlow(with book: BookProfileModel, environment: PreparedEnvironment? = nil) {
         guard let nav = activeNavigationController else { return }
-        // 루트(BookViewController)만 남기고 새 BookProfileView push
-        let view = BookProfileView(coordinator: self, book: book)
+
+        let lightingController: any LightingControllable
+        #if targetEnvironment(simulator)
+        lightingController = MockLightingController()
+        #else
+        lightingController = HomeKitLightingController()
+        #endif
+
+        let viewModel = ReadingViewModel(
+            book: book,
+            lightingController: lightingController,
+            preparedEnvironment: environment
+        )
+        activeReadingViewModel = viewModel
+        UIApplication.shared.isIdleTimerDisabled = true
+
+        // 루트(BookViewController)만 남기고 새 독서 화면 push
+        let view = ReadingView(coordinator: self, viewModel: viewModel)
         let hostingVC = UIHostingController(rootView: view)
+        hostingVC.title = book.bookTitle
+        hostingVC.navigationItem.largeTitleDisplayMode = .never
         hostingVC.hidesBottomBarWhenPushed = true
 
         var viewControllers = [nav.viewControllers.first].compactMap { $0 }

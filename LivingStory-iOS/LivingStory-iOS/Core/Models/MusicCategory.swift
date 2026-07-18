@@ -59,4 +59,52 @@ enum MusicCategory: String, Codable, CaseIterable, Sendable {
     - Playful: 가볍고 경쾌한 즐거움
     - Quirky: 예측 불가하고 해학적인 유머감
     """
+
+    /// 곡 리스트·미니플레이어에 노출할 짧은 한국어 무드 이름.
+    var koreanName: String {
+        switch self {
+        case .warm: return "따뜻한 품"
+        case .cozy: return "아늑함"
+        case .peaceful: return "고요함"
+        case .airy: return "청량함"
+        case .dreamy: return "몽환"
+        case .healing: return "위로"
+        case .lyrical: return "서정"
+        case .curious: return "호기심"
+        case .fairytale: return "동화 속"
+        case .mysterious: return "신비"
+        case .playful: return "경쾌함"
+        case .quirky: return "엉뚱함"
+        }
+    }
+
+    /// 상위 감정 축 (칩 필터용).
+    var axis: MoodAxis {
+        switch self {
+        case .warm, .cozy: return .loveCalm
+        case .peaceful, .airy, .dreamy: return .naturePeace
+        case .healing, .lyrical: return .emotion
+        case .curious, .fairytale, .mysterious: return .adventure
+        case .playful, .quirky: return .humorEnergy
+        }
+    }
+}
+
+/// 12개 무드 키워드의 상위 5개 감정 축 (음악 조정 칩 필터).
+enum MoodAxis: String, CaseIterable, Sendable {
+    case loveCalm       // 사랑/안정: Warm, Cozy
+    case naturePeace    // 자연/고요: Peaceful, Airy, Dreamy
+    case emotion        // 감정/공감: Healing, Lyrical
+    case adventure      // 상상/모험: Curious, Fairytale, Mysterious
+    case humorEnergy    // 유머/에너지: Playful, Quirky
+
+    var koreanLabel: String {
+        switch self {
+        case .loveCalm: return "사랑·안정"
+        case .naturePeace: return "자연·고요"
+        case .emotion: return "감정·공감"
+        case .adventure: return "상상·모험"
+        case .humorEnergy: return "유머·에너지"
+        }
+    }
 }

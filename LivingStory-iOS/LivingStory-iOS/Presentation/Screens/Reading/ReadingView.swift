@@ -16,12 +16,21 @@ struct ReadingView: View {
     @State private var showStopAlert = false
     @State private var isFinishing = false
     @State private var showLightingSheet = false
+    @State private var showMusicSheet = false
 
     var body: some View {
         VStack(spacing: 0) {
-            if viewModel.state == .reading {
+            switch viewModel.state {
+            case .reading:
                 readingDoneLayout
-            } else {
+            case .preview:
+                EnvironmentPreviewView(
+                    viewModel: viewModel,
+                    onStart: { Task { await viewModel.startReading() } },
+                    onAdjustLighting: { showLightingSheet = true },
+                    onAdjustMusic: { showMusicSheet = true }
+                )
+            default:
                 settingLayout
             }
         }
@@ -30,12 +39,22 @@ struct ReadingView: View {
         .toolbarBackground(.hidden, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(viewModel.book.bookTitle)
+                Text(viewModel.state == .preview ? StringLiterals.Reading.envPreviewTitle : viewModel.book.bookTitle)
                     .font(.headline)
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     // 중단 시 체크 전환 인터랙션 동안엔 제목 숨김 (페이드 함께)
                     .opacity(isFinishing ? 0 : 1)
+            }
+            if viewModel.state == .preview {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        viewModel.cancelPreview()
+                        coordinator.backToScannerFromPreview()
+                    } label: {
+                        Image(.close)
+                    }
+                }
             }
         }
         .background { pulseBackground }
@@ -54,9 +73,13 @@ struct ReadingView: View {
         .sheet(isPresented: $showLightingSheet) {
             LightingAdjustSheet(viewModel: viewModel)
         }
+        .sheet(isPresented: $showMusicSheet) {
+            MusicAdjustSheet(viewModel: viewModel)
+        }
         .onAppear {
+            // 세팅중 글로우 깜빡임 — 0.8초 주기로 또렷하게 왕복(2.5초 노출 동안 약 3회)
             withAnimation(
-                .easeInOut(duration: 2.5)
+                .easeInOut(duration: 0.8)
                 .repeatForever(autoreverses: true)
             ) {
                 isPulsing = true
@@ -129,7 +152,8 @@ struct ReadingView: View {
             ControlCard(
                 viewModel: viewModel,
                 lightingColor: lightingColor,
-                onAdjustLighting: { showLightingSheet = true }
+                onAdjustLighting: { showLightingSheet = true },
+                onAdjustMusic: { showMusicSheet = true }
             )
             .padding(.horizontal, 20)
 
@@ -243,6 +267,7 @@ private struct ControlCard: View {
     let viewModel: ReadingViewModel
     let lightingColor: Color
     let onAdjustLighting: () -> Void
+    let onAdjustMusic: () -> Void
 
     /// 채움 색(그라데이션). 네이티브 Slider tint로 넘기면 단색으로 뭉개질 수 있음(의도).
     private static let fill = LinearGradient(
@@ -297,7 +322,8 @@ private struct ControlCard: View {
                 valueLabel: StringLiterals.Reading.volume,
                 value: volumeBinding,
                 range: 0...1,
-                fill: Self.fill
+                fill: Self.fill,
+                onAdjust: onAdjustMusic
             ) {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(

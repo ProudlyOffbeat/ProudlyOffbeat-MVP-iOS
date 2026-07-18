@@ -105,11 +105,11 @@ struct LightingAdjustSheet: View {
             .frame(width: 38, height: 38)
             .overlay {
                 Circle()
-                    .fill(.white)
+                    .fill(eyedropperColor(for: current))
                     .overlay {
                         Image(.eyedropper)
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(.black)
+                            .foregroundStyle(eyedropperIconColor(for: current))
                     }
                     .allowsHitTesting(false)
             }
@@ -138,6 +138,29 @@ struct LightingAdjustSheet: View {
 
             Spacer(minLength: 0)
         }
+    }
+
+    /// 스포이드 well 배경 = 현재 선택색 (밝기 1로 선명하게, 스와치·노브와 동일 규칙).
+    private func eyedropperColor(for config: LightingConfig) -> Color {
+        Color(
+            hue: Double(config.hue) / 360,
+            saturation: Double(config.saturation) / 100,
+            brightness: 1
+        )
+    }
+
+    /// 선택색 상대 휘도로 스포이드 아이콘 대비색 결정 (밝으면 검정, 어두우면 흰색).
+    private func eyedropperIconColor(for config: LightingConfig) -> Color {
+        let ui = UIColor(
+            hue: CGFloat(config.hue) / 360,
+            saturation: CGFloat(config.saturation) / 100,
+            brightness: 1,
+            alpha: 1
+        )
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        ui.getRed(&r, green: &g, blue: &b, alpha: &a)
+        let luminance = 0.299 * r + 0.587 * g + 0.114 * b
+        return luminance > 0.6 ? .black : .white
     }
 }
 

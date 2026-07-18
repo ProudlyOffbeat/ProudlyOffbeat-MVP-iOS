@@ -19,70 +19,105 @@ import SwiftUI
 
 struct CheckmarkTransitionView: View {
 
-    /// 체크 그리기 + 정지 후 호출 (다음 화면 전환 트리거)
+    /// 체크 등장 + 정지 후 호출 (다음 화면 전환 트리거)
     let onFinished: () -> Void
 
-    /// 그리기 시간
-    private let drawDuration: Double = 0.7
-    /// 그리기 완료 후 정지(다음 화면 넘어가기 전)
-    private let holdDuration: Double = 0.7
+    /// 등장(스프링) 시간
+    private let appearDuration: Double = 0.5
+    /// 등장 후 정지(다음 화면 넘어가기 전)
+    private let holdDuration: Double = 0.8
 
-    /// 렌더 크기 — Figma SVG 원본 크기(96×77 = 체크 글리프의 실제 크기) 그대로.
-    /// SVG width/height는 '체크 바운딩 박스'이지 Figma의 120×120 프레임이 아니다.
-    /// (풀스크린 검정 배경이라 프레임 여백은 보이지 않고, 체크 절대 크기만 의미 있음.)
-    private let renderSize = CGSize(width: 96, height: 77)
-
-    @State private var progress: CGFloat = 0
+    @State private var reveal: CGFloat = 0
 
     var body: some View {
         ZStack {
             Color.black
-                .ignoresSafeArea()
-
-            FigmaCheckShape()
-                .fill(checkGradient)
-                .frame(width: renderSize.width, height: renderSize.height)
-                // 중심선 따라가는 굵은 stroke를 trim으로 키워 도형을 점진적으로 드러냄(펜-드로잉)
-                .mask(
-                    CheckSpine()
-                        .trim(from: 0, to: progress)
-                        .stroke(
-                            style: StrokeStyle(lineWidth: 28, lineCap: .round, lineJoin: .round)
-                        )
-                        .frame(width: renderSize.width, height: renderSize.height)
-                )
+            // 새 Check 에셋 — 왼쪽→오른쪽으로 그려지듯 드러남(체크되는 효과), 전체화면 중앙
+            Image("Check")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 140, height: 140)
+                .mask(alignment: .leading) {
+                    GeometryReader { geo in
+                        Rectangle().frame(width: geo.size.width * reveal)
+                    }
+                }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)   // 전체화면 채워 화면 진짜 중앙에
+        .ignoresSafeArea()
         .onAppear {
-            withAnimation(.easeInOut(duration: drawDuration)) {
-                progress = 1
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + drawDuration + holdDuration) {
+            withAnimation(.easeInOut(duration: appearDuration)) { reveal = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + appearDuration + holdDuration) {
                 onFinished()
             }
         }
     }
-
-    /// Figma 그라데이션(userSpaceOnUse) 복제: 우상단 파랑 → 중앙 연두 → 좌하단 노랑.
-    /// 시작/끝 점은 Figma 벡터 좌표를 viewBox(96×77)로 정규화한 값(범위 밖 좌표 허용).
-    private var checkGradient: LinearGradient {
-        LinearGradient(
-            stops: [
-                .init(color: Color(checkHex: 0x63B0FF), location: 0.159), // 파랑
-                .init(color: Color(checkHex: 0xBFEE68), location: 0.421), // 연두
-                .init(color: Color(checkHex: 0xFFCB24), location: 0.788)  // 노랑
-            ],
-            startPoint: UnitPoint(x: 95.0329 / 96, y: 65.712 / 77),
-            endPoint: UnitPoint(x: -5.69032 / 96, y: 35.8199 / 77)
-        )
-    }
 }
 
-// MARK: - Figma Check Shape (fill path)
+// MARK: - Animated Checkmark (재사용)
 
-/// Figma SVG(viewBox 96×77)의 `<path d>` 를 좌표 그대로 옮긴 닫힌 도형.
-/// 절대좌표를 그대로 쓰고 마지막에 rect 크기로 스케일 → 어떤 frame에서도 동일 비율.
-private struct FigmaCheckShape: Shape {
-    func path(in rect: CGRect) -> Path {
+/// 그라데이션 체크가 펜으로 그려지듯 나타나는 애니메이션 뷰.
+/// 독서 종료 전환(CheckmarkTransitionView)과 온보딩 세팅 완료(SetupCompleteView)에서 공유.
+struct AnimatedCheckmark: View {
+
+    /// 체크 글리프 크기 (기본 = Figma 원본 96×77, 비율 유지 권장)
+    var size: CGSize = CGSize(width: 96, height: 77)
+    /// 그려지는 시간
+    var drawDuration: Double = 0.7
+    /// onAppear에서 자동 재생
+    var autoPlay: Bool = true
+
+    @State private var progress: CGFloat = 0
+
+    /// 마스크 스트로크 두께(디자인 96 기준 28)를 크기에 맞춰 스케일
+    private var maskLineWidth: CGFloat { 28 * (size.width / 96) }
+
+    var body: some View {
+        FigmaCheckShape()
+            .fill(AnimatedCheckmark.gradient)
+            .frame(width: size.width, height: size.height)
+            // 중심선 따라가는 굵은 stroke를 trim으로 키워 도형을 점진적으로 드러냄(펜-드로잉)
+            .mask(
+                CheckSpine()
+                    .trim(from: 0, to: progress)
+                    .stroke(
+                        style: StrokeStyle(lineWidth: maskLineWidth, lineCap: .round, lineJoin: .round)
+                    )
+                    .frame(width: size.width, height: size.height)
+            )
+            .onAppear {
+                guard autoPlay else { return }
+                withAnimation(.easeInOut(duration: drawDuration)) {
+                    progress = 1
+                }
+            }
+    }
+
+    /// Figma 그라데이션(userSpaceOnUse) 복제: 우상단 파랑 → 중앙 연두 → 좌하단 노랑.
+    static let gradient = LinearGradient(
+        stops: [
+            .init(color: Color(checkHex: 0x63B0FF), location: 0.159), // 파랑
+            .init(color: Color(checkHex: 0xBFEE68), location: 0.421), // 연두
+            .init(color: Color(checkHex: 0xFFCB24), location: 0.788)  // 노랑
+        ],
+        startPoint: UnitPoint(x: 95.0329 / 96, y: 65.712 / 77),
+        endPoint: UnitPoint(x: -5.69032 / 96, y: 35.8199 / 77)
+    )
+}
+
+// MARK: - Check Art (fill path · spine · 중앙정렬 변환 공용)
+
+/// 체크 fill 도형과 마스크용 중심선(spine)을 담고, 둘 다 "글리프 실제 경계 기준" 동일 변환으로
+/// rect 중앙에 정렬한다. → 어떤 frame에서도 가로·세로 정중앙, fill·spine은 정확히 겹침.
+private enum CheckArt {
+    static let design = CGSize(width: 96, height: 77)
+
+    /// 체크 글리프의 실제(on-path) 바운딩. Figma 절대좌표는 96×77 박스 안에서 위로 치우쳐 있어
+    /// 단순 스케일만 하면 세로 중앙이 어긋난다. 이 값을 기준으로 중앙 정렬한다.
+    static let glyphBounds = CGRect(x: 0.730162, y: 0, width: 93.8675, height: 72.7969)
+
+    /// Figma SVG(viewBox 96×77)의 `<path d>` 를 좌표 그대로 옮긴 닫힌 도형.
+    static let fillPath: Path = {
         var p = Path()
         p.move(to: CGPoint(x: 70.8669, y: 4.87691))
         p.addCurve(to: CGPoint(x: 84.3203, y: 0), control1: CGPoint(x: 75.5844, y: 1.59526), control2: CGPoint(x: 80, y: -7.08923e-06))
@@ -123,18 +158,11 @@ private struct FigmaCheckShape: Shape {
         p.addCurve(to: CGPoint(x: 59.8679, y: 16.8535), control1: CGPoint(x: 51.9055, y: 28.2079), control2: CGPoint(x: 56.0499, y: 21.986))
         p.addCurve(to: CGPoint(x: 70.8669, y: 4.87691), control1: CGPoint(x: 63.4978, y: 11.9737), control2: CGPoint(x: 67.3894, y: 7.29604))
         p.closeSubpath()
+        return p
+    }()
 
-        return p.applying(CGAffineTransform(scaleX: rect.width / 96, y: rect.height / 77))
-    }
-}
-
-// MARK: - Check Spine (마스크용 중심선)
-
-/// 체크의 중심선(왼팔 끝 → 꼭짓점 → 우상단 끝). FigmaCheckShape와 동일 좌표계(96×77)에서
-/// 그린 뒤 같은 스케일을 적용해 정확히 겹친다. 굵은 stroke로 도형을 덮는 mask 용도라
-/// 픽셀 정밀할 필요는 없고 도형 두께를 충분히 커버하기만 하면 된다.
-private struct CheckSpine: Shape {
-    func path(in rect: CGRect) -> Path {
+    /// 체크의 중심선(왼팔 끝 → 꼭짓점 → 우상단 끝). fill과 동일 변환으로 정확히 겹친다.
+    static let spinePath: Path = {
         var p = Path()
         p.move(to: CGPoint(x: 5, y: 42))                       // 왼팔 끝
         p.addLine(to: CGPoint(x: 30, y: 66))                   // 꼭짓점(꺾이는 곳)
@@ -142,8 +170,25 @@ private struct CheckSpine: Shape {
             to: CGPoint(x: 87, y: 7),
             control: CGPoint(x: 58, y: 40)
         )
-        return p.applying(CGAffineTransform(scaleX: rect.width / 96, y: rect.height / 77))
+        return p
+    }()
+
+    /// 글리프 실제 경계 중심을 rect 중심에 맞춰 스케일·정렬. fill·spine 모두 같은 변환을 쓴다.
+    static func aligned(_ path: Path, in rect: CGRect) -> Path {
+        let scale = min(rect.width / design.width, rect.height / design.height)
+        var t = CGAffineTransform(translationX: rect.midX, y: rect.midY)
+        t = t.scaledBy(x: scale, y: scale)
+        t = t.translatedBy(x: -glyphBounds.midX, y: -glyphBounds.midY)
+        return path.applying(t)
     }
+}
+
+private struct FigmaCheckShape: Shape {
+    func path(in rect: CGRect) -> Path { CheckArt.aligned(CheckArt.fillPath, in: rect) }
+}
+
+private struct CheckSpine: Shape {
+    func path(in rect: CGRect) -> Path { CheckArt.aligned(CheckArt.spinePath, in: rect) }
 }
 
 // MARK: - Color Helper
