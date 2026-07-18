@@ -135,7 +135,9 @@ final class AppCoordinator: Coordinator {
     // MARK: - 마이 탭 네비게이션
     /// 책 읽기 완료 화면 (SwiftUI)
     func showStopReading(book: BookProfileModel, conversations: [ConversationProfile]) {
-        let view = StopReadingView(coordinator: self, book: book, conversations: conversations)
+        // 방금 저장된 세션까지 포함해 "이 책 몇 번째 읽음" 계산
+        let readCount = (try? ReadingSessionRepository().fetchReadCount(forISBN: book.isbn)) ?? 1
+        let view = StopReadingView(coordinator: self, book: book, conversations: conversations, readCount: max(1, readCount))
         let hostingVC = UIHostingController(rootView: view)
         (activeNavigationController ?? navigationController).pushViewController(hostingVC, animated: true)
     }
