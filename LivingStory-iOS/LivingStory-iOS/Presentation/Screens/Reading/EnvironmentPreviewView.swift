@@ -272,7 +272,8 @@ private struct PercentAdjustOverlay: View {
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { g in
-                    value = min(max(1 - g.location.y / h, 0), 1)
+                    // value(Double)와 h(CGFloat) 혼용 시 암묵 변환이 모호해져 타입 체크 실패 → Double로 명시
+                    value = min(max(1 - Double(g.location.y) / Double(h), 0), 1)
                     onChanged()
                 }
                 .onEnded { _ in onEnded() }
