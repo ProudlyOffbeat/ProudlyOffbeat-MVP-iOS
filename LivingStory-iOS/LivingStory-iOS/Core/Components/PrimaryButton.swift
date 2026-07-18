@@ -67,13 +67,15 @@ final class PrimaryButton: UIButton {
 struct PrimaryButtonSwiftUI: View {
     let title: String
     var height: CGFloat = 52
+    /// 글래스 틴트. 기본 클리어(.clear), 디자인상 주요 CTA는 검정 글래스(.black).
+    var glassTint: Color = .clear
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Capsule()
                 .frame(height: height)
-                .foregroundStyle(.clear)
+                .foregroundStyle(glassTint)
                 .glassEffect()
                 .overlay {
                     Text(title)
