@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 // MARK: - Scanner State
 
@@ -33,6 +34,10 @@ final class ScannerViewController: BaseViewController {
     private var detectedISBN: String?
     private var fetchedBook: BookProfileModel?
     private var lookupTask: Task<Void, Never>?
+
+    /// 직접 검색 버튼 위치 제약 — 상태별 토글 (.scanning: 하단 / .failed: "다시 스캔" 위)
+    private var directSearchScanningConstraint: NSLayoutConstraint!
+    private var directSearchFailedConstraint: NSLayoutConstraint!
 
     let scanningDetent = UISheetPresentationController.Detent.custom(identifier: .init("scanning")) { context in
         context.maximumDetentValue * 0.75
@@ -188,10 +193,18 @@ private extension ScannerViewController {
             resultContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             resultContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            // 직접 검색 — safe area 바로 위, 중앙
-            directSearchButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            // 직접 검색 — 중앙 정렬 (세로 위치는 상태별 제약으로 토글)
             directSearchButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
         ])
+
+        // .scanning: safe area 바로 위 / .failed: "다시 스캔" 버튼 위
+        directSearchScanningConstraint = directSearchButton.bottomAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8
+        )
+        directSearchFailedConstraint = directSearchButton.bottomAnchor.constraint(
+            equalTo: resultContentView.retryButton.topAnchor, constant: -16
+        )
+        directSearchScanningConstraint.isActive = true
     }
 
     func setupActions() {
@@ -201,7 +214,30 @@ private extension ScannerViewController {
     }
 
     @objc func directSearchTapped() {
-        // TODO: 직접(수동) 책 검색 화면 연결 (검색 플로우 미구현)
+        let searchView = BookDirectSearchView(
+            onSelect: { [weak self] book in
+                guard let self else { return }
+                // 검색 시트를 먼저 닫고, 기존 바코드 성공 플로우를 그대로 재사용
+                self.dismiss(animated: true) {
+                    self.fetchedBook = book
+                    self.state = .success
+                }
+            },
+            onClose: { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        )
+
+        let hostingVC = UIHostingController(rootView: searchView)
+        hostingVC.view.backgroundColor = UIColor(hex: 0x1C1C1E)
+
+        if let sheet = hostingVC.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.preferredCornerRadius = 32
+            sheet.prefersGrabberVisible = true
+        }
+
+        present(hostingVC, animated: true)
     }
 }
 
@@ -274,8 +310,12 @@ private extension ScannerViewController {
         scanningContentView.alpha = state == .scanning ? 1 : 0
         scanningContentView.isHidden = state != .scanning
 
-        // 직접 검색은 스캐닝 상태에서만
-        directSearchButton.isHidden = state != .scanning
+        // 직접 검색은 스캐닝 + 실패 상태에서 노출
+        directSearchButton.isHidden = !(state == .scanning || state == .failed)
+
+        // 위치 제약 토글: 실패 상태에선 "다시 스캔" 위로, 그 외엔 하단
+        directSearchScanningConstraint.isActive = (state != .failed)
+        directSearchFailedConstraint.isActive = (state == .failed)
 
         resultContentView.alpha = state == .scanning ? 0 : 1
         resultContentView.isHidden = state == .scanning
