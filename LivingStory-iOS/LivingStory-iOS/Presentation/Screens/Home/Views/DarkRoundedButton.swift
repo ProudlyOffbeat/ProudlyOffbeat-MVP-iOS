@@ -12,12 +12,11 @@ final class DarkRoundedButton: UIButton {
     init(title: String) {
         super.init(frame: .zero)
 
-        var config = UIButton.Configuration.filled()
+        // 앱 표준 리퀴드 글래스와 통일 (clear — "홈으로" 버튼과 동일)
+        var config = UIButton.Configuration.glass()
         config.title = title
-        config.baseBackgroundColor = UIColor(named: "gray0")
         config.baseForegroundColor = .white
-        config.cornerStyle = .fixed
-        config.background.cornerRadius = 24
+        config.cornerStyle = .capsule
         config.contentInsets = NSDirectionalEdgeInsets(
             top: 15, leading: 40.5, bottom: 15, trailing: 40.5
         )

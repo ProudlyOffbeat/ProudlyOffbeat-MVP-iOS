@@ -16,7 +16,7 @@ final class HomeEmptyStateView: UIView {
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = UIColor(named: "gray10")
+        imageView.tintColor = .white   // 집 아이콘 = 흰색
         let config = UIImage.SymbolConfiguration(pointSize: 66, weight: .regular)
         imageView.preferredSymbolConfiguration = config
         return imageView
@@ -25,7 +25,7 @@ final class HomeEmptyStateView: UIView {
     private let titleLabel: UILabel = {
         let label = DynamicLabel()
         label.font = .body1SemiBold
-        label.textColor = UIColor(named: "gray10")
+        label.textColor = .white                                     // 타이틀 = 흰색 (Labels/Primary)
         label.textAlignment = .center
         return label
     }()
@@ -33,7 +33,7 @@ final class HomeEmptyStateView: UIView {
     private let subtitleLabel: UILabel = {
         let label = DynamicLabel()
         label.font = .labelRegular
-        label.textColor = UIColor(named: "gray40")
+        label.textColor = UIColor(hex: 0xEBEBF5).withAlphaComponent(0.6)  // 서브타이틀 = 세컨더리 그레이 (바탕과 구분)
         label.textAlignment = .center
         label.numberOfLines = 0
         return label
@@ -109,8 +109,10 @@ private extension HomeEmptyStateView {
         contentStackView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            contentStackView.topAnchor.constraint(equalTo: topAnchor),
-            contentStackView.centerXAnchor.constraint(equalTo: centerXAnchor)
+            // Figma 269-4973 — 콘텐츠를 화면 중앙에 동적 배치(상단 고정 X), 살짝 위로.
+            // 기기별 화면 높이에 맞춰 자동 이동. spacing(22/8)·색상·버튼은 유지.
+            contentStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            contentStackView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: -100)
         ])
     }
 
