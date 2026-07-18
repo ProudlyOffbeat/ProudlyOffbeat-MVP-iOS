@@ -45,7 +45,9 @@ protocol LightingControllable {
     func stopBrightnessPulse() async
 }
 
-#if DEBUG
+// 시뮬레이터엔 HomeKit이 없어 Release+시뮬 빌드에서도 필요 → DEBUG뿐 아니라 simulator에서도 컴파일.
+// (실기기 Release에선 제외 — AppCoordinator가 HomeKitLightingController 사용)
+#if DEBUG || targetEnvironment(simulator)
 struct MockLightingController: LightingControllable {
     func applyLighting(_ config: LightingConfig) async throws {
         print("[MockLighting] 조명 적용 - H\(config.hue) S\(config.saturation) B\(config.brightness)")
