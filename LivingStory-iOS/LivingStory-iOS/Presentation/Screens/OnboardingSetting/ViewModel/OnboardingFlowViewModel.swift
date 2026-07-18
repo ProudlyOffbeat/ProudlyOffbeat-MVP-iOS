@@ -36,10 +36,12 @@ final class OnboardingFlowViewModel {
     private var deniedTask: Task<Void, Never>?
 
     // MARK: - Dependencies
-    private let homeKit = HomeKitManager()
+    private let homeProvider: HomeDataProviding
+    private var homeObservation: HomeObservation?
     private let repository: EnvironmentSettingRepositoryProtocol
 
-    init(repository: EnvironmentSettingRepositoryProtocol? = nil) {
+    init(homeProvider: HomeDataProviding, repository: EnvironmentSettingRepositoryProtocol? = nil) {
+        self.homeProvider = homeProvider
         // @MainActor 타입이라 기본 인자가 아닌 init 본문(@MainActor)에서 생성
         self.repository = repository ?? EnvironmentSettingRepository()
         bindHomeKit()
@@ -188,13 +190,13 @@ final class OnboardingFlowViewModel {
     // MARK: - Private: HomeKit binding
 
     private func bindHomeKit() {
-        homeKit.onPermissionDenied = { [weak self] in
-            self?.scheduleDeniedIfNeeded()
-        }
-        homeKit.onHomesUpdated = { [weak self] homes in
-            self?.handleHomes(homes)
-        }
-        homeKit.checkInitialStatus()
+        // 공유 프로바이더에 구독. addObserver가 등록 직후 현재 상태를 1회 전달하고,
+        // 미결정이면 내부에서 checkInitialStatus를 트리거 → VM이 첫 소비자여도(재개-투-세팅) 안 멈춤.
+        homeObservation = homeProvider.addObserver(
+            self,
+            onHomesUpdated: { [weak self] homes in self?.handleHomes(homes) },
+            onPermissionDenied: { [weak self] in self?.scheduleDeniedIfNeeded() }
+        )
     }
 
     /// 거부 신호를 400ms 디바운스 — 그 안에 homes가 오면(권한 OK) #27을 띄우지 않는다.

@@ -16,6 +16,13 @@ final class AppCoordinator: Coordinator {
     private var tabBarController: MainTabBarController?
     private(set) var activeReadingViewModel: ReadingViewModel?
 
+    /// 앱당 단일 공유 홈 데이터 소스. 소유자는 AppDelegate(프로세스당 1개)이며 여기선 읽기만 한다.
+    /// 실기 앱에선 항상 AppDelegate.homeProvider(lazy 단일 인스턴스)를 반환.
+    /// (프리뷰/테스트 등 delegate가 AppDelegate가 아닌 문맥에서만 폴백 — 실앱 단일성엔 영향 없음)
+    var homeProvider: HomeDataProviding {
+        (UIApplication.shared.delegate as? AppDelegate)?.homeProvider ?? HomeProviderFactory.make()
+    }
+
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
@@ -37,7 +44,7 @@ final class AppCoordinator: Coordinator {
 
         // Tab 1: 환경 세팅
         let homeNav = UINavigationController()
-        let homeVC = HomeViewController()
+        let homeVC = HomeViewController(homeProvider: homeProvider)
         homeVC.coordinator = self
         homeNav.setViewControllers([homeVC], animated: false)
         homeNav.tabBarItem = UITabBarItem(
@@ -271,7 +278,7 @@ final class AppCoordinator: Coordinator {
 
     /// 첫 실행 환경 세팅 플로우 (SwiftUI) — VM 생성·완료 와이어링·주입은 여기서
     func showOnboardingSetting() {
-        let viewModel = OnboardingFlowViewModel()
+        let viewModel = OnboardingFlowViewModel(homeProvider: homeProvider)
         viewModel.onCompleted = { [weak self] in
             self?.enterMain()
         }

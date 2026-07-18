@@ -13,8 +13,9 @@ final class HomeViewController: BaseViewController {
 
     weak var coordinator: AppCoordinator?
 
-    // 실제(HomeKitManager) 또는 목업(MockHomeProvider) — 실행 인자로 결정 (DEBUG)
-    private let homeProvider: HomeDataProviding = HomeProviderFactory.make()
+    // 앱당 단일 공유 프로바이더를 주입받음 (AppCoordinator가 AppDelegate의 것을 전달)
+    private let homeProvider: HomeDataProviding
+    private var homeObservation: HomeObservation?
     private let homeDataSource = HomeDataSource()
     private var homes: [HomeModel] = []
     private var currentHome: HomeModel?
@@ -51,6 +52,18 @@ final class HomeViewController: BaseViewController {
         view.isHidden = true
         return view
     }()
+
+    // MARK: - Init
+
+    init(homeProvider: HomeDataProviding) {
+        self.homeProvider = homeProvider
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -239,31 +252,33 @@ extension HomeViewController: UICollectionViewDelegate {
 private extension HomeViewController {
 
     func bindHomeKit() {
-        homeProvider.onHomesUpdated = { [weak self] homes in
-            guard let self else { return }
-            self.homes = homes
+        // 공유 프로바이더에 구독. addObserver가 등록 직후 현재 상태를 1회 전달하고,
+        // 미결정이면 내부에서 상태 확인을 트리거 → HomeVC가 첫 소비자여도(둘 다 완료 재실행) 초기 렌더 보장.
+        homeObservation = homeProvider.addObserver(
+            self,
+            onHomesUpdated: { [weak self] homes in
+                guard let self else { return }
+                self.homes = homes
 
-            // 현재 선택된 집 유지 (실시간 업데이트 시 리셋 방지)
-            if let selectedId = self.currentHome?.id,
-               let updated = homes.first(where: { $0.id == selectedId }) {
-                self.currentHome = updated
-                self.updateUI(for: updated.state)
-            } else if let first = homes.first {
-                self.currentHome = first
-                self.updateUI(for: first.state)
-            } else {
-                self.currentHome = nil
-                self.updateUI(for: .noDevices)
+                // 현재 선택된 집 유지 (실시간 업데이트 시 리셋 방지)
+                if let selectedId = self.currentHome?.id,
+                   let updated = homes.first(where: { $0.id == selectedId }) {
+                    self.currentHome = updated
+                    self.updateUI(for: updated.state)
+                } else if let first = homes.first {
+                    self.currentHome = first
+                    self.updateUI(for: first.state)
+                } else {
+                    self.currentHome = nil
+                    self.updateUI(for: .noDevices)
+                }
+            },
+            onPermissionDenied: { [weak self] in
+                self?.homes = []
+                self?.currentHome = nil
+                self?.updateUI(for: .permissionsRequired)
             }
-        }
-
-        homeProvider.onPermissionDenied = { [weak self] in
-            self?.homes = []
-            self?.currentHome = nil
-            self?.updateUI(for: .permissionsRequired)
-        }
-
-        homeProvider.checkInitialStatus()
+        )
     }
 }
 

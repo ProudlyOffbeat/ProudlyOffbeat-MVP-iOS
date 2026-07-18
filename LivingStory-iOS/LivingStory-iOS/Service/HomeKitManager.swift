@@ -26,11 +26,61 @@ final class HomeKitManager: NSObject, HomeDataProviding {
     private let homeManager = HMHomeManager()
     private var pendingUpdateTask: Task<Void, Never>?
 
-    /// HomeKit에서 집 목록이 업데이트되면 호출되는 콜백 (항상 메인에서 호출 — 타입으로 강제)
-    var onHomesUpdated: (@MainActor ([HomeModel]) -> Void)?
+    // MARK: - Multicast (여러 소비처가 각자 구독 — 단일 클로저 덮어쓰기 방지)
 
-    /// HomeKit 권한이 거부되었을 때 호출되는 콜백 (항상 메인에서 호출 — 타입으로 강제)
-    var onPermissionDenied: (@MainActor () -> Void)?
+    private enum LastHomeState { case unknown, homes([HomeModel]), denied }
+    private var lastState: LastHomeState = .unknown
+
+    private struct Observer {
+        weak var owner: AnyObject?
+        let onHomes: @MainActor ([HomeModel]) -> Void
+        let onDenied: @MainActor () -> Void
+    }
+    private var observers: [UUID: Observer] = [:]
+
+    var currentHomes: [HomeModel] {
+        if case .homes(let h) = lastState { return h } else { return [] }
+    }
+
+    @discardableResult
+    func addObserver(_ owner: AnyObject,
+                     onHomesUpdated: @escaping @MainActor ([HomeModel]) -> Void,
+                     onPermissionDenied: @escaping @MainActor () -> Void) -> HomeObservation {
+        let id = UUID()
+        observers[id] = Observer(owner: owner, onHomes: onHomesUpdated, onDenied: onPermissionDenied)
+        // 초기 전달을 다음 틱으로 미뤄 호출부 토큰 대입이 먼저 끝나게 함(#4).
+        // 미결정이면 checkInitialStatus를 내부 트리거해 '첫 소비자'가 반드시 초기값을 받게 함(#1).
+        Task { @MainActor [weak self] in
+            guard let self, self.observers[id] != nil else { return }
+            switch self.lastState {
+            case .homes(let h): onHomesUpdated(h)
+            case .denied: onPermissionDenied()
+            case .unknown: self.checkInitialStatus()
+            }
+        }
+        return HomeObservation { [weak self] in self?.observers[id] = nil }
+    }
+
+    /// 스냅샷 순회(#5) — 콜백 중 구독 취소/추가가 순회를 변형하지 못하게. dead(owner==nil)는 사후 프루닝.
+    private func emitHomes(_ homes: [HomeModel]) {
+        lastState = .homes(homes)
+        let snapshot = observers
+        var dead: [UUID] = []
+        for (id, o) in snapshot {
+            if o.owner == nil { dead.append(id) } else { o.onHomes(homes) }
+        }
+        for id in dead { observers[id] = nil }
+    }
+
+    private func emitDenied() {
+        lastState = .denied
+        let snapshot = observers
+        var dead: [UUID] = []
+        for (id, o) in snapshot {
+            if o.owner == nil { dead.append(id) } else { o.onDenied() }
+        }
+        for id in dead { observers[id] = nil }
+    }
 
     // MARK: - Init
 
@@ -97,14 +147,14 @@ extension HomeKitManager: HMHomeDelegate {
             accessory.delegate = self
             await enableNotifications(for: accessory)
             let homes = homeManager.homes.map { mapHome($0) }
-            onHomesUpdated?(homes)
+            emitHomes(homes)
         }
     }
 
     nonisolated func home(_ home: HMHome, didRemove accessory: HMAccessory) {
         Task { @MainActor in
             let homes = homeManager.homes.map { mapHome($0) }
-            onHomesUpdated?(homes)
+            emitHomes(homes)
         }
     }
 }
@@ -131,7 +181,7 @@ private extension HomeKitManager {
     func handleStatus(_ status: HMHomeManagerAuthorizationStatus) {
         guard status.contains(.authorized) else {
             Task { @MainActor in
-                onPermissionDenied?()
+                emitDenied()
             }
             return
         }
@@ -143,7 +193,7 @@ private extension HomeKitManager {
 
             let homes = homeManager.homes.map { mapHome($0) }
             await MainActor.run {
-                onHomesUpdated?(homes)
+                emitHomes(homes)
             }
         }
     }
@@ -163,7 +213,7 @@ extension HomeKitManager: HMAccessoryDelegate {
                 try? await Task.sleep(for: .milliseconds(150))
                 guard !Task.isCancelled else { return }
                 let homes = homeManager.homes.map { mapHome($0) }
-                onHomesUpdated?(homes)
+                emitHomes(homes)
             }
         }
     }
