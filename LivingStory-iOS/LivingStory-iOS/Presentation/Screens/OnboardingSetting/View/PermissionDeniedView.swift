@@ -16,8 +16,8 @@ struct PermissionDeniedView: View {
             Spacer()
 
             Image(systemName: "house.badge.exclamationmark")
-                .font(.system(size: 52))
-                .foregroundStyle(.white)
+                .font(.system(size: 66))                 // 빈 상태(기기 없음)와 동일 크기
+                .foregroundStyle(.white)                 // 흰색 아이콘 (빈 상태와 통일)
                 .padding(.bottom, 8)
 
             Text(StringLiterals.Home.permissionTitle)
@@ -26,20 +26,13 @@ struct PermissionDeniedView: View {
 
             Text(StringLiterals.Home.permissionSubtitle)
                 .font(.calloutRegular)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color(red: 0xEB/255, green: 0xEB/255, blue: 0xF5/255).opacity(0.6))  // 빈 상태와 동일 세컨더리 그레이
                 .multilineTextAlignment(.center)
 
-            Button(action: onOpenSettings) {
-                Text(StringLiterals.Home.permissionButton)
-                    .font(.body2SemiBold)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 14)
-                    .background {
-                        Capsule().foregroundStyle(.black).glassEffect()   // 검정 글래스
-                    }
+            // 앱 표준 리퀴드 글래스 CTA (clear — 검정이라 안 보이던 문제 해결)
+            PrimaryButtonSwiftUI(title: StringLiterals.Home.permissionButton) {
+                onOpenSettings()
             }
-            .buttonStyle(.plain)
             .padding(.top, 8)
 
             Spacer()

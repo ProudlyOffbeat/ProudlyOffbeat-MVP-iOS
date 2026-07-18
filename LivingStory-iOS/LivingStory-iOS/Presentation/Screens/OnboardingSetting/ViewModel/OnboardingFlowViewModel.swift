@@ -150,15 +150,19 @@ final class OnboardingFlowViewModel {
                 print("[Onboarding] 환경 세팅 저장 실패: \(error.localizedDescription)")
             }
         }
+        // 읽어줄 시간을 단일 소스(UserData)에도 동기화 → 알림 스케줄 기준 통일 (온보딩 CoreData ↔ 설정 UserDefaults)
+        UserData.notificationTime = readingTime
+        UserData.notificationEnabled = true
+
         // 저장이 성공했거나 저장할 게 없을 때만 완료 도장 → 실패 시 다음 진입에서 재세팅 기회 유지.
-        // (완료 화면 전환·메인 이동 자체는 막지 않아 무한 온보딩은 방지)
         if didPersist {
             UserData.hasCompletedInitialSetup = true
         }
-        phase = .completed
 
-        // #33 완료 화면을 잠깐 보여준 뒤 메인으로 전환
+        // 알림 권한을 "먼저" 요청하고(사용자 응답 대기) → 그 다음 완료 화면 애니메이션. (동시 표시 방지)
         Task { [weak self] in
+            await ReadingNotificationScheduler.shared.requestAuthorization()
+            self?.phase = .completed
             try? await Task.sleep(for: .seconds(1.8))
             self?.onCompleted?()
         }

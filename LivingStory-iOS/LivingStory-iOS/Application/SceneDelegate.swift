@@ -37,6 +37,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidBecomeActive(_ scene: UIScene) {
         appCoordinator?.activeReadingViewModel?.resume()
+        // 포그라운드 복귀 시 오늘 읽음/스트릭 반영해 알림 재스케줄 (재알림·22시 경고 갱신)
+        Task { await ReadingNotificationScheduler.shared.refreshSchedule() }
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
