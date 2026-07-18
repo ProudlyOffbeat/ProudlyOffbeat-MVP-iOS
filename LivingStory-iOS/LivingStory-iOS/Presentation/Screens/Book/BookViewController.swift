@@ -76,19 +76,9 @@ final class BookViewController: BaseViewController {
         streakBadge.configure(count: computeStreak())
     }
 
-    /// 오늘부터 거슬러 연속으로 읽은 날 수
+    /// 연속으로 읽은 날 수 (공용 StreakCalculator로 통합 — 중복 제거)
     private func computeStreak() -> Int {
-        let readDates = (try? readingRepository.fetchReadDates()) ?? []
-        let cal = Calendar.current
-        let readDays = Set(readDates.compactMap { cal.date(from: $0).map { cal.startOfDay(for: $0) } })
-        var streak = 0
-        var day = cal.startOfDay(for: Date())
-        while readDays.contains(day) {
-            streak += 1
-            guard let prev = cal.date(byAdding: .day, value: -1, to: day) else { break }
-            day = prev
-        }
-        return streak
+        (try? readingRepository.fetchCurrentStreak()) ?? 0
     }
 }
 
