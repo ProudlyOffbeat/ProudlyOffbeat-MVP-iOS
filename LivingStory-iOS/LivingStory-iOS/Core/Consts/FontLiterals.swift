@@ -141,6 +141,7 @@ extension Font {
 
     // ───── Headline ─────
     static let headlineMedium = pretendard(24, .medium, .title3)
+    static let headlineRegular = pretendard(17, .regular, .headline)   // 표준 Headline 17 (UIFont와 대응)
     static let headlineParagraph = pretendard(24, .medium, .title3)
 
     // ───── Body 1 ─────
