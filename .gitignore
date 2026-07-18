@@ -138,6 +138,7 @@ iOSInjectionProject/
 
 # Development tools
 .claude/
+CLAUDE.md
 
 # Secrets
 **/Secrets.swift

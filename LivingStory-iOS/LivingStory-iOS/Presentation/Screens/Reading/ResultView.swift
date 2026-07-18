@@ -14,8 +14,10 @@ struct ResultView: View {
     let coordinator: AppCoordinator
     let repository: ReadingSessionRepositoryProtocol
 
-    // TODO: 연속일(streak) 데이터 연동 — 현재 더미 고정값
-    private let flameCount = 12
+    // 연속일(streak) — CoreData 세션에서 파생 (StreakCalculator)
+    private var flameCount: Int {
+        (try? repository.fetchCurrentStreak()) ?? 0
+    }
 
     private var todaySessions: [ReadingSessionProfile] {
         (try? repository.fetchTodaySessions()) ?? []
@@ -26,15 +28,15 @@ struct ResultView: View {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Spacer()
+                Spacer().frame(height: 65)    // 헤더 → 스트릭
 
                 flameRow
 
-                Spacer().frame(height: 52)
+                Spacer().frame(height: 55)    // 스트릭 → 애니메이션 스택
 
                 BookStackAnimationView()
 
-                Spacer().frame(height: 30)
+                Spacer().frame(height: 36)    // 스택 → "오늘 N권" 텍스트
 
                 Text(StringLiterals.Reading.todayReadBooks(todaySessions.count))
                     .font(.headlineMedium)
@@ -43,7 +45,7 @@ struct ResultView: View {
                     .lineSpacing(6)
                     .tracking(0.5)
 
-                Spacer().frame(height: 52)
+                Spacer().frame(height: 57)    // 텍스트 → 책 데이터
 
                 bookThumbnails
 
