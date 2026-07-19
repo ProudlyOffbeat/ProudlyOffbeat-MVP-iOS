@@ -2,7 +2,7 @@
 //  ChildAgeSettingView.swift
 //  LivingStory-iOS
 //
-//  아이 나이 설정 (디자인 897-4862) — 현재 UI만, 값 더미
+//  아이 나이 설정 (디자인 897-4862) — UserData.childAge 연결됨
 //
 
 import SwiftUI

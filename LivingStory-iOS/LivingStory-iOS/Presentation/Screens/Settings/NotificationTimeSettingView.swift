@@ -2,7 +2,7 @@
 //  NotificationTimeSettingView.swift
 //  LivingStory-iOS
 //
-//  알림 시간 설정 (디자인 897-4898) — 현재 UI만, 값 더미
+//  알림 시간 설정 (디자인 897-4898) — UserData + ReadingNotificationScheduler 연결됨
 //
 
 import SwiftUI
@@ -55,11 +55,11 @@ struct NotificationTimeSettingView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.circle.fill")
                             .foregroundStyle(.yellow60)
-                        Text("알림이 꺼져 있어요. 설정 > 나루 > 알림에서 켜주세요")
+                        Text(StringLiterals.Setting.notificationDeniedNotice)
                             .font(.labelRegular)
                             .foregroundStyle(.white.opacity(0.8))
                         Spacer()
-                        Button("설정") {
+                        Button(StringLiterals.Setting.openSettings) {
                             if let url = URL(string: UIApplication.openSettingsURLString) {
                                 UIApplication.shared.open(url)
                             }
