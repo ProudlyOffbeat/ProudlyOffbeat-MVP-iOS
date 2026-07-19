@@ -35,7 +35,8 @@ final class ScannerViewController: BaseViewController {
     private var fetchedBook: BookProfileModel?
     /// 인식중에 미리 받아온 환경 추천 (조명·음악·대화) — 성공 시 독서 화면으로 전달
     private var preparedEnvironment: PreparedEnvironment?
-    private let geminiService = GeminiService()
+    /// AI 추천 서비스 — 프로토콜 의존이라 목 구현체로 교체 가능
+    var aiService: any AIService = GeminiService()
     private var lookupTask: Task<Void, Never>?
 
     /// 직접 검색 버튼 위치 제약 — 상태별 토글 (.scanning: 하단 / .failed: "다시 스캔" 위)
@@ -285,15 +286,15 @@ private extension ScannerViewController {
                     var fallbackMessage: String? = nil
                     do {
                         #if DEBUG
-                        if LaunchArguments.mockGemini429 { throw NetworkError.invalidResponse(statusCode: 429) }
-                        if LaunchArguments.mockGeminiServerError { throw NetworkError.invalidResponse(statusCode: 500) }
+                        if LaunchArguments.mockGemini429 { throw AIServiceError.rateLimited }
+                        if LaunchArguments.mockGeminiServerError { throw AIServiceError.server(statusCode: 500) }
                         #endif
-                        async let envTask = self.geminiService.generateLightingAndMusic(for: book)
-                        async let questionsTask = self.geminiService.generateQuestions(for: book, age: UserData.childAge)
-                        let (env, conversationDTOs) = try await (envTask, questionsTask)
+                        async let envTask = self.aiService.generateEnvironment(for: book)
+                        async let questionsTask = self.aiService.generateQuestions(for: book, age: UserData.childAge)
+                        let (env, questions) = try await (envTask, questionsTask)
                         lighting = env.lighting
                         music = env.musicCategory
-                        conversations = conversationDTOs.map { $0.toProfile() }
+                        conversations = questions
                     } catch is CancellationError {
                         return
                     } catch {

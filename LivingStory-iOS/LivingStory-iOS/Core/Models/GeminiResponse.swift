@@ -15,14 +15,14 @@ struct ReadingEnvironment: Codable, Sendable {
 }
 
 /// Gemini 응답용 대화 주제 DTO (Codable)
-struct ConversationDTO: Codable, Sendable {
+nonisolated struct ConversationDTO: Codable, Sendable {
     let question: String
     let effect: String
 }
 
 /// 2-호출 구조의 호출 B(조명·음악) 응답.
 /// 질문(호출 A)과 분리되어 그라운딩 OFF + JSON 강제로 안전하게 디코딩된다.
-struct LightingMusicResult: Codable, Sendable {
+nonisolated struct LightingMusicResult: Codable, Sendable {
     let lighting: LightingConfig
     let musicCategory: MusicCategory
 }
