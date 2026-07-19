@@ -2,7 +2,8 @@
 //  SettingsView.swift
 //  LivingStory-iOS
 //
-//  설정 메인 (디자인 897-4792) — 현재 UI만, 값 더미
+//  설정 메인 (디자인 897-4792)
+//  나이·알림 시간·버전은 실제 값 연결됨. 집 이름만 더미(PO-107 머지 후 연결 예정).
 //
 
 import SwiftUI
@@ -15,8 +16,11 @@ struct SettingsView: View {
     @State private var childAge: String = ""
     @State private var notificationTime: String = ""
 
+    // TODO: 집 선택 실제 연결 — PO-107(HomeDataProviding 멀티캐스트 구독) 머지 후 진행
     private let homeName = "서울 집"
-    private let appVersion = "1.0.0"
+
+    /// Info.plist(CFBundleShortVersionString) 조회 — 빌드 설정 MARKETING_VERSION과 항상 일치
+    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
 
     /// 오후 09:30 형식
     private static let timeFormatter: DateFormatter = {
@@ -84,7 +88,7 @@ struct SettingsView: View {
 
     /// 진입/복귀 시 저장값을 화면 상태로 재로드
     private func reload() {
-        childAge = "\(UserData.childAge)살"
+        childAge = "\(UserData.childAge)\(StringLiterals.Setting.ageUnit)"
         notificationTime = Self.timeFormatter.string(from: UserData.notificationTime)
     }
 

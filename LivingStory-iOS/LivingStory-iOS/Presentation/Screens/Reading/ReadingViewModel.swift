@@ -21,9 +21,6 @@ struct PreparedEnvironment: Sendable {
 @Observable
 final class ReadingViewModel {
 
-    // TODO: 아이 나이 입력(설정) 구현 후 UserData에서 읽어오도록 교체. 현재는 임시 상수.
-    private static let childAge = 6
-
     let book: BookProfileModel
     private(set) var state: ReadingState = .setting
     private(set) var isLightingReady = false
@@ -151,7 +148,7 @@ final class ReadingViewModel {
         var music: MusicCategory = .warm
         var convos: [ConversationProfile] = []
         do {
-            async let questionsTask = aiService.generateQuestions(for: book, age: Self.childAge)
+            async let questionsTask = aiService.generateQuestions(for: book, age: UserData.childAge)
             async let environmentTask = aiService.generateEnvironment(for: book)
             let (questions, environment) = try await (questionsTask, environmentTask)
             lighting = environment.lighting
@@ -196,7 +193,7 @@ final class ReadingViewModel {
     func retryAIRecommendation() async {
         aiFallbackMessage = nil
         do {
-            async let questionsTask = aiService.generateQuestions(for: book, age: Self.childAge)
+            async let questionsTask = aiService.generateQuestions(for: book, age: UserData.childAge)
             async let environmentTask = aiService.generateEnvironment(for: book)
             let (questions, environment) = try await (questionsTask, environmentTask)
             lightingConfig = environment.lighting

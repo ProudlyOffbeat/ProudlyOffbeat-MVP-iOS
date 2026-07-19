@@ -92,25 +92,19 @@ final class HomeKitManager: NSObject, HomeDataProviding {
 
 extension HomeKitManager: HMHomeDelegate {
     
-    func home(_ home: HMHome, didAdd accessory: HMAccessory) {
-        accessory.delegate = self
-
-        Task {
+    nonisolated func home(_ home: HMHome, didAdd accessory: HMAccessory) {
+        Task { @MainActor in
+            accessory.delegate = self
             await enableNotifications(for: accessory)
-
             let homes = homeManager.homes.map { mapHome($0) }
-            await MainActor.run {
-                onHomesUpdated?(homes)
-            }
+            onHomesUpdated?(homes)
         }
     }
 
-    func home(_ home: HMHome, didRemove accessory: HMAccessory) {
-        Task {
+    nonisolated func home(_ home: HMHome, didRemove accessory: HMAccessory) {
+        Task { @MainActor in
             let homes = homeManager.homes.map { mapHome($0) }
-            await MainActor.run {
-                onHomesUpdated?(homes)
-            }
+            onHomesUpdated?(homes)
         }
     }
 }
@@ -119,14 +113,14 @@ extension HomeKitManager: HMHomeDelegate {
 
 extension HomeKitManager: HMHomeManagerDelegate {
 
-    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        handleStatus(manager.authorizationStatus)
+    nonisolated func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
+        let status = manager.authorizationStatus
+        Task { @MainActor in handleStatus(status) }
     }
 
-    func homeManager(_ manager: HMHomeManager, didUpdate status: HMHomeManagerAuthorizationStatus) {
-        if status.contains(.determined) {
-            handleStatus(status)
-        }
+    nonisolated func homeManager(_ manager: HMHomeManager, didUpdate status: HMHomeManagerAuthorizationStatus) {
+        guard status.contains(.determined) else { return }
+        Task { @MainActor in handleStatus(status) }
     }
 }
 
@@ -160,15 +154,17 @@ private extension HomeKitManager {
 extension HomeKitManager: HMAccessoryDelegate {
 
     /// 액세서리의 특성 값이 변경되면 호출 (외부 앱, 자동화, 물리 제어 등)
-    func accessory(_ accessory: HMAccessory, service: HMService,
-                   didUpdateValueFor characteristic: HMCharacteristic) {
+    nonisolated func accessory(_ accessory: HMAccessory, service: HMService,
+                               didUpdateValueFor characteristic: HMCharacteristic) {
         // 디바운싱: 150ms 내 연속 변경을 최종 1회로 합침 (밝기 슬라이더 등)
-        pendingUpdateTask?.cancel()
-        pendingUpdateTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(150))
-            guard !Task.isCancelled else { return }
-            let homes = homeManager.homes.map { mapHome($0) }
-            onHomesUpdated?(homes)
+        Task { @MainActor in
+            pendingUpdateTask?.cancel()
+            pendingUpdateTask = Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(150))
+                guard !Task.isCancelled else { return }
+                let homes = homeManager.homes.map { mapHome($0) }
+                onHomesUpdated?(homes)
+            }
         }
     }
 }

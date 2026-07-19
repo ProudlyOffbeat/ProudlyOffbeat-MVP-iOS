@@ -152,6 +152,8 @@ enum StringLiterals {
         static let notificationHeadline = "몇시에 책을 읽어주실 건가요?"
         static let notificationSubtitle = "매일 설정한 시간에 알람을 드릴게요"
         static let notificationToggle = "알림 설정"
+        static let notificationDeniedNotice = "알림이 꺼져 있어요. 설정 > 나루 > 알림에서 켜주세요"
+        static let openSettings = "설정"
 
         static let homeTitle = "집 선택"
         static let homeHeadline = "어디에서 사용할 건가요?"
