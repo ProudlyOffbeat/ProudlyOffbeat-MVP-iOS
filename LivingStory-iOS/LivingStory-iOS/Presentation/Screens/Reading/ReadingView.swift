@@ -476,14 +476,6 @@ private struct TickSlider: View {
 
 private extension Color {
     static let fillTertiary = Color(red: 118 / 255, green: 118 / 255, blue: 128 / 255).opacity(0.24)
-
-    init(hex: UInt) {
-        self.init(
-            red: Double((hex >> 16) & 0xFF) / 255,
-            green: Double((hex >> 8) & 0xFF) / 255,
-            blue: Double(hex & 0xFF) / 255
-        )
-    }
 }
 
 // MARK: - Preview
