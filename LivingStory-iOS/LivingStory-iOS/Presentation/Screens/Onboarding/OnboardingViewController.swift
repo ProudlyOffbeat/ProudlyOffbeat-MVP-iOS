@@ -21,7 +21,8 @@ final class OnboardingViewController: BaseViewController {
     // MARK: - Properties
 
     weak var coordinator: AppCoordinator?
-    private var homeKitManager: HomeKitManager?
+    private var homeObservation: HomeObservation?
+    private var didProceed = false
     
     override var backgroundStyle: ScreenBackgroundColor { .primary }
     
@@ -101,13 +102,14 @@ private extension OnboardingViewController {
     /// HomeKitManager(서비스) 초기화로 권한 다이얼로그를 띄우고,
     /// 권한 결과(허용/거부)와 무관하게 메인으로 진입한다.
     func requestHomeKitPermission() {
-        let manager = HomeKitManager()
-        homeKitManager = manager
-        manager.onHomesUpdated = { [weak self] _ in self?.proceedToMain() }
-        manager.onPermissionDenied = { [weak self] in self?.proceedToMain() }
-
-        // 이미 권한이 결정된 상태면 즉시 콜백 → 바로 진입
-        manager.checkInitialStatus()
+        // coordinator.homeProvider 첫 접근 = AppDelegate lazy 생성 = 권한 다이얼로그 트리거 앵커.
+        guard homeObservation == nil, let provider = coordinator?.homeProvider else { return }
+        homeObservation = provider.addObserver(
+            self,
+            onHomesUpdated: { [weak self] _ in self?.proceedToMain() },
+            onPermissionDenied: { [weak self] in self?.proceedToMain() }
+        )
+        // checkInitialStatus 직접 호출 불필요 — addObserver가 미결정 시 내부 트리거.
     }
 }
 
@@ -116,9 +118,11 @@ private extension OnboardingViewController {
 private extension OnboardingViewController {
 
     func proceedToMain() {
-        // 중복 호출 방지
-        guard homeKitManager != nil else { return }
-        homeKitManager = nil
+        // 중복 호출 방지 (didProceed가 단일 진실). 공유 인스턴스는 nil 금지 — 콜백만 해지.
+        guard !didProceed else { return }
+        didProceed = true
+        homeObservation?.cancel()
+        homeObservation = nil
 
         UserData.hasCompletedOnboarding = true
         coordinator?.completeOnboarding()
